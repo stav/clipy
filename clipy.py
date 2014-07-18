@@ -41,8 +41,8 @@ for event in dev.read_loop():
                 video = pafy.new(url)
                 best = video.getbest(preftype="mp4")
                 print('engaged:', '\n%s\n%s' % (video.title, best))
-                myfilename = download_dir + best.title + "." + best.extension
-                best.download(filepath=myfilename)
+                path = '%s.%s' % (os.path.join(download_dir, best.title), best.extension)
+                best.download(filepath=path)
 
             except (OSError, ValueError, FileNotFoundError) as e:
                 print(e)

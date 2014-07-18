@@ -8,6 +8,7 @@ Requirements
 
 * evdev
 * Pafy
+* pyperclip
 
 Usage
 -----
