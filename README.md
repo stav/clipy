@@ -6,7 +6,7 @@ Python commmand-line YouTube video downloader.
 Requirements
 ------------
 
-* evdev
+* Python3, or asyncio port
 * Pafy
 * pyperclip
 
@@ -15,9 +15,10 @@ Usage
 
 1. start script
 2. copy youtube url into clipboard
-3. press shift-ctrl-d to start downloading
+3. send SIGINT to the script process, try Ctrl-C for a terminal
+4. enter "d" to start download
 
 Notes
 -----
 
-You may need to run this script as root.
+Hardcoded to home directory download.
