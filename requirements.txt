@@ -1,0 +1,3 @@
+evdev
+Pafy
+pyperclip
