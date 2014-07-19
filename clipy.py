@@ -1,4 +1,3 @@
-
 import os
 import signal
 import asyncio
@@ -8,10 +7,8 @@ import pafy
 import pyperclip
 
 
-download_dir = os.path.expanduser('~')
-
-
 def download(video):
+    download_dir = os.path.expanduser('~')
     try:
         best = video.getbest(preftype="mp4")
         print('engaged:', '\n%s\n%s' % (video.title, best))
@@ -21,7 +18,7 @@ def download(video):
         print(e)
 
 
-def ask_exit():
+def ask_exit(loop):
     url = pyperclip.paste().strip()
 
     print('\nChecking clipboard: "%s"' % url)
@@ -40,11 +37,10 @@ def ask_exit():
     if cmd in cmds:
         cmds[cmd]()
 
-
-if __name__ == '__main__':
+def main():
     loop = asyncio.get_event_loop()
 
-    loop.add_signal_handler(signal.SIGINT, ask_exit)
+    loop.add_signal_handler(signal.SIGINT, functools.partial(ask_exit, loop))
 
     print("Event loop running (pid %s), press CTRL+c to interrupt." % os.getpid())
 
@@ -52,3 +48,6 @@ if __name__ == '__main__':
         loop.run_forever()
     finally:
         loop.close()
+
+if __name__ == '__main__':
+    main()
