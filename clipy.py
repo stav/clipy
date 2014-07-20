@@ -11,20 +11,17 @@ TITLE = '.:. Clipy .:.'
 class Window(object):
     """Window absraction with border"""
 
-    print_line = 10
+    print_line = 0
 
-    def __init__(self, name, lines, cols, y, x):
-        self.name = name
+    def __init__(self, lines, cols, y, x):
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
         self.win = self.box.subwin(Y-2, X-4, 2, 2)
 
         self.box.box()
-        self.win.box()
-        self.box.addstr(self.name)
-        self.coord(Y-4, X-5)
-        for i in range(Y-2):
-            self.coord(i, i)
+        # self.coord(Y-4, X-5)
+        # for i in range(Y-2):
+        #     self.coord(i, i)
 
     def coord(self, y, x):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
@@ -39,11 +36,28 @@ class Window(object):
     def getch(self):
         return self.win.getch()
 
-    def printstr(self, string, indent=0, error=False):
-        self.win.addstr(self.print_line, 0+indent, str(string))
+    def printstr(self, object, indent=0, error=False):
+        # lines = str(object).strip().splitlines()
+        # if len(lines) > 1:
+        #     for line in lines:
+        #         self.printstr(line, indent, error)
+        #     self.print_line += 10
+        # string = lines[0]
+
+        string = '{}\n'.format(object)
         if error:
-            self.win.addstr(self.print_line, 0, str(string), curses.A_BOLD | curses.color_pair(1))
-        self.print_line += 1
+            self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
+        else:
+            self.win.addstr(string)
+        # self.win.addstr('\n')
+        # y, x = curses.getsyx()
+        # self.win.addstr('yy{} xx{}'.format(y, x))
+        # curses.setsyx(y, 0)
+        # self.win.move(y, 0)
+        # self.win.addstr(self.print_line, 0+indent, string)
+        # if error:
+        #     self.win.addstr(self.print_line, 0, string, curses.A_BOLD | curses.color_pair(1))
+        # self.print_line += 1
 
 
 def download(video):
@@ -66,9 +80,8 @@ def inquire(window):
 
     url = pyperclip.paste().strip()
 
-    p('Checking clipboard:')
-    p(url, 1)
-    # p()
+    p('Checking clipboard: {}'.format(url))
+    window.freshen()
     try:
         video = pafy.new(url)
         p(video)
@@ -111,7 +124,7 @@ def main(stdscr):
     stdscr.addstr(curses.LINES-1, 0, 'Press "Q": quit, "I": inquire')
     stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
-    console = Window('Console', curses.LINES-2, curses.COLS, 1, 0)
+    console = Window(curses.LINES-2, curses.COLS, 1, 0)
 
     stdscr.noutrefresh()
     console.freshen()
