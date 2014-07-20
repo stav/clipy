@@ -1,6 +1,4 @@
-from setuptools import setup, find_packages
-from codecs import open  # To use a consistent encoding
-from os import path
+from setuptools import setup
 
 setup(
     name='clipy',
@@ -15,12 +13,11 @@ setup(
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
-        'Topic :: Utilities',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3.4',
+        'Topic :: Utilities',
     ],
     keywords='video downloader',
-    # packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=['Pafy', 'pyperclip'],
     entry_points={
         'console_scripts': [
