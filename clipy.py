@@ -1,6 +1,6 @@
-import os
+import os, sys
 import curses
-import functools
+import threading
 
 import pafy
 import pyperclip
@@ -10,8 +10,6 @@ TITLE = '.:. Clipy .:.'
 
 class Window(object):
     """Window absraction with border"""
-
-    print_line = 0
 
     def __init__(self, lines, cols, y, x):
         self.box = curses.newwin(lines, cols, y, x)
@@ -29,6 +27,7 @@ class Window(object):
     def freshen(self):
         self.box.noutrefresh()
         self.win.noutrefresh()
+        curses.doupdate()
 
     def getch(self):
         return self.win.getch()
@@ -39,7 +38,15 @@ class Window(object):
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
         else:
             self.win.addstr(string)
+        self.freshen()
 
+    def progress(self, total, *progress_stats):
+        status_string = ('STAV!!!  {:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
+                         'KB/s].  ETA: [{:.0f} secs]')
+
+        status = status_string.format(*progress_stats)
+        sys.stdout.write("\r" + status + ' ' * 4 + "\r")
+        # sys.stdout.flush()
 
 def download(window):
     download_dir = os.path.expanduser('~')
@@ -47,9 +54,11 @@ def download(window):
         best = window.video.getbest(preftype="mp4")
         path = '%s.%s' % (os.path.join(download_dir, best.title), best.extension)
         print('Downloading', best, path)
-        best.download(filepath=path)
+        best.download(filepath=path, quiet=False, callback=window.progress)
     except (OSError, ValueError, FileNotFoundError) as e:
         print(e)
+    window.printstr('')
+    window.printstr('DONE!!!!')
 
 
 def inquire(window):
@@ -62,7 +71,6 @@ def inquire(window):
     url = pyperclip.paste().strip()
 
     p('Checking clipboard: {}'.format(url))
-    window.freshen()
     try:
         video = pafy.new(url)
         p(video)
@@ -84,7 +92,9 @@ def loop(stdscr, console):
             inquire(console)
 
         if c == ord('d') or c == ord('D'):
-            download(console)
+            t = threading.Thread(target=download, args=(console,))
+            t.daemon = True
+            t.start()
 
         stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
