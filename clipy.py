@@ -27,43 +27,24 @@ class Window(object):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
 
     def freshen(self):
-        # self.box.refresh()
-        # self.win.refresh()
         self.box.noutrefresh()
         self.win.noutrefresh()
-        curses.doupdate()
 
     def getch(self):
         return self.win.getch()
 
     def printstr(self, object, indent=0, error=False):
-        # lines = str(object).strip().splitlines()
-        # if len(lines) > 1:
-        #     for line in lines:
-        #         self.printstr(line, indent, error)
-        #     self.print_line += 10
-        # string = lines[0]
-
         string = '{}\n'.format(object)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
         else:
             self.win.addstr(string)
-        # self.win.addstr('\n')
-        # y, x = curses.getsyx()
-        # self.win.addstr('yy{} xx{}'.format(y, x))
-        # curses.setsyx(y, 0)
-        # self.win.move(y, 0)
-        # self.win.addstr(self.print_line, 0+indent, string)
-        # if error:
-        #     self.win.addstr(self.print_line, 0, string, curses.A_BOLD | curses.color_pair(1))
-        # self.print_line += 1
 
 
-def download(video):
+def download(window):
     download_dir = os.path.expanduser('~')
     try:
-        best = video.getbest(preftype="mp4")
+        best = window.video.getbest(preftype="mp4")
         path = '%s.%s' % (os.path.join(download_dir, best.title), best.extension)
         print('Downloading', best, path)
         best.download(filepath=path)
@@ -86,6 +67,7 @@ def inquire(window):
         video = pafy.new(url)
         p(video)
         p('allstreams: {}'.format(video.allstreams))
+        window.video = video
 
     except ValueError as ve:
         e(ve)
@@ -101,6 +83,9 @@ def loop(stdscr, console):
         if c == ord('i') or c == ord('I'):
             inquire(console)
 
+        if c == ord('d') or c == ord('D'):
+            download(console)
+
         stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
         stdscr.noutrefresh()
@@ -112,16 +97,12 @@ def main(stdscr):
     if curses.has_colors():
         curses.start_color()
 
-    # curses.curs_set(False)
-    # import pdb; pdb.set_trace()
-
+    curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_BLUE , curses.COLOR_BLACK)
 
     stdscr.addstr(TITLE, curses.A_REVERSE)
     stdscr.chgat(-1, curses.A_REVERSE)
-    stdscr.addstr(curses.LINES-1, 0, 'Press "Q": quit, "I": inquire')
+    stdscr.addstr(curses.LINES-1, 0, 'Press "I": inquire, "D": download, "Q": quit')
     stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
     console = Window(curses.LINES-2, curses.COLS, 1, 0)
