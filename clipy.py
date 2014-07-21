@@ -51,6 +51,20 @@ class Window(object):
         self.freshen()
 
 
+def inquire(window):
+    url = pyperclip.paste().strip()
+
+    window.printstr('Checking clipboard: {}'.format(url))
+    try:
+        video = pafy.new(url)
+        window.printstr(video)
+        window.printstr('allstreams: {}'.format(video.allstreams))
+        window.video = video
+
+    except (OSError, ValueError) as e:
+        window.printstr(e, error=True)
+
+
 def download(window):
     download_dir = os.path.expanduser('~')
     try:
@@ -68,62 +82,58 @@ def download(window):
             window.printstr('Downloaded: "{}"'.format(f))
 
 
-def inquire(window):
-    url = pyperclip.paste().strip()
-
-    window.printstr('Checking clipboard: {}'.format(url))
-    try:
-        video = pafy.new(url)
-        window.printstr(video)
-        window.printstr('allstreams: {}'.format(video.allstreams))
-        window.video = video
-
-    except (OSError, ValueError) as e:
-        window.printstr(e, error=True)
-
-
 def cancel(window):
     if window.stream:
         window.printstr('Cancelling {}'.format(window.stream))
         if window.stream.cancel():
             window.printstr('Cancelled "{}"'.format(window.stream.title))
+    else:
+        window.printstr('Nothing to cancel')
 
 
 def loop(stdscr, console):
+    KEYS_QUIT = (ord('q'), ord('Q'), 27)  # 27 is escape
+    KEYS_INQUIRE = (ord('i'), ord('I'))
+    KEYS_DOWNLOAD = (ord('d'), ord('D'))
+    KEYS_CANCEL = (ord('c'), ord('C'))
+
     while True:
         c = console.getch()
 
-        if c == ord('q') or c == ord('Q'):
+        if c in KEYS_QUIT:
             break
 
-        if c == ord('i') or c == ord('I'):
+        if c in KEYS_INQUIRE:
             inquire(console)
 
-        if c == ord('d') or c == ord('D'):
+        if c in KEYS_DOWNLOAD:
             t = threading.Thread(target=download, args=(console,))
             t.daemon = True
             t.start()
 
-        if c == ord('c') or c == ord('C'):
+        if c in KEYS_CANCEL:
             cancel(console)
 
-        stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
+        # console.printstr(threading.active_count())
 
         stdscr.noutrefresh()
         console.freshen()
         curses.doupdate()
 
 
-def main(stdscr):
+def init(stdscr):
     if curses.has_colors():
         curses.start_color()
+
+    # menu_options = 'Press "I": inquire, "S": select, "D": download, "C": cancel, "Q": quit'
+    menu_options = 'Press "I": inquire, "D": download, "C": cancel, "Q": quit'
 
     # curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
 
     stdscr.addstr(TITLE, curses.A_REVERSE)
     stdscr.chgat(-1, curses.A_REVERSE)
-    stdscr.addstr(curses.LINES-1, 0, 'Press "I": inquire, "D": download, "S": select, "Q": quit')
+    stdscr.addstr(curses.LINES-1, 0, menu_options)
     stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
     console = Window(stdscr, curses.LINES-2, curses.COLS, 1, 0)
@@ -135,5 +145,8 @@ def main(stdscr):
     loop(stdscr, console)
 
 
+def main():
+    curses.wrapper(init)
+
 if __name__ == '__main__':
-    curses.wrapper(main)
+    main()

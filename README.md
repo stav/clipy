@@ -15,7 +15,7 @@ Usage
 
 1. start script
 2. copy youtube url into clipboard
-3. follow menu: I to inquire, d to download
+3. follow menu: I to inquire, D to download
 
 Notes
 -----
