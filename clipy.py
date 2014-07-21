@@ -13,6 +13,7 @@ class Window(object):
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
+        self.stream = None
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
         self.win = self.box.subwin(Y-2, X-4, 2, 2)
@@ -48,20 +49,23 @@ class Window(object):
         status = status_string.format(*progress_stats)
         self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
         self.freshen()
-        # sys.stdout.write("\r" + status + ' ' * 4 + "\r")
-        # sys.stdout.flush()
+
 
 def download(window):
     download_dir = os.path.expanduser('~')
     try:
         best = window.video.getbest(preftype="mp4")
+        window.stream = best
         path = '%s.%s' % (os.path.join(download_dir, best.title), best.extension)
-        print('Downloading', best, path)
-        best.download(filepath=path, quiet=True, callback=window.progress)
+        window.printstr('Downloading {} to {}'.format(best, download_dir))
+        f = best.download(filepath=path, quiet=True, callback=window.progress)
+
     except (OSError, ValueError, FileNotFoundError) as e:
-        print(e)
-    window.printstr('')
-    window.printstr('DONE!!!!')
+        window.printstr(e, error=True)
+
+    else:
+        if f:
+            window.printstr('Downloaded: "{}"'.format(f))
 
 
 def inquire(window):
@@ -78,6 +82,13 @@ def inquire(window):
         window.printstr(e, error=True)
 
 
+def cancel(window):
+    if window.stream:
+        window.printstr('Cancelling {}'.format(window.stream))
+        if window.stream.cancel():
+            window.printstr('Cancelled "{}"'.format(window.stream.title))
+
+
 def loop(stdscr, console):
     while True:
         c = console.getch()
@@ -92,6 +103,9 @@ def loop(stdscr, console):
             t = threading.Thread(target=download, args=(console,))
             t.daemon = True
             t.start()
+
+        if c == ord('c') or c == ord('C'):
+            cancel(console)
 
         stdscr.addstr(curses.LINES-1, curses.COLS-15, str(curses.getsyx()))
 
