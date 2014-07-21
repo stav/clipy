@@ -77,35 +77,13 @@ def select(window):
         window.printstr('No video to select streams, Inquire first', error=True)
 
 
-def choice(window, index):
-    window.printstr('Choice')
+def download(window):
     download_dir = os.path.expanduser('~')
-    stream = window.video.allstreams[index]
-    window.stream = stream
     try:
+        stream = window.stream
         path = '%s.%s' % (os.path.join(download_dir, stream.title), stream.extension)
         window.printstr('Downloading {} to {}'.format(stream, download_dir))
         f = stream.download(filepath=path, quiet=True, callback=window.progress)
-
-    except (OSError, ValueError, FileNotFoundError) as e:
-        window.printstr(e, error=True)
-
-    else:
-        if f:
-            window.printstr('Downloaded: "{}"'.format(f))
-
-
-def download(window):
-    download_dir = os.path.expanduser('~')
-    if window.video is None:
-        window.printstr('No video to download, Inquire first', error=True)
-        return
-    try:
-        best = window.video.getbest(preftype="mp4")
-        window.stream = best
-        path = '%s.%s' % (os.path.join(download_dir, best.title), best.extension)
-        window.printstr('Downloading {} to {}'.format(best, download_dir))
-        f = best.download(filepath=path, quiet=True, callback=window.progress)
 
     except (OSError, ValueError, FileNotFoundError) as e:
         window.printstr(e, error=True)
@@ -122,6 +100,29 @@ def cancel(window):
             window.printstr('Cancelled "{}"'.format(window.stream.title))
     else:
         window.printstr('Nothing to cancel')
+    window.stream = None
+
+
+def spawn(window, index=None):
+    if window.video is None:
+        window.printstr('No video to download, Inquire first', error=True)
+        return
+    if index is None:
+        try:
+            window.stream = window.video.getbest(preftype="mp4")
+        except (OSError, ValueError) as e:
+            window.printstr(e, error=True)
+            return
+    else:
+        if index >= len(window.video.allstreams):
+            window.printstr('Stream {} not available'.format(index), error=True)
+            return
+        else:
+            window.stream = window.video.allstreams[index]
+
+    t = threading.Thread(target=download, args=(window,))
+    t.daemon = True
+    t.start()
 
 
 def loop(stdscr, console):
@@ -130,7 +131,7 @@ def loop(stdscr, console):
     KEYS_SELECT = (ord('s'), ord('S'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_CANCEL = (ord('c'), ord('C'))
-    KEYS_NUMERIC = range(49, 58)
+    KEYS_NUMERIC = range(48, 58)
 
     while True:
         c = console.getch()
@@ -145,19 +146,16 @@ def loop(stdscr, console):
             select(console)
 
         if c in KEYS_DOWNLOAD:
-            t = threading.Thread(target=download, args=(console,))
-            t.daemon = True
-            t.start()
+            spawn(console)
 
         if c in KEYS_NUMERIC:
-            choice(console, c-48)
+            spawn(console, c-48)
 
         if c in KEYS_CANCEL:
             cancel(console)
 
         # Debug
-        # console.printstr(str(c))
-        # console.printstr(threading.active_count())
+        # stdscr.addstr(curses.LINES-1, 108, 'c={}, t={}      '.format(c, threading.active_count()))
 
         # Refresh screen
         stdscr.noutrefresh()
