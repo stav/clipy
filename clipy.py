@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os, sys
 import curses
 import threading
@@ -18,6 +20,8 @@ class Window(object):
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
         self.win = self.box.subwin(Y-2, X-4, 2, 2)
+        self.win.scrollok(True)
+        self.win.keypad(True)
 
         self.box.box()
         # self._coord(Y-4, X-5)
@@ -167,9 +171,9 @@ def init(stdscr):
     if curses.has_colors():
         curses.start_color()
 
-    # Setup
+    # Setup curses
     menu_options = 'Press "I": inquire, "S": select, "D": download, "C": cancel, "Q": quit'
-    # curses.curs_set(False)
+    curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
 
     # Title bar at top
@@ -179,7 +183,7 @@ def init(stdscr):
     # Menu options at bottom
     stdscr.addstr(curses.LINES-1, 0, menu_options)
 
-    # Create container class
+    # Create container box
     console = Window(stdscr, curses.LINES-2, curses.COLS, 1, 0)
 
     # Refresh screen
