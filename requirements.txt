@@ -1,3 +1,6 @@
-evdev
+gobject
+gtk
+keybinder
+notify2
 Pafy
-pyperclip
+pygtk
