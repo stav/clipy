@@ -13,6 +13,7 @@ TITLE = '.:. Clipy .:.'
 class Window(object):
     """Window absraction with border"""
     stream = None
+    testing = False
     video = None
 
     def __init__(self, stdscr, lines, cols, y, x):
@@ -35,7 +36,8 @@ class Window(object):
         self.stdscr.noutrefresh()
         self.box.noutrefresh()
         self.win.noutrefresh()
-        curses.doupdate()
+        if not self.testing:
+            curses.doupdate()
 
     def getch(self):
         return self.win.getch()

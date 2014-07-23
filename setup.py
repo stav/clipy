@@ -19,6 +19,7 @@ setup(
     ],
     keywords='video downloader',
     install_requires=['Pafy', 'pyperclip'],
+    test_suite='tests',
     entry_points={
         'console_scripts': [
             'clipy=clipy:main',
