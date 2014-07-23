@@ -1,18 +1,26 @@
 clipy
 =====
 
-Python commmand-line YouTube video downloader using the `curses` library.
+_Command Line Interface using Python for Youtube._
+
+Python commmand-line YouTube video downloader.
 
 Requirements
 ------------
 
-* pyperclip
-* Pafy
+The following third-party libraries are used:
+
+* pyperclip (uses Gtk to read the clipboard)
+* Pafy (YouTube api)
 
 Usage
 -----
 
-1. start script
+`clipy http://youtube.com/w...`
+
+Menu option uses `curses`:
+
+1. start script with `-m` option
 2. copy youtube url into clipboard
 3. follow menu: I to inquire, D to download
 

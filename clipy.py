@@ -1,14 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
+import argparse
 import curses
+import os
+import sys
 import threading
 
 import pafy
-import pyperclip
+# import pyperclip
 
 TITLE = '.:. Clipy .:.'
-
+VERSION = 0.5
 
 class Window(object):
     """Window absraction with border"""
@@ -197,8 +199,91 @@ def init(stdscr):
     loop(stdscr, console)
 
 
+def _get_commandline_options():
+    """
+    >>> options = ['--qualify']
+    >>> r = Router()
+    >>> r.setup(options)
+    >>> r.options
+    Namespace... qualify=True...
+    """
+    # declare command-line argument parser
+    command_line = argparse.ArgumentParser(
+        description='YouTube video downloader',
+        epilog='Refer to the documentation for more detailed information.',
+        )
+
+    # define the command-line arguments
+    command_line.add_argument('-V', '--version', action='version',
+                        version='%(prog)s version {}'.format(VERSION),
+                        help='print the version information and exit')
+
+    command_line.add_argument('-s', '--stream', metavar='S', type=int,
+                        help='Stream to download: 0, 1, 2, 3...')
+
+    command_line.add_argument('-d', '--download', action='store_true',
+                        help='Downloaded a stream')
+
+    command_line.add_argument('-m', '--menu', action='store_true',
+                        help='Start the graphical menu')
+
+    # command_line.add_argument('-i', dest='inputfile', nargs='?', metavar='INFL',
+    #                     type=argparse.FileType('rU'), default=sys.stdin,
+    #                     help='input filename, def=stdin')
+
+    # command_line.add_argument('-o', dest='outputfile', metavar='OUFL', nargs='?',
+    #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
+    #                     help='output filename, def=stdout, const=/dev/null')
+
+    command_line.add_argument('-l', dest='logger', metavar='LOGFILE',
+                        nargs='?', default=lambda *a: None, const=print,
+                        help='Logging enabled, option must follow RESOURCE')
+
+    # command_line.add_argument('-m', dest='mogrifyers', type=str, metavar='MGRFs',
+    #                     help='mogrifyer classes "M1, M2,... Mn"')
+
+    # command_line.add_argument('-p', dest='parser', type=str, metavar='PRSR',
+    #                     help='parser class')
+
+    command_line.add_argument('resource', metavar='RESOURCE', type=str, nargs='?',
+                        help='URL or video Id')
+
+    return command_line.parse_args(sys.argv[1:])
+
+
 def main():
-    curses.wrapper(init)
+    """ Command line entry point """
+    options = _get_commandline_options()
+    log = options.logger
+    video = None
+    stream = None
+
+    log('Clipy started with {}'.format(options))
+
+    if options.resource:
+        log('Supplied resouree: {}'.format(options.resource))
+        video = pafy.new(options.resource)
+
+    if video:
+        log('Video found on YouTube ')
+        print(video)
+        for i, stream in enumerate(video.allstreams):
+            print('{}: {} {} {} {} {}'.format(i,
+                stream.mediatype,
+                stream.quality,
+                stream.extension,
+                stream.notes,
+                stream.bitrate or ''))
+
+    # if options.download:
+    #     stream = _get_stream(options)
+    #     if stream:
+    #         download()
+
+    # if options.menu:
+    #     curses.wrapper(init)
+
+    log('Clipy stopping')
 
 if __name__ == '__main__':
     main()
