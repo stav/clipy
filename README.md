@@ -1,12 +1,11 @@
 clipy
 =====
 
-Python commmand-line YouTube video downloader.
+Python commmand-line YouTube video downloader using the `curses` library.
 
 Requirements
 ------------
 
-* Python3
 * pyperclip
 * Pafy
 
@@ -19,5 +18,12 @@ Usage
 
 Notes
 -----
+
+Developed with Python 3 but should also work with Python 2.
+
+Only tested on Ubuntu.
+
+Python for Windows does not contain the needed `curses` library, perhaps
+UniCurses can help.
 
 Hardcoded to home directory download.
