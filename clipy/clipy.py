@@ -1,30 +1,28 @@
 """
 Clipy
 
-Command Line Interface using Python for Youtube.
+Command Line Interface using Python for Youtube
 
 Python commmand-line YouTube video downloader.
+
+mxvLMEyCXR0
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import argparse
 import os
 import sys
+import argparse
 
 import pafy
 # import pyperclip - lazy import
+# import clipy.ui - lazy import
 
-TITLE = '.:. Clipy .:.'
 VERSION = 0.5
 
 
 def _get_commandline_options():
     """
-    >>> options = ['--qualify']
-    >>> r = Router()
-    >>> r.setup(options)
-    >>> r.options
-    Namespace... qualify=True...
+    Parse command line.
     """
     # declare command-line argument parser
     command_line = argparse.ArgumentParser(
@@ -92,7 +90,7 @@ def download(stream, options):
 
 
 def main():
-    """ Command line entry point """
+    """ Script entry point """
     options = _get_commandline_options()
     log = options.logger
     video = None
@@ -140,7 +138,11 @@ def main():
                     if not prop.startswith('_') and not hasattr(attr, '__call__'):
                         print('{}: {}'.format(prop, getattr(stream, prop, '')))
 
-    if options.download:
+    if options.ui:
+        import clipy.ui
+        clipy.ui.main()
+
+    elif options.download:
         if video is None:
             print('No valid resource provided {} {}'.format(options.resource or '', resource or ''))
         elif stream is None:
@@ -148,11 +150,8 @@ def main():
         else:
             download(stream, options)
 
-    # if options.menu:
-    #     curses.wrapper(init)
-
     log('Clipy stopping')
-    # import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
     main()
+5
