@@ -29,25 +29,31 @@ def _get_commandline_options():
     # declare command-line argument parser
     command_line = argparse.ArgumentParser(
         description='YouTube video downloader',
-        epilog='Refer to the documentation for more detailed information.',
+        epilog='E.g.: clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d -s1',
         )
 
     # define the command-line arguments
-    command_line.add_argument('-V', '--version', action='version',
-                        version='%(prog)s version {}'.format(VERSION),
-                        help='print the version information and exit')
-
-    command_line.add_argument('-s', '--stream', metavar='S', type=int,
-                        help='Stream to download: 0, 1, 2, 3...')
-
-    command_line.add_argument('-c', '--clipboard', action='store_true',
-                        help='Check clipboard for resource')
+    command_line.add_argument('resource', metavar='RESOURCE', type=str, nargs='?',
+                        help='URL or video Id')
 
     command_line.add_argument('-d', '--download', action='store_true',
                         help='Downloaded a stream')
 
-    command_line.add_argument('-m', '--menu', action='store_true',
-                        help='Start the graphical menu')
+    command_line.add_argument('-s', '--stream', metavar='S', type=int,
+                        help='Select stream to download: 0, 1, 2, 3...')
+
+    command_line.add_argument('-t', '--target', metavar='DIR', type=str,
+                        help='Target folder to save to', default='~')
+
+    command_line.add_argument('-c', '--clipboard', action='store_true',
+                        help='Check clipboard for resource')
+
+    command_line.add_argument('-u', '--ui', action='store_true',
+                        help='Start the user interface menu')
+
+    command_line.add_argument('-l', dest='logger', metavar='LOGFILE',
+                        nargs='?', default=lambda *a: None, const=print,
+                        help='Logging enabled, option must follow RESOURCE')
 
     # command_line.add_argument('-i', dest='inputfile', nargs='?', metavar='INFL',
     #                     type=argparse.FileType('rU'), default=sys.stdin,
@@ -57,28 +63,24 @@ def _get_commandline_options():
     #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
     #                     help='output filename, def=stdout, const=/dev/null')
 
-    command_line.add_argument('-l', dest='logger', metavar='LOGFILE',
-                        nargs='?', default=lambda *a: None, const=print,
-                        help='Logging enabled, option must follow RESOURCE')
-
     # command_line.add_argument('-m', dest='mogrifyers', type=str, metavar='MGRFs',
     #                     help='mogrifyer classes "M1, M2,... Mn"')
 
     # command_line.add_argument('-p', dest='parser', type=str, metavar='PRSR',
     #                     help='parser class')
 
-    command_line.add_argument('resource', metavar='RESOURCE', type=str, nargs='?',
-                        help='URL or video Id')
+    command_line.add_argument('-V', '--version', action='version',
+                        version='%(prog)s version {}'.format(VERSION),
+                        help='print the version information and exit')
 
     return command_line.parse_args(sys.argv[1:])
 
-
-def download(stream):
+def download(stream, options):
     """ Download a video from YouTube. """
-    download_dir = os.path.expanduser('~')
+    target_dir = os.path.expanduser(options.target)
     try:
-        path = os.path.join(download_dir, stream.filename)
-        print('Downloading {} to {}'.format(stream.title, download_dir))
+        path = os.path.join(target_dir, stream.filename)
+        print('Downloading {} to {}'.format(stream.title, target_dir))
         filename = stream.download(filepath=path, quiet=False)
 
     except (OSError, ValueError, FileNotFoundError) as e:
@@ -144,7 +146,7 @@ def main():
         elif stream is None:
             print('No stream selected for download')
         else:
-            download(stream)
+            download(stream, options)
 
     # if options.menu:
     #     curses.wrapper(init)
