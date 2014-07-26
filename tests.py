@@ -1,18 +1,18 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-import clipy
 import curses
-import pyperclip
 import unittest
+import pyperclip
+import clipy.ui
 
 
-class ClipyTest(unittest.TestCase):
+class ClipyUITest(unittest.TestCase):
 
     console = None
 
     def setUp(self):
         def main(stdscr):
-            self.console = clipy.Window(stdscr, curses.LINES, curses.COLS, 0, 0)
+            self.console = clipy.ui.Window(stdscr, curses.LINES, curses.COLS, 0, 0)
             self.console.testing = True
         curses.wrapper(main)
 
@@ -42,7 +42,7 @@ class ClipyTest(unittest.TestCase):
         vid = 'mxvLMEyCXR0'
         pyperclip.copy(vid)
         self.assertIsNone(self.console.video)
-        clipy.inquire(self.console)
+        clipy.ui.inquire(self.console)
         self.assertIsNotNone(self.console.video)
 
     # def test_4_download(self):
