@@ -17,7 +17,7 @@ import pafy
 # import pyperclip - lazy import
 # import clipy.ui - lazy import
 
-VERSION = 0.6
+VERSION = 0.5
 
 
 def _get_commandline_options():

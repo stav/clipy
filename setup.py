@@ -3,13 +3,14 @@ from setuptools import setup
 setup(
     name='clipy',
     version='0.5',
+    license='BSD',
     url='https://github.com/stav/clipy',
+    download_url='https://github.com/stav/clipy/archive/master.zip',
     description='YouTube video downloader',
-    long_description='''Command-line script for downloading videos from YouTube
-        Command Line Interface using Python for Youtube''',
+    long_description=open("README.md").read(),
     author='Steven Almeroth',
     author_email='sroth77@gmail.com',
-    license='BSD',
+    keywords='video downloader',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
@@ -18,12 +19,13 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Utilities',
     ],
-    keywords='video downloader',
+    packages=['clipy'],
+    package_data={"": ["LICENSE", "README.md", "CHANGELOG"]},
     install_requires=['Pafy', 'pyperclip'],
-     dependency_links = [
-        # 'http://github.com/gabrielgrant/django-ckeditor/tarball/master#egg=django-ckeditor-0.9.3',
-        'git+https://github.com/np1/pafy.git@develop',
-    ],
+    #  dependency_links = [
+    #     'http://github.com/gabrielgrant/django-ckeditor/tarball/master#egg=django-ckeditor-0.9.3',
+    #     'git+https://github.com/np1/pafy.git@develop',
+    # ],
     test_suite='tests',
     entry_points={
         'console_scripts': [
