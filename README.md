@@ -1,7 +1,7 @@
 clipy
 =====
 
-_Command Line Interface using Python for Youtube._
+_Command Line Interface using Python for Youtube_
 
 Python commmand-line YouTube video downloader.
 
