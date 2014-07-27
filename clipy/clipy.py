@@ -73,6 +73,12 @@ def _get_commandline_options():
 
     return command_line.parse_args(sys.argv[1:])
 
+def _get_video(resource):
+    try:
+        return pafy.new(resource)
+    except (OSError, ValueError) as ex:
+        print(ex)
+
 def download(stream, options):
     """ Download a video from YouTube. """
     target_dir = os.path.expanduser(options.target)
@@ -100,21 +106,14 @@ def main():
     log('Clipy started with {}'.format(options))
 
     if options.resource:
-        log('Supplied resouree: {}'.format(options.resource))
-        try:
-            video = pafy.new(options.resource)
-        except ValueError as ex:
-            print(ex)
+        log('Supplied resource: {}'.format(options.resource))
+        video = _get_video(options.resource)
 
     if video is None and options.clipboard:
         log('Checking clipboard for resource')
         import pyperclip
         resource = pyperclip.paste().strip()
-
-        try:
-            video = pafy.new(resource)
-        except (OSError, ValueError) as ex:
-            print(ex)
+        video = _get_video(resource)
 
     if video:
         log('Video found on YouTube ')
@@ -140,7 +139,7 @@ def main():
 
     if options.ui:
         import clipy.ui
-        clipy.ui.main()
+        clipy.ui.main(video)
 
     elif options.download:
         if video is None:

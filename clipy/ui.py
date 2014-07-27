@@ -9,28 +9,37 @@ import pafy
 import pyperclip
 
 TITLE = '.:. Clipy .:.'
+VIDEO = None
 
 class Window(object):
     """Window absraction with border"""
-    stream = None
     testing = False
+    resource = None
+    stream = None
     video = None
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
-        self.win = self.box.subwin(Y-2, X-4, 2, 2)
+        # import pdb; pdb.set_trace()
+        self.win = self.box.subwin(Y-2, X-4, y+1, 2)
         self.win.scrollok(True)
         self.win.keypad(True)
 
         self.box.box()
+
         # self._coord(Y-4, X-5)
         # for i in range(Y-2):
         #     self._coord(i, i)
 
     def _coord(self, y, x):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
+
+    def display(self):
+        if self.video:
+            self.printstr(self.video)
+            self.printstr('allstreams: {}'.format(self.video.allstreams))
 
     def freshen(self):
         self.stdscr.noutrefresh()
@@ -58,113 +67,119 @@ class Window(object):
         self.freshen()
 
 
-def inquire(window):
-    url = pyperclip.paste().strip()
-
-    window.printstr('Checking clipboard: {}'.format(url))
+def inquire(panel, console):
+    console.printstr('Inquiring')
     try:
-        video = pafy.new(url)
-        window.printstr(video)
-        window.printstr('allstreams: {}'.format(video.allstreams))
-        window.video = video
+        if panel.resource:
+            console.printstr('Resourse found: {}'.format(panel.resource))
+            panel.video = pafy.new(panel.resource)
+            panel.resource = None
 
     except (OSError, ValueError) as e:
-        window.printstr(e, error=True)
+        console.printstr(e, error=True)
 
 
-def select(window):
-    if window.video:
-        window.printstr('Streams:')
-        for i, stream in enumerate(window.video.allstreams):
-            window.printstr('{}: {} {} {} {}'.format(i, stream.mediatype, stream.quality, stream.extension, stream.notes))
-        window.printstr('Press one of the numbers above to download (0-{})'.format(i))
+def select(panel, console):
+    if panel.video:
+        panel.printstr('Streams:')
+        for i, stream in enumerate(panel.video.allstreams):
+            panel.printstr('{}: {} {} {} {}'.format(i, stream.mediatype, stream.quality, stream.extension, stream.notes))
+        panel.printstr('Press one of the numbers above to download (0-{})'.format(i))
 
     else:
-        window.printstr('No video to select streams, Inquire first', error=True)
+        console.printstr('No video to select streams, Inquire first', error=True)
 
 
-def download(window):
+def download(panel, console):
     download_dir = os.path.expanduser('~')
     try:
-        stream = window.stream
+        stream = panel.stream
         path = '%s.%s' % (os.path.join(download_dir, stream.title), stream.extension)
-        window.printstr('Downloading {} to {}'.format(stream, download_dir))
-        f = stream.download(filepath=path, quiet=True, callback=window.progress)
+        console.printstr('Downloading {} to {}'.format(stream, download_dir))
+        f = stream.download(filepath=path, quiet=True, callback=panel.progress)
 
     except (OSError, ValueError, FileNotFoundError) as e:
-        window.printstr(e, error=True)
+        console.printstr(e, error=True)
 
     else:
         if f:
-            window.printstr('Downloaded: "{}"'.format(f))
+            console.printstr('Downloaded: "{}"'.format(f))
 
 
-def cancel(window):
-    if window.stream:
-        window.printstr('Cancelling {}'.format(window.stream))
-        if window.stream.cancel():
-            window.printstr('Cancelled "{}"'.format(window.stream.title))
+def cancel(panel, console):
+    if panel.stream:
+        console.printstr('Cancelling {}'.format(panel.stream))
+        if panel.stream.cancel():
+            console.printstr('Cancelled "{}"'.format(panel.stream.title))
     else:
-        window.printstr('Nothing to cancel')
-    window.stream = None
+        console.printstr('Nothing to cancel')
+
+    panel.stream = None
 
 
-def spawn(window, index=None):
-    if window.video is None:
-        window.printstr('No video to download, Inquire first', error=True)
+def spawn(panel, console, index=None):
+    if panel.video is None:
+        console.printstr('No video to download, Inquire first', error=True)
         return
     if index is None:
         try:
-            window.stream = window.video.getbest(preftype="mp4")
+            panel.stream = panel.video.getbest(preftype="mp4")
         except (OSError, ValueError) as e:
-            window.printstr(e, error=True)
+            console.printstr(e, error=True)
             return
     else:
-        if index >= len(window.video.allstreams):
-            window.printstr('Stream {} not available'.format(index), error=True)
+        if index >= len(panel.video.allstreams):
+            console.printstr('Stream {} not available'.format(index), error=True)
             return
         else:
-            window.stream = window.video.allstreams[index]
+            panel.stream = panel.video.allstreams[index]
 
-    t = threading.Thread(target=download, args=(window,))
+    t = threading.Thread(target=download, args=(panel, console))
     t.daemon = True
     t.start()
 
 
-def loop(stdscr, console):
-    KEYS_QUIT = (ord('q'), ord('Q'), 27)  # 27 is escape
-    KEYS_INQUIRE = (ord('i'), ord('I'))
-    KEYS_SELECT = (ord('s'), ord('S'))
+def loop(stdscr, panel, console):
+    KEYS_CANCEL   = (ord('c'), ord('C'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
-    KEYS_CANCEL = (ord('c'), ord('C'))
-    KEYS_NUMERIC = range(48, 58)
+    KEYS_INQUIRE  = (ord('i'), ord('I'))
+    KEYS_NUMERIC  = range(48, 58)
+    KEYS_PASTE    = (ord('p'), ord('P'))
+    KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
+    KEYS_SELECT   = (ord('s'), ord('S'))
 
     while True:
-        c = console.getch()
+        c = panel.getch()
 
         if c in KEYS_QUIT:
             break
 
+        if c in KEYS_PASTE:
+            panel.resource = pyperclip.paste().strip()
+            console.printstr('Checking clipboard: {}'.format(panel.resource))
+            inquire(panel, console)
+
         if c in KEYS_INQUIRE:
-            inquire(console)
+            inquire(panel, console)
 
         if c in KEYS_SELECT:
-            select(console)
+            select(panel, console)
 
         if c in KEYS_DOWNLOAD:
-            spawn(console)
+            spawn(panel, console)
 
         if c in KEYS_NUMERIC:
-            spawn(console, c-48)
+            spawn(panel, console, c-48)
 
         if c in KEYS_CANCEL:
-            cancel(console)
+            cancel(panel, console)
 
         # Debug
         # stdscr.addstr(curses.LINES-1, 108, 'c={}, t={}      '.format(c, threading.active_count()))
 
         # Refresh screen
         stdscr.noutrefresh()
+        panel.freshen()
         console.freshen()
         curses.doupdate()
 
@@ -174,7 +189,7 @@ def init(stdscr):
         curses.start_color()
 
     # Setup curses
-    menu_options = 'Press "I": inquire, "S": select, "D": download, "C": cancel, "Q": quit'
+    menu_options = 'Press "P": paste, "I": inquire, "S": select, "D": download, "C": cancel, "Q": quit'
     curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
 
@@ -186,18 +201,32 @@ def init(stdscr):
     stdscr.addstr(curses.LINES-1, 0, menu_options)
 
     # Create container box
-    console = Window(stdscr, curses.LINES-2, curses.COLS, 1, 0)
+    # console = Window(stdscr, curses.LINES-2, curses.COLS, 1, 0)
+    panel = Window(stdscr, curses.LINES-9, curses.COLS, 1, 0)
+    console = Window(stdscr, 7, curses.COLS, curses.LINES-8, 0)
+
+    # Load specified video if available
+    if VIDEO:
+        panel.video = VIDEO
+        console.printstr('Loading video')
+        inquire(panel, console)
+
+    # Display video if available
+    panel.display()
 
     # Refresh screen
     stdscr.noutrefresh()
+    panel.freshen()
     console.freshen()
     curses.doupdate()
 
     # Enter event loop
-    loop(stdscr, console)
+    loop(stdscr, panel, console)
 
 
-def main():
+def main(video=None):
+    global VIDEO
+    VIDEO = video
     curses.wrapper(init)
 
 if __name__ == '__main__':

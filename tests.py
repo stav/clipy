@@ -8,11 +8,14 @@ import clipy.ui
 
 class ClipyUITest(unittest.TestCase):
 
+    panel = None
     console = None
 
     def setUp(self):
         def main(stdscr):
-            self.console = clipy.ui.Window(stdscr, curses.LINES, curses.COLS, 0, 0)
+            self.panel = clipy.ui.Window(stdscr, 10, curses.COLS, 0, 0)
+            self.panel.testing = True
+            self.console = clipy.ui.Window(stdscr, 10, curses.COLS, 12, 0)
             self.console.testing = True
         curses.wrapper(main)
 
@@ -28,8 +31,8 @@ class ClipyUITest(unittest.TestCase):
 
     def test_1_windows_created(self):
         """ Test that we can create the window abstration object correctly """
-        self.assertIsInstance(self.console.box, type(curses.newwin(0, 0)))
-        self.assertIsInstance(self.console.win, type(curses.newwin(0, 0)))
+        self.assertIsInstance(self.panel.box, type(curses.newwin(0, 0)))
+        self.assertIsInstance(self.panel.win, type(curses.newwin(0, 0)))
 
     def test_2_clipboard_communication(self):
         """ Test that we can read info from the clipboard """
@@ -41,9 +44,10 @@ class ClipyUITest(unittest.TestCase):
         """ Test that we can query YouTube and store info """
         vid = 'mxvLMEyCXR0'
         pyperclip.copy(vid)
-        self.assertIsNone(self.console.video)
-        clipy.ui.inquire(self.console)
-        self.assertIsNotNone(self.console.video)
+        self.assertIsNone(self.panel.video)
+        self.panel.resource = pyperclip.paste().strip()
+        clipy.ui.inquire(self.panel, self.console)
+        self.assertIsNotNone(self.panel.video)
 
     # def test_4_download(self):
     #     """ Test that we can download from YouTube """
