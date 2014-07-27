@@ -37,9 +37,20 @@ class Window(object):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
 
     def display(self):
+        self.win.erase()
+
         if self.video:
             self.printstr(self.video)
-            self.printstr('allstreams: {}'.format(self.video.allstreams))
+
+            self.printstr('Streams:')
+
+            for i, stream in enumerate(self.video.allstreams):
+                self.printstr('{}: {} {} {} {} {}'.format(i,
+                    stream.mediatype,
+                    stream.quality,
+                    stream.extension,
+                    stream.notes,
+                    stream.bitrate or ''))
 
     def freshen(self):
         self.stdscr.noutrefresh()
@@ -48,7 +59,7 @@ class Window(object):
         if not self.testing:
             curses.doupdate()
 
-    def getch(self):
+    def wait_for_input(self):
         return self.win.getch()
 
     def printstr(self, object, error=False):
@@ -81,10 +92,8 @@ def inquire(panel, console):
 
 def select(panel, console):
     if panel.video:
-        panel.printstr('Streams:')
-        for i, stream in enumerate(panel.video.allstreams):
-            panel.printstr('{}: {} {} {} {}'.format(i, stream.mediatype, stream.quality, stream.extension, stream.notes))
-        panel.printstr('Press one of the numbers above to download (0-{})'.format(i))
+        panel.printstr('Press one of the numbers above to download (0-{})'
+            .format(len(panel.video.allstreams)))
 
     else:
         console.printstr('No video to select streams, Inquire first', error=True)
@@ -149,7 +158,18 @@ def loop(stdscr, panel, console):
     KEYS_SELECT   = (ord('s'), ord('S'))
 
     while True:
-        c = panel.getch()
+
+        # Display video if available
+        panel.display()
+
+        # Refresh screen
+        stdscr.noutrefresh()
+        panel.freshen()
+        console.freshen()
+        curses.doupdate()
+
+        # Blocking
+        c = panel.wait_for_input()
 
         if c in KEYS_QUIT:
             break
@@ -176,12 +196,6 @@ def loop(stdscr, panel, console):
 
         # Debug
         # stdscr.addstr(curses.LINES-1, 108, 'c={}, t={}      '.format(c, threading.active_count()))
-
-        # Refresh screen
-        stdscr.noutrefresh()
-        panel.freshen()
-        console.freshen()
-        curses.doupdate()
 
 
 def init(stdscr):
@@ -210,15 +224,6 @@ def init(stdscr):
         panel.video = VIDEO
         console.printstr('Loading video')
         inquire(panel, console)
-
-    # Display video if available
-    panel.display()
-
-    # Refresh screen
-    stdscr.noutrefresh()
-    panel.freshen()
-    console.freshen()
-    curses.doupdate()
 
     # Enter event loop
     loop(stdscr, panel, console)
