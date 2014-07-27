@@ -152,10 +152,11 @@ def loop(stdscr, panel, console):
     KEYS_CANCEL   = (ord('c'), ord('C'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
-    KEYS_NUMERIC  = range(48, 58)
+    KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
     KEYS_SELECT   = (ord('s'), ord('S'))
+    KEYS_NUMERIC  = range(48, 58)
 
     while True:
 
@@ -194,6 +195,9 @@ def loop(stdscr, panel, console):
         if c in KEYS_CANCEL:
             cancel(panel, console)
 
+        if c in KEYS_HELP:
+            console.printstr('Help is on the way')
+
         # Debug
         # stdscr.addstr(curses.LINES-1, 108, 'c={}, t={}      '.format(c, threading.active_count()))
 
@@ -203,7 +207,6 @@ def init(stdscr):
         curses.start_color()
 
     # Setup curses
-    menu_options = 'Press "P": paste, "I": inquire, "S": select, "D": download, "C": cancel, "Q": quit'
     curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
 
@@ -212,10 +215,20 @@ def init(stdscr):
     stdscr.chgat(-1, curses.A_REVERSE)
 
     # Menu options at bottom
-    stdscr.addstr(curses.LINES-1, 0, menu_options)
+    menu_options = (
+        ('P', 'paste'),
+        ('I', 'inquire'),
+        ('S', 'select'),
+        ('D', 'download'),
+        ('C', 'cancel'),
+        ('H', 'help'),
+        ('Q', 'quit'),
+    )
+    menu_string = 'Press: ' + ', '.join(
+        ['{}: {}'.format(k, v) for k, v in menu_options])
+    stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create container box
-    # console = Window(stdscr, curses.LINES-2, curses.COLS, 1, 0)
     panel = Window(stdscr, curses.LINES-9, curses.COLS, 1, 0)
     console = Window(stdscr, 7, curses.COLS, curses.LINES-8, 0)
 
