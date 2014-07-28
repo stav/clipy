@@ -9,15 +9,15 @@ mxvLMEyCXR0
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
 import sys
 import argparse
 
 import pafy
 # import pyperclip - lazy import
 # import clipy.ui - lazy import
+from clipy.request import download
 
-VERSION = 0.5
+VERSION = 0.5.1
 
 
 def _get_commandline_options():
@@ -61,38 +61,18 @@ def _get_commandline_options():
     #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
     #                     help='output filename, def=stdout, const=/dev/null')
 
-    # command_line.add_argument('-m', dest='mogrifyers', type=str, metavar='MGRFs',
-    #                     help='mogrifyer classes "M1, M2,... Mn"')
-
-    # command_line.add_argument('-p', dest='parser', type=str, metavar='PRSR',
-    #                     help='parser class')
-
     command_line.add_argument('-V', '--version', action='version',
                         version='%(prog)s version {}'.format(VERSION),
                         help='print the version information and exit')
 
     return command_line.parse_args(sys.argv[1:])
 
+
 def _get_video(resource):
     try:
         return pafy.new(resource)
     except (OSError, ValueError) as ex:
         print(ex)
-
-def download(stream, options):
-    """ Download a video from YouTube. """
-    target_dir = os.path.expanduser(options.target)
-    try:
-        path = os.path.join(target_dir, stream.filename)
-        print('Downloading {} to {}'.format(stream.title, target_dir))
-        filename = stream.download(filepath=path, quiet=False)
-
-    except (OSError, ValueError, FileNotFoundError) as e:
-        print(e)
-
-    else:
-        print()
-        print('Downloaded: "{}"'.format(filename))
 
 
 def main():
@@ -139,7 +119,7 @@ def main():
 
     if options.ui:
         import clipy.ui
-        clipy.ui.main(video)
+        clipy.ui.main(video, stream, options.target)
 
     elif options.download:
         if video is None:
@@ -147,9 +127,10 @@ def main():
         elif stream is None:
             print('No stream selected for download')
         else:
-            download(stream, options)
+            download(stream, options.target)
 
     log('Clipy stopping')
+
 
 if __name__ == '__main__':
     main()

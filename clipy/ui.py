@@ -8,7 +8,10 @@ import threading
 import pafy
 import pyperclip
 
+import clipy.request
+
 TITLE = '.:. Clipy .:.'
+TARGET = None
 VIDEO = None
 
 class Window(object):
@@ -17,6 +20,7 @@ class Window(object):
     resource = None
     stream = None
     video = None
+    target = '~'
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
@@ -42,6 +46,7 @@ class Window(object):
         if self.video:
             self.printstr(self.video)
 
+            self.printstr('')
             self.printstr('Streams:')
 
             for i, stream in enumerate(self.video.allstreams):
@@ -62,7 +67,7 @@ class Window(object):
     def wait_for_input(self):
         return self.win.getch()
 
-    def printstr(self, object, success=False, error=False, wow=False):
+    def printstr(self, object='', success=False, error=False, wow=False):
         string = '{}\n'.format(object)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
@@ -103,24 +108,6 @@ def select(panel, console):
         console.printstr('No video to select streams, Inquire first', error=True)
 
 
-def request(panel, console):
-    download_dir = os.path.expanduser('~')
-    try:
-        stream = panel.stream
-        path = '%s.%s' % (os.path.join(download_dir, stream.title), stream.extension)
-        console.printstr('Downloading {} to {}'.format(stream, download_dir))
-        f = stream.download(filepath=path, quiet=True, callback=panel.progress)
-
-    except (OSError, ValueError, FileNotFoundError) as e:
-        console.printstr(e, error=True)
-
-    else:
-        if str(f).endswith('.temp'):
-            console.printstr('Partial download : "{}"'.format(f))
-        else:
-            console.printstr('Downloaded: "{}"'.format(f), success=True)
-
-
 def cancel(panel, console):
     if panel.stream:
         console.printstr('Cancelling {}'.format(panel.stream))
@@ -148,7 +135,9 @@ def download(panel, console, index=None):
             return
         panel.stream = panel.video.allstreams[index]
 
-    t = threading.Thread(target=request, args=(panel, console))
+    t = threading.Thread(
+        target=clipy.request.download,
+        args=(panel.stream, panel.target, console.printstr, panel.progress))
     t.daemon = True
     t.start()
 
@@ -238,7 +227,9 @@ def init(stdscr):
     panel = Window(stdscr, curses.LINES-9, curses.COLS, 1, 0)
     console = Window(stdscr, 7, curses.COLS, curses.LINES-8, 0)
 
-    # Load specified video if available
+    # Load command line options
+    if TARGET:
+        panel.target = TARGET
     if VIDEO:
         panel.video = VIDEO
         console.printstr('Loading video')
@@ -248,9 +239,10 @@ def init(stdscr):
     loop(stdscr, panel, console)
 
 
-def main(video=None):
-    global VIDEO
+def main(video=None, stream=None, target=None):
+    global VIDEO, TARGET
     VIDEO = video
+    TARGET = target
     curses.wrapper(init)
 
 if __name__ == '__main__':
