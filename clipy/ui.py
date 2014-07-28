@@ -62,10 +62,14 @@ class Window(object):
     def wait_for_input(self):
         return self.win.getch()
 
-    def printstr(self, object, error=False):
+    def printstr(self, object, success=False, error=False, wow=False):
         string = '{}\n'.format(object)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
+        elif success:
+            self.win.addstr(string, curses.color_pair(2))
+        elif wow:
+            self.win.addstr(string, curses.A_STANDOUT)
         else:
             self.win.addstr(string)
         self.freshen()
@@ -92,14 +96,14 @@ def inquire(panel, console):
 
 def select(panel, console):
     if panel.video:
-        panel.printstr('Press one of the numbers above to download (0-{})'
-            .format(len(panel.video.allstreams)))
+        console.printstr('Press one of the numbers above to download (0-{})'
+            .format(len(panel.video.allstreams)-1))
 
     else:
         console.printstr('No video to select streams, Inquire first', error=True)
 
 
-def download(panel, console):
+def request(panel, console):
     download_dir = os.path.expanduser('~')
     try:
         stream = panel.stream
@@ -111,8 +115,10 @@ def download(panel, console):
         console.printstr(e, error=True)
 
     else:
-        if f:
-            console.printstr('Downloaded: "{}"'.format(f))
+        if str(f).endswith('.temp'):
+            console.printstr('Partial download : "{}"'.format(f))
+        else:
+            console.printstr('Downloaded: "{}"'.format(f), success=True)
 
 
 def cancel(panel, console):
@@ -126,7 +132,7 @@ def cancel(panel, console):
     panel.stream = None
 
 
-def spawn(panel, console, index=None):
+def download(panel, console, index=None):
     if panel.video is None:
         console.printstr('No video to download, Inquire first', error=True)
         return
@@ -140,10 +146,9 @@ def spawn(panel, console, index=None):
         if index >= len(panel.video.allstreams):
             console.printstr('Stream {} not available'.format(index), error=True)
             return
-        else:
-            panel.stream = panel.video.allstreams[index]
+        panel.stream = panel.video.allstreams[index]
 
-    t = threading.Thread(target=download, args=(panel, console))
+    t = threading.Thread(target=request, args=(panel, console))
     t.daemon = True
     t.start()
 
@@ -187,10 +192,10 @@ def loop(stdscr, panel, console):
             select(panel, console)
 
         if c in KEYS_DOWNLOAD:
-            spawn(panel, console)
+            download(panel, console)
 
         if c in KEYS_NUMERIC:
-            spawn(panel, console, c-48)
+            download(panel, console, c-48)
 
         if c in KEYS_CANCEL:
             cancel(panel, console)
@@ -208,7 +213,8 @@ def init(stdscr):
 
     # Setup curses
     curses.curs_set(False)
-    curses.init_pair(1, curses.COLOR_RED  , curses.COLOR_BLACK)
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_RED)
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN)
 
     # Title bar at top
     stdscr.addstr(TITLE, curses.A_REVERSE)
