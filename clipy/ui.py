@@ -14,7 +14,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.6.1'
+VERSION = '0.6.2'
 TARGET = None
 VIDEO = None
 
@@ -49,10 +49,6 @@ class Stream(object):
 class Window(object):
     """
     Window absraction with border
-
-    A Window has an outer window (box) with a border around it, and an inner
-    window (win) which is half the screen width.  Conceptually "box" is used
-    to display the "right" pane, and "win" is used to display the "left" pane.
     """
     testing = False
 
@@ -116,11 +112,40 @@ class Window(object):
             attr = curses.A_STANDOUT if i == self.videos.index else 0
             self.box.addstr(3+i, self.cache_x, str(video), attr)
 
-    # def save(self):
-    #     with open('curses.putwin', 'wb') as f:
-    #         self.win.putwin(f)
-    #     # curses.savetty() Save the current state of the terminal modes in a buffer, usable by resetty().
-    #     # scr-dump filename
+    def load(self):
+        class Cache(): pass
+
+        with open('clipy.lookups', 'r') as f:
+            for line in f.readlines():
+                key, duration, title = line.split(maxsplit=2)
+                # self.printstr('{} {} {}.'.format(key, duration, title))
+                # print('key({}) - ({}) - ({}).'.format(key, duration, title))
+                video = Cache()
+                video.videoid = key
+                video.duration = duration
+                video.title = title.strip()
+                self.lookups[key] = Video(video)
+
+        with open('clipy.downloads', 'r') as f:
+            for line in f.readlines():
+                url, filename = line.split(maxsplit=1)
+                stream = Cache()
+                stream.url = url
+                self.downloads[url] = Stream(stream, filename.strip())
+
+    def save(self):
+        #     self.win.putwin(f)
+        # curses.savetty() Save the current state of the terminal modes in a buffer, usable by resetty().
+        # scr-dump filename
+        with open('clipy.lookups', 'w') as f:
+            for key in self.lookups:
+                cache = self.lookups[key]
+                f.write('{} {}\n'.format(cache.video.videoid, cache))
+
+        with open('clipy.downloads', 'w') as f:
+            for key in self.downloads:
+                cache = self.downloads[key]
+                f.write('{} {}\n'.format(cache.stream.url, cache))
 
     def freshen(self):
         self.stdscr.noutrefresh()
@@ -153,7 +178,11 @@ class Window(object):
 
 
 class Panel(Window):
-    """docstring for Panel"""
+    """
+    A Panel has an outer window (box) with a border around it, and an inner
+    window (win) which is half the screen width.  Conceptually "box" is used
+    to display the "right" pane, and "win" is used to display the "left" pane.
+    """
     def __init__(self, stdscr, lines, cols, y, x):
         super(Panel, self).__init__(stdscr, lines, cols, y, x)
         Y, X = self.box.getmaxyx()
@@ -172,7 +201,10 @@ class Panel(Window):
 
 
 class Console(Window):
-    """docstring for Console"""
+    """
+    A Console has an outer window (box) with a border around it, and an inner
+    window (win) which is the full screen width.
+    """
     def __init__(self, stdscr, lines, cols, y, x):
         super(Console, self).__init__(stdscr, lines, cols, y, x)
         Y, X = self.box.getmaxyx()
@@ -204,7 +236,13 @@ def inquire(panel, console):
 
 
 def cache(panel, console, key):
-    if key == curses.KEY_LEFT:
+    if key == ord('L'):
+        panel.load()
+
+    elif key == ord('C'):
+        panel.save()
+
+    elif key == curses.KEY_LEFT:
         panel.videos = panel.lookups
 
     elif key == curses.KEY_RIGHT:
@@ -226,6 +264,7 @@ def cache(panel, console, key):
             if panel.videos.index >= 0 and panel.videos.index < len(panel.videos):
                 panel.resource = list(panel.videos)[panel.videos.index]
                 inquire(panel, console)
+
 
 def select(panel, console):
     if panel.video:
@@ -284,7 +323,7 @@ def loop(stdscr, panel, console):
     KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_SELECT   = (ord('s'), ord('S'))
     KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
-    KEYS_CACHE    = (curses.KEY_LEFT, curses.KEY_RIGHT, curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)
+    KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT, curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
     KEYS_NUMERIC  = range(48, 58)
 
     while True:
@@ -297,9 +336,6 @@ def loop(stdscr, panel, console):
         panel.freshen()
         console.freshen()
         curses.doupdate()
-
-        # Save state
-        # panel.save()
 
         # Blocking
         c = panel.wait_for_input()
