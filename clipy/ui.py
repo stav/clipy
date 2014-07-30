@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
@@ -5,10 +6,12 @@ import sys
 import curses
 import threading
 
+from collections import OrderedDict
+
 import pafy
 import pyperclip
 
-import clipy.request
+from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
 TARGET = None
@@ -19,19 +22,27 @@ class Window(object):
     testing = False
     resource = None
     stream = None
+    streams=False
     video = None
     target = '~'
+    lookups = OrderedDict()
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
+
+        # Border
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
-        # import pdb; pdb.set_trace()
-        self.win = self.box.subwin(Y-2, X-4, y+1, 2)
+        self.box.box()
+
+        # Inner window, left side
+        self.win = self.box.subwin(Y-2, X//2, y+1, 2)
         self.win.scrollok(True)
         self.win.keypad(True)
 
-        self.box.box()
+        # Inner window, right side
+        self.cache_x = X//2 + 4
+        self.cache_index = None
 
         # self._coord(Y-4, X-5)
         # for i in range(Y-2):
@@ -46,16 +57,22 @@ class Window(object):
         if self.video:
             self.printstr(self.video)
 
-            self.printstr('')
-            self.printstr('Streams:')
+            if self.streams:
+                self.printstr('')
+                self.printstr('Streams:')
+                for i, stream in enumerate(self.video.allstreams):
+                    self.printstr('{}: {} {} {} {} {}'.format(i,
+                        stream.mediatype,
+                        stream.quality,
+                        stream.extension,
+                        stream.notes,
+                        stream.bitrate or ''))
 
-            for i, stream in enumerate(self.video.allstreams):
-                self.printstr('{}: {} {} {} {} {}'.format(i,
-                    stream.mediatype,
-                    stream.quality,
-                    stream.extension,
-                    stream.notes,
-                    stream.bitrate or ''))
+        for i, lookup in enumerate(self.lookups):
+            video = self.lookups[lookup]
+            attr = curses.A_STANDOUT if i == self.cache_index else 0
+            self.box.addstr(1+i, self.cache_x, '{i} - {dur}  {title}'.format(
+                i=i, dur=video.duration, title=video.title), attr)
 
     def freshen(self):
         self.stdscr.noutrefresh()
@@ -94,15 +111,62 @@ def inquire(panel, console):
             console.printstr('Resourse found: {}'.format(panel.resource))
             panel.video = pafy.new(panel.resource)
             panel.resource = None
+            if panel.video.videoid not in panel.lookups:
+                panel.lookups[panel.video.videoid] = panel.video
 
     except (OSError, ValueError) as e:
         console.printstr(e, error=True)
 
 
+def cache(panel, console, key):
+    # console.printstr(
+    #   'key={} UP({}) DOWN({}), ci={} None({}), len={}'.format(
+    #     key,
+    #     key is curses.KEY_UP,
+    #     key is curses.KEY_DOWN,
+    #     panel.cache_index,
+    #     panel.cache_index is None,
+    #     len(panel.lookups),
+    # ), wow=True)
+
+    if panel.cache_index is None:
+        panel.cache_index = 0
+
+    else:
+
+        if key == curses.KEY_UP:
+            if panel.cache_index > 0:
+                panel.cache_index -= 1
+
+        elif key == curses.KEY_DOWN:
+            if panel.cache_index < len(panel.lookups) -1:
+                panel.cache_index += 1
+
+        elif key == curses.KEY_ENTER or key == 10:
+            if panel.cache_index >= 0 and panel.cache_index < len(panel.lookups):
+                # console.printstr('lookups={}, index={}'.format(panel.lookups, panel.cache_index))
+                panel.resource = list(panel.lookups)[panel.cache_index]
+                # videoid = list(panel.lookups)[panel.cache_index]
+                # panel.resource = panel.lookups[videoid]
+                inquire(panel, console)
+
+    # console.printstr('key={}, enter={}'.format(key, curses.KEY_ENTER))
+
+    # console.printstr('key={}, ci={}, lups={}, cache_index is None={}'.format(
+    #     key,
+    #     panel.cache_index,
+    #     len(panel.lookups),
+    #     panel.cache_index is None,
+    # ))
+
+    # panel.display()
+
+
 def select(panel, console):
     if panel.video:
-        console.printstr('Press one of the numbers above to download (0-{})'
-            .format(len(panel.video.allstreams)-1))
+        if panel.streams:
+            console.printstr('Press one of the numbers above to download (0-{})'
+                .format(len(panel.video.allstreams)-1))
 
     else:
         console.printstr('No video to select streams, Inquire first', error=True)
@@ -135,21 +199,21 @@ def download(panel, console, index=None):
             return
         panel.stream = panel.video.allstreams[index]
 
-    t = threading.Thread(
-        target=clipy.request.download,
+    t = threading.Thread(target=clipy_request_download,
         args=(panel.stream, panel.target, console.printstr, panel.progress))
     t.daemon = True
     t.start()
 
 
 def loop(stdscr, panel, console):
-    KEYS_CANCEL   = (ord('c'), ord('C'))
+    KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
     KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_PASTE    = (ord('p'), ord('P'))
-    KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
     KEYS_SELECT   = (ord('s'), ord('S'))
+    KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
+    KEYS_CACHE    = (curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)
     KEYS_NUMERIC  = range(48, 58)
 
     while True:
@@ -178,7 +242,11 @@ def loop(stdscr, panel, console):
             inquire(panel, console)
 
         if c in KEYS_SELECT:
+            panel.streams = not panel.streams
             select(panel, console)
+
+        if c in KEYS_CACHE:
+            cache(panel, console, c)
 
         if c in KEYS_DOWNLOAD:
             download(panel, console)
@@ -193,7 +261,7 @@ def loop(stdscr, panel, console):
             console.printstr('Help is on the way')
 
         # Debug
-        # stdscr.addstr(curses.LINES-1, 108, 'c={}, t={}      '.format(c, threading.active_count()))
+        stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}, t={}      '.format(c, threading.active_count()))
 
 
 def init(stdscr):
@@ -214,8 +282,10 @@ def init(stdscr):
         ('P', 'paste'),
         ('I', 'inquire'),
         ('S', 'select'),
+        ('↑↓', 'cache'),
+        ('⏎ ', 'cache'),
         ('D', 'download'),
-        ('C', 'cancel'),
+        ('X', 'cancel'),
         ('H', 'help'),
         ('Q', 'quit'),
     )
