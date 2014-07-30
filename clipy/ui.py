@@ -14,6 +14,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
+VERSION = '0.6.1'
 TARGET = None
 VIDEO = None
 
@@ -78,18 +79,6 @@ class Window(object):
         Y, X = self.box.getmaxyx()
         self.box.box()
 
-        # Inner window, left side
-        self.win = self.box.subwin(Y-2, X//2, y+1, 2)
-        self.win.scrollok(True)
-        self.win.keypad(True)
-
-        # Inner window, right pane margin
-        self.cache_x = X//2 + 4
-
-        # self._coord(Y-4, X-5)
-        # for i in range(Y-2):
-        #     self._coord(i, i)
-
     def _coord(self, y, x):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
 
@@ -144,7 +133,7 @@ class Window(object):
         return self.win.getch()
 
     def printstr(self, object='', success=False, error=False, wow=False):
-        string = '{}\n'.format(object)
+        string = '\n{}'.format(object)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
         elif success:
@@ -161,6 +150,41 @@ class Window(object):
         status = status_string.format(*progress_stats)
         self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
         self.freshen()
+
+
+class Panel(Window):
+    """docstring for Panel"""
+    def __init__(self, stdscr, lines, cols, y, x):
+        super(Panel, self).__init__(stdscr, lines, cols, y, x)
+        Y, X = self.box.getmaxyx()
+        # Inner window, left side
+        self.win = self.box.subwin(Y-2, X//2, y+1, 2)
+        self.win.scrollok(True)
+        self.win.keypad(True)
+
+        # Inner window, right pane margin
+        self.cache_x = X//2 + 4
+
+        # Debug
+        # self._coord(Y-4, X-5)
+        # for i in range(Y-2):
+        #     self._coord(i, i)
+
+
+class Console(Window):
+    """docstring for Console"""
+    def __init__(self, stdscr, lines, cols, y, x):
+        super(Console, self).__init__(stdscr, lines, cols, y, x)
+        Y, X = self.box.getmaxyx()
+       # Inner window
+        self.win = self.box.subwin(Y-2, X-3, y+1, 2)
+        self.win.scrollok(True)
+        self.win.keypad(True)
+
+        # Debug
+        # self._coord(Y-4, X-5)
+        # for i in range(Y-2):
+        #     self._coord(i, i)
 
 
 def inquire(panel, console):
@@ -344,8 +368,8 @@ def init(stdscr):
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create container box
-    panel = Window(stdscr, curses.LINES-9, curses.COLS, 1, 0)
-    console = Window(stdscr, 7, curses.COLS, curses.LINES-8, 0)
+    panel   = Panel  (stdscr, curses.LINES-9, curses.COLS, 1             , 0)
+    console = Console(stdscr, 7             , curses.COLS, curses.LINES-8, 0)
 
     # Load command line options
     if TARGET:
