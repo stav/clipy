@@ -17,15 +17,34 @@ TITLE = '.:. Clipy .:.'
 TARGET = None
 VIDEO = None
 
+
+class VideoList(OrderedDict):
+    """docstring for VideoList"""
+    def __init__(self, name):
+        super(VideoList, self).__init__()
+        self.name = name
+        self.index = None
+
+
 class Window(object):
     """Window absraction with border"""
     testing = False
+
     resource = None
+    target = '~'
+
     stream = None
     streams=False
+
+    caches = (
+        VideoList('Lookups'),
+        VideoList('Downloads'),
+    )
+    lookups = caches[0]
+    downloads = caches[1]
+    videos = lookups
     video = None
-    target = '~'
-    lookups = OrderedDict()
+    # videos.index = None
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
@@ -40,9 +59,8 @@ class Window(object):
         self.win.scrollok(True)
         self.win.keypad(True)
 
-        # Inner window, right side
+        # Inner window, right pane margin
         self.cache_x = X//2 + 4
-        self.cache_index = None
 
         # self._coord(Y-4, X-5)
         # for i in range(Y-2):
@@ -53,10 +71,14 @@ class Window(object):
 
     def display(self):
         self.win.erase()
+        self.box.erase()
+        self.box.box()
 
+        # Display video detail on left pane
         if self.video:
             self.printstr(self.video)
 
+            # Display streams only if toggled
             if self.streams:
                 self.printstr('')
                 self.printstr('Streams:')
@@ -68,11 +90,25 @@ class Window(object):
                         stream.notes,
                         stream.bitrate or ''))
 
-        for i, lookup in enumerate(self.lookups):
-            video = self.lookups[lookup]
-            attr = curses.A_STANDOUT if i == self.cache_index else 0
-            self.box.addstr(1+i, self.cache_x, '{i} - {dur}  {title}'.format(
+        # Display list of video caches on right pand
+        for i, cache in enumerate(self.caches):
+            # self.printstr('{}: {} {} {}'.format(i, cache.name, self.videos.name, cache.name == self.videos.name))
+            attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
+            self.box.addstr(1, self.cache_x + 20*i, cache.name.upper(), attr)
+
+        # Display video list on right pane
+        self.box.addstr(2, self.cache_x, self.videos.name)
+        for i, key in enumerate(self.videos):
+            video = self.videos[key]
+            attr = curses.A_STANDOUT if i == self.videos.index else 0
+            self.box.addstr(3+i, self.cache_x, '{i} - {dur}  {title}'.format(
                 i=i, dur=video.duration, title=video.title), attr)
+
+    # def save(self):
+    #     with open('curses.putwin', 'wb') as f:
+    #         self.win.putwin(f)
+    #     # curses.savetty() Save the current state of the terminal modes in a buffer, usable by resetty().
+    #     # scr-dump filename
 
     def freshen(self):
         self.stdscr.noutrefresh()
@@ -111,56 +147,38 @@ def inquire(panel, console):
             console.printstr('Resourse found: {}'.format(panel.resource))
             panel.video = pafy.new(panel.resource)
             panel.resource = None
-            if panel.video.videoid not in panel.lookups:
-                panel.lookups[panel.video.videoid] = panel.video
 
     except (OSError, ValueError) as e:
         console.printstr(e, error=True)
 
+    if panel.video:
+        if panel.video.videoid not in panel.lookups:
+            panel.lookups[panel.video.videoid] = panel.video
+
 
 def cache(panel, console, key):
-    # console.printstr(
-    #   'key={} UP({}) DOWN({}), ci={} None({}), len={}'.format(
-    #     key,
-    #     key is curses.KEY_UP,
-    #     key is curses.KEY_DOWN,
-    #     panel.cache_index,
-    #     panel.cache_index is None,
-    #     len(panel.lookups),
-    # ), wow=True)
+    if key == curses.KEY_LEFT:
+        panel.videos = panel.lookups
 
-    if panel.cache_index is None:
-        panel.cache_index = 0
+    elif key == curses.KEY_RIGHT:
+        panel.videos = panel.downloads
 
     else:
+        if panel.videos.index is None:
+            panel.videos.index = 0
 
         if key == curses.KEY_UP:
-            if panel.cache_index > 0:
-                panel.cache_index -= 1
+            if panel.videos.index > 0:
+                panel.videos.index -= 1
 
         elif key == curses.KEY_DOWN:
-            if panel.cache_index < len(panel.lookups) -1:
-                panel.cache_index += 1
+            if panel.videos.index < len(panel.videos) -1:
+                panel.videos.index += 1
 
         elif key == curses.KEY_ENTER or key == 10:
-            if panel.cache_index >= 0 and panel.cache_index < len(panel.lookups):
-                # console.printstr('lookups={}, index={}'.format(panel.lookups, panel.cache_index))
-                panel.resource = list(panel.lookups)[panel.cache_index]
-                # videoid = list(panel.lookups)[panel.cache_index]
-                # panel.resource = panel.lookups[videoid]
+            if panel.videos.index >= 0 and panel.videos.index < len(panel.videos):
+                panel.resource = list(panel.videos)[panel.videos.index]
                 inquire(panel, console)
-
-    # console.printstr('key={}, enter={}'.format(key, curses.KEY_ENTER))
-
-    # console.printstr('key={}, ci={}, lups={}, cache_index is None={}'.format(
-    #     key,
-    #     panel.cache_index,
-    #     len(panel.lookups),
-    #     panel.cache_index is None,
-    # ))
-
-    # panel.display()
-
 
 def select(panel, console):
     if panel.video:
@@ -174,9 +192,9 @@ def select(panel, console):
 
 def cancel(panel, console):
     if panel.stream:
-        console.printstr('Cancelling {}'.format(panel.stream))
+        console.printstr('Cancelling {} `{}`'.format(panel.stream, panel.stream.title))
         if panel.stream.cancel():
-            console.printstr('Cancelled "{}"'.format(panel.stream.title))
+            console.printstr('Cancelled {} `{}`'.format(panel.stream, panel.stream.title))
     else:
         console.printstr('Nothing to cancel')
 
@@ -187,6 +205,7 @@ def download(panel, console, index=None):
     if panel.video is None:
         console.printstr('No video to download, Inquire first', error=True)
         return
+
     if index is None:
         try:
             panel.stream = panel.video.getbest(preftype="mp4")
@@ -213,7 +232,7 @@ def loop(stdscr, panel, console):
     KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_SELECT   = (ord('s'), ord('S'))
     KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
-    KEYS_CACHE    = (curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)
+    KEYS_CACHE    = (curses.KEY_LEFT, curses.KEY_RIGHT, curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)
     KEYS_NUMERIC  = range(48, 58)
 
     while True:
@@ -226,6 +245,9 @@ def loop(stdscr, panel, console):
         panel.freshen()
         console.freshen()
         curses.doupdate()
+
+        # Save state
+        # panel.save()
 
         # Blocking
         c = panel.wait_for_input()

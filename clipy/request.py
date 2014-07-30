@@ -12,8 +12,10 @@ def download(stream, target='~', logger=print, callback=None):
             logger(string, *a, **kw)
 
     try:
-        path = os.path.join(target_dir, stream.filename)
-        log('Downloading {} to {}'.format(stream.title, target_dir))
+        name = '{}-({}).{}'.format(stream.title, stream.quality, stream.extension)
+        path = os.path.join(target_dir, name)
+        # path = os.path.join(target_dir, stream.filename)
+        log('Downloading {} `{}` to {}'.format(stream, stream.title, target_dir))
         if callback:
             filename = stream.download(filepath=path, quiet=True, callback=callback)
         else:
@@ -26,6 +28,6 @@ def download(stream, target='~', logger=print, callback=None):
         if log is print:
             log()
         if str(filename).endswith('.temp'):
-            log('Partial download : "{}"'.format(filename))
+            log('Partial download: `{}` ({})'.format(filename, stream))
         else:
-            log('Downloaded: "{}"'.format(filename), success=True)
+            log('Downloaded: `{}` ({})'.format(filename, stream), success=True)
