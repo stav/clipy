@@ -18,16 +18,41 @@ TARGET = None
 VIDEO = None
 
 
-class VideoList(OrderedDict):
-    """docstring for VideoList"""
+class CacheList(OrderedDict):
+    """docstring for CacheList"""
     def __init__(self, name):
-        super(VideoList, self).__init__()
+        super(CacheList, self).__init__()
         self.name = name
         self.index = None
 
 
+class Video(object):
+    """Pafy video encapsulation"""
+    def __init__(self, video):
+        self.video = video
+
+    def __str__(self):
+        return '{dur}  {title}'.format(dur=self.video.duration, title=self.video.title)
+
+
+class Stream(object):
+    """Pafy stream encapsulation"""
+    def __init__(self, stream, filename):
+        self.stream = stream
+        self.filename = filename
+
+    def __str__(self):
+        return str(self.filename)
+
+
 class Window(object):
-    """Window absraction with border"""
+    """
+    Window absraction with border
+
+    A Window has an outer window (box) with a border around it, and an inner
+    window (win) which is half the screen width.  Conceptually "box" is used
+    to display the "right" pane, and "win" is used to display the "left" pane.
+    """
     testing = False
 
     resource = None
@@ -37,14 +62,13 @@ class Window(object):
     streams=False
 
     caches = (
-        VideoList('Lookups'),
-        VideoList('Downloads'),
+        CacheList('Lookups'),
+        CacheList('Downloads'),
     )
     lookups = caches[0]
     downloads = caches[1]
     videos = lookups
     video = None
-    # videos.index = None
 
     def __init__(self, stdscr, lines, cols, y, x):
         self.stdscr = stdscr
@@ -101,8 +125,7 @@ class Window(object):
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
-            self.box.addstr(3+i, self.cache_x, '{i} - {dur}  {title}'.format(
-                i=i, dur=video.duration, title=video.title), attr)
+            self.box.addstr(3+i, self.cache_x, str(video), attr)
 
     # def save(self):
     #     with open('curses.putwin', 'wb') as f:
@@ -153,7 +176,7 @@ def inquire(panel, console):
 
     if panel.video:
         if panel.video.videoid not in panel.lookups:
-            panel.lookups[panel.video.videoid] = panel.video
+            panel.lookups[panel.video.videoid] = Video(panel.video)
 
 
 def cache(panel, console, key):
@@ -202,6 +225,11 @@ def cancel(panel, console):
 
 
 def download(panel, console, index=None):
+    def success(stream, filename):
+        panel.downloads[stream.url] = Stream(stream, filename)
+        panel.display()
+        panel.freshen()
+
     if panel.video is None:
         console.printstr('No video to download, Inquire first', error=True)
         return
@@ -219,7 +247,7 @@ def download(panel, console, index=None):
         panel.stream = panel.video.allstreams[index]
 
     t = threading.Thread(target=clipy_request_download,
-        args=(panel.stream, panel.target, console.printstr, panel.progress))
+        args=(panel.stream, panel.target, console.printstr, panel.progress, success))
     t.daemon = True
     t.start()
 

@@ -1,7 +1,7 @@
 import os
 
 
-def download(stream, target='~', logger=print, callback=None):
+def download(stream, target='~', logger=print, progress_callback=None, success_callback=lambda *a: None):
     """ Download a video from YouTube. """
     target_dir = os.path.expanduser(target)
 
@@ -16,8 +16,8 @@ def download(stream, target='~', logger=print, callback=None):
         path = os.path.join(target_dir, name)
         # path = os.path.join(target_dir, stream.filename)
         log('Downloading {} `{}` to {}'.format(stream, stream.title, target_dir))
-        if callback:
-            filename = stream.download(filepath=path, quiet=True, callback=callback)
+        if progress_callback:
+            filename = stream.download(filepath=path, quiet=True, callback=progress_callback)
         else:
             filename = stream.download(filepath=path, quiet=False)
 
@@ -31,3 +31,4 @@ def download(stream, target='~', logger=print, callback=None):
             log('Partial download: `{}` ({})'.format(filename, stream))
         else:
             log('Downloaded: `{}` ({})'.format(filename, stream), success=True)
+            success_callback(stream, filename)
