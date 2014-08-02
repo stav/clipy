@@ -1,10 +1,12 @@
 # coding=utf-8
+"""
+Clipy YouTube video downloader user interface
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import sys
 import curses
 import threading
+import subprocess
 
 from collections import OrderedDict
 
@@ -14,9 +16,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.6.2'
-TARGET = None
-VIDEO = None
+VERSION = '0.6.3'
 
 
 class CacheList(OrderedDict):
@@ -33,7 +33,8 @@ class Video(object):
         self.video = video
 
     def __str__(self):
-        return '{dur}  {title}'.format(dur=self.video.duration, title=self.video.title)
+        return '{dur}  {title}'.format(
+            dur=self.video.duration, title=self.video.title)
 
 
 class Stream(object):
@@ -50,13 +51,15 @@ class Window(object):
     """
     Window absraction with border
     """
+    win = box = None
     testing = False
+    cache_x = 0
 
     resource = None
     target = '~'
 
     stream = None
-    streams=False
+    streams = False
 
     caches = (
         CacheList('Lookups'),
@@ -134,9 +137,6 @@ class Window(object):
                 self.downloads[url] = Stream(stream, filename.strip())
 
     def save(self):
-        #     self.win.putwin(f)
-        # curses.savetty() Save the current state of the terminal modes in a buffer, usable by resetty().
-        # scr-dump filename
         with open('clipy.lookups', 'w') as f:
             for key in self.lookups:
                 cache = self.lookups[key]
@@ -157,8 +157,8 @@ class Window(object):
     def wait_for_input(self):
         return self.win.getch()
 
-    def printstr(self, object='', success=False, error=False, wow=False):
-        string = '\n{}'.format(object)
+    def printstr(self, text='', success=False, error=False, wow=False):
+        string = '\n{}'.format(text)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
         elif success:
@@ -262,8 +262,18 @@ def cache(panel, console, key):
 
         elif key == curses.KEY_ENTER or key == 10:
             if panel.videos.index >= 0 and panel.videos.index < len(panel.videos):
-                panel.resource = list(panel.videos)[panel.videos.index]
-                inquire(panel, console)
+                if panel.videos == panel.lookups:
+                    panel.resource = list(panel.videos)[panel.videos.index]
+                    inquire(panel, console)
+                else:
+                    key = list(panel.videos)[panel.videos.index]
+                    filename = panel.videos[key].filename
+                    try:
+                        console.printstr(filename, wow=True)
+                        subprocess.call(['mplayer', '{}'.format(filename)], shell=False)
+                    except Exception as e:
+                        import pdb; pdb.set_trace()
+                        console.printstr(e, error=True)
 
 
 def select(panel, console):
@@ -316,6 +326,7 @@ def download(panel, console, index=None):
 
 
 def loop(stdscr, panel, console):
+    KEYS_NUMERIC  = range(48, 58)
     KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
@@ -323,8 +334,8 @@ def loop(stdscr, panel, console):
     KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_SELECT   = (ord('s'), ord('S'))
     KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
-    KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT, curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
-    KEYS_NUMERIC  = range(48, 58)
+    KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
+        curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
 
     while True:
 
@@ -371,10 +382,11 @@ def loop(stdscr, panel, console):
             console.printstr('Help is on the way')
 
         # Debug
-        stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}, t={}      '.format(c, threading.active_count()))
+        stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}, t={}      '
+            .format(c, threading.active_count()))
 
 
-def init(stdscr):
+def init(stdscr, video, stream, target):
     if curses.has_colors():
         curses.start_color()
 
@@ -408,10 +420,9 @@ def init(stdscr):
     console = Console(stdscr, 7             , curses.COLS, curses.LINES-8, 0)
 
     # Load command line options
-    if TARGET:
-        panel.target = TARGET
-    if VIDEO:
-        panel.video = VIDEO
+    panel.target = target
+    panel.video = video
+    if video:
         console.printstr('Loading video')
         inquire(panel, console)
 
@@ -420,10 +431,10 @@ def init(stdscr):
 
 
 def main(video=None, stream=None, target=None):
-    global VIDEO, TARGET
-    VIDEO = video
-    TARGET = target
-    curses.wrapper(init)
+    """
+    Single entry point for command-line as well as stand-alone execution.
+    """
+    curses.wrapper(init, video, stream, target)
 
 if __name__ == '__main__':
     main()
