@@ -1,9 +1,11 @@
 import os
 
 
-def download(stream, target='~', logger=print, progress_callback=None, success_callback=lambda *a: None):
+def download(stream, target='~', logger=print, progress_callback=None, done_callback=lambda *a: None):
     """ Download a video from YouTube. """
     target_dir = os.path.expanduser(target)
+    success = False
+    filename = ''
 
     def log(string, *a, **kw):
         if logger is print:
@@ -31,4 +33,7 @@ def download(stream, target='~', logger=print, progress_callback=None, success_c
             log('Partial download: `{}` ({})'.format(filename, stream))
         else:
             log('Downloaded: `{}` ({})'.format(filename, stream), success=True)
-            success_callback(stream, filename)
+            success = True
+
+    finally:
+        done_callback(stream, filename, success)
