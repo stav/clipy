@@ -16,7 +16,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7'
+VERSION = '0.7.1'
 
 
 class CacheList(OrderedDict):
@@ -84,7 +84,7 @@ class Window(object):
     def load(self):
         class Cache(): pass
 
-        with open('clipy.lookups', 'r') as f:
+        with open('clipy.lookups', 'w+') as f:
             for line in f.readlines():
                 key, duration, title = line.split(maxsplit=2)
                 # self.printstr('{} {} {}.'.format(key, duration, title))
@@ -94,7 +94,7 @@ class Window(object):
                 video.title = title.strip()
                 self.lookups[key] = Video(video)
 
-        with open('clipy.downloads', 'r') as f:
+        with open('clipy.downloads', 'w+') as f:
             for line in f.readlines():
                 url, filename = line.split(maxsplit=1)
                 stream = Cache()
@@ -236,50 +236,72 @@ class Panel(object):
             self.console.printstr(e, error=True)
 
         else:
+            # If entry not in Lookups
             if self.detail_panel.video.videoid not in self.list_panel.lookups:
-                self.list_panel.lookups[self.detail_panel.video.videoid] = Video(self.detail_panel.video)
+                # Add entry to Lookups
+                vid = self.detail_panel.video.videoid
+                self.list_panel.lookups[vid] = Video(self.detail_panel.video)
 
     def wait_for_input(self):
         return self.detail_panel.win.getch()
 
     def cache(self, key):
+        # Load cache from disk
         if key == ord('L'):
             self.list_panel.load()
 
+        # Save cache to disk
         elif key == ord('C'):
             self.list_panel.save()
 
+        # Display lookups
         elif key == curses.KEY_LEFT:
             self.list_panel.videos = self.list_panel.lookups
 
+        # Display downloads
         elif key == curses.KEY_RIGHT:
             self.list_panel.videos = self.list_panel.downloads
 
+        # Intra-cache navigation
         else:
+            # Initialize cache
             if self.list_panel.videos.index is None:
                 self.list_panel.videos.index = 0
+            v_index = self.list_panel.videos.index
 
+            # Move up the list
             if key == curses.KEY_UP:
-                if self.list_panel.videos.index > 0:
+                if v_index > 0:
                     self.list_panel.videos.index -= 1
 
+            # Move down the list
             elif key == curses.KEY_DOWN:
-                if self.list_panel.videos.index < len(self.list_panel.videos) -1:
+                if v_index < len(self.list_panel.videos) -1:
                     self.list_panel.videos.index += 1
 
+            # Selected cache entry action
             elif key == curses.KEY_ENTER or key == 10:
-                if self.list_panel.videos.index >= 0 and self.list_panel.videos.index < len(self.list_panel.videos):
+
+                # Validate selected index
+                if v_index >= 0 and v_index < len(self.list_panel.videos):
+
+                    # Lookups action
                     if self.list_panel.videos == self.list_panel.lookups:
-                        self.inquire(list(self.list_panel.videos)[self.list_panel.videos.index])
+                        self.inquire(list(self.list_panel.videos)[v_index])
+
+                    # Downloads action
                     else:
-                        key = list(self.list_panel.videos)[self.list_panel.videos.index]
+                        key = list(self.list_panel.videos)[v_index]
                         filename = self.list_panel.videos[key].filename
-                        try:
-                            self.console.printstr(filename, wow=True)
-                            subprocess.call(['mplayer', '{}'.format(filename)], shell=False)
-                        except Exception as e:
-                            import pdb; pdb.set_trace()
-                            self.console.printstr(e, error=True)
+                        self.console.printstr(filename, wow=True)
+                        subprocess.call(
+                            ['mplayer', "{}".format(filename)],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+                        # try:
+                        # except Exception as e:
+                        #     import pdb; pdb.set_trace()
+                        #     self.console.printstr(e, error=True)
 
 
     def select(self):
@@ -288,16 +310,15 @@ class Panel(object):
             if self.detail_panel.streams:
                 self.console.printstr('Press one of the numbers above to download (0-{})'
                     .format(len(self.detail_panel.video.allstreams)-1))
-
         else:
             console.printstr('No video to select streams, Inquire first', error=True)
 
 
     def cancel(self):
         if self.detail_panel.stream:
-            self.console.printstr('Cancelling {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
+            self.console.printstr('Canceling {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
             if self.detail_panel.stream.cancel():
-                self.console.printstr('Cancelled {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
+                self.console.printstr('Canceled {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
         else:
             self.console.printstr('Nothing to cancel')
 
