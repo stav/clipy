@@ -17,7 +17,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.5'
+VERSION = '0.7.6'
 
 
 class Video(object):
@@ -34,6 +34,15 @@ class Stream(object):
     """Pafy stream encapsulation"""
     def __init__(self, stream, filename):
         self.stream = stream
+        self.filename = filename
+
+    def __str__(self):
+        return str(self.filename)
+
+
+class File(object):
+    """file encapsulation"""
+    def __init__(self, filename):
         self.filename = filename
 
     def __str__(self):
@@ -173,7 +182,7 @@ class ListWindow(Window):
             for filename in sorted(os.listdir(target_dir)):
                 path = os.path.join(target_dir, filename)
                 if os.path.isfile(path) and not filename.startswith('.'):
-                    self.files[path] = filename
+                    self.files[path] = File(path)
 
         # Manually build the threads list here real-time
         if self.videos == self.threads:
@@ -341,11 +350,12 @@ class Panel(object):
                 if v_index >= 0 and v_index < len(self.cache.videos):
 
                     # Lookups action
-                    if self.cache.videos == self.cache.lookups:
+                    if self.cache.videos is self.cache.lookups:
                         self.inquire(list(self.cache.videos)[v_index])
 
                     # Downloads action
-                    elif self.cache.videos == self.cache.downloads:
+                    elif self.cache.videos is self.cache.downloads \
+                      or self.cache.videos is self.cache.files:
                         key = list(self.cache.videos)[v_index]
                         filename = self.cache.videos[key].filename
                         self.console.printstr('Playing {}'.format(filename))
