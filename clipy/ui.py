@@ -17,7 +17,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.2'
+VERSION = '0.7.3'
 
 
 class CacheList(OrderedDict):
@@ -55,9 +55,7 @@ class Window(object):
     win = box = None
     testing = False
 
-    def __init__(self, stdscr, lines, cols, y, x):
-        self.stdscr = stdscr
-
+    def __init__(self, lines, cols, y, x):
         # Border
         self.box = curses.newwin(lines, cols, y, x)
         Y, X = self.box.getmaxyx()
@@ -96,13 +94,8 @@ class Window(object):
             self.win.addstr(string, curses.A_STANDOUT)
         else:
             self.win.addstr(string)
-
-    def progress(self, total, *progress_stats):
-        status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
-                         'KB/s].  ETA: [{:.0f} secs]')
-        status = status_string.format(*progress_stats)
-        self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
-        self.stdscr.noutrefresh()
+        # Display immediately
+        self.freshen()
         curses.doupdate()
 
 
@@ -110,11 +103,16 @@ class DetailWindow(Window):
     """
     Window with video info
     """
-    resource = None
+    target = '~'
+
+    video = None
     stream = None
     streams = False
-    target = '~'
-    video = None
+
+    def reset(self):
+        self.video = None
+        self.stream = None
+        self.streams = False
 
     def display(self):
         super(DetailWindow, self).display()
@@ -149,6 +147,15 @@ class ListWindow(Window):
     lookups = caches[0]
     downloads = caches[1]
     videos = lookups
+
+    def reset(self):
+        self.caches = (
+            CacheList('Lookups'),
+            CacheList('Downloads'),
+        )
+        self.lookups = self.caches[0]
+        self.downloads = self.caches[1]
+        self.videos = self.lookups
 
     def display(self):
         super(ListWindow, self).display()
@@ -198,75 +205,78 @@ class Panel(object):
     """docstring for Panel"""
     testing = False
 
-    def __init__(self, detail_panel, list_panel, console):
-        self.detail_panel = detail_panel
-        self.list_panel = list_panel
+    def __init__(self, stdscr, detail, cache, console):
+        self.stdscr = stdscr
+        self.detail = detail
+        self.cache = cache
         self.console = console
 
-    def display(self):
-        self.detail_panel.display()
-        self.list_panel.display()
-        self.console.freshen()
+    def reset(self):
+        self.detail.reset()
+        self.cache.reset()
+        self.console.display()
 
-    def freshen(self):
-        self.detail_panel.freshen()
-        self.list_panel.freshen()
+    def display(self):
+        self.detail.display()
+        self.cache.display()
         self.console.freshen()
-        # if not self.testing:
-        #     curses.doupdate()
 
     def load_cache(self):
         if os.path.exists('clipy.lookups'):
-            self.list_panel.load_lookups()
+            self.cache.load_lookups()
             self.console.printstr('Cache: lookups loaded')
         else:
             self.console.printstr('Cache: no lookups found, not loaded')
 
         if os.path.exists('clipy.downloads'):
-            self.list_panel.load_downloads()
+            self.cache.load_downloads()
             self.console.printstr('Cache: downloads loaded')
         else:
             self.console.printstr('Cache: no downloads found, not loaded')
 
     def save_cache(self):
         with open('clipy.lookups', 'w') as f:
-            for key in self.list_panel.lookups:
-                cache = self.list_panel.lookups[key]
+            for key in self.cache.lookups:
+                cache = self.cache.lookups[key]
                 f.write('{} {}\n'.format(cache.video.videoid, cache))
 
         with open('clipy.downloads', 'w') as f:
-            for key in self.list_panel.downloads:
-                cache = self.list_panel.downloads[key]
+            for key in self.cache.downloads:
+                cache = self.cache.downloads[key]
                 f.write('{} {}\n'.format(cache.stream.url, cache))
 
             self.console.printstr('Cache: saved')
 
     # def load_video(self, video):
     #     self.console.printstr('Loading video: {}'.format(video.title))
-    #     self.detail_panel.video = video
+    #     self.detail.video = video
 
-    #     if self.detail_panel.video.videoid not in self.list_panel.lookups:
-    #         self.list_panel.lookups[self.detail_panel.video.videoid] = Video(self.detail_panel.video)
+    #     if self.detail.video.videoid not in self.cache.lookups:
+    #         self.cache.lookups[self.detail.video.videoid] = Video(self.detail.video)
 
-    def inquire(self, resource):
+    def inquire(self, resource=None):
+        if resource is None:
+            resource = pyperclip.paste().strip()
+            self.console.printstr('Checking clipboard: {}'.format(resource))
+
         try:
-            self.console.printstr('Resource: {}'.format(resource))
-            self.detail_panel.video = pafy.new(resource)
+            self.console.printstr('Inquiring: {}'.format(resource))
+            self.detail.video = pafy.new(resource)
 
         except (OSError, ValueError) as e:
             self.console.printstr(e, error=True)
 
         else:
             # If entry not in Lookups
-            if self.detail_panel.video.videoid not in self.list_panel.lookups:
+            if self.detail.video.videoid not in self.cache.lookups:
                 # Add entry to Lookups
-                vid = self.detail_panel.video.videoid
-                self.list_panel.lookups[vid] = Video(self.detail_panel.video)
+                vid = self.detail.video.videoid
+                self.cache.lookups[vid] = Video(self.detail.video)
 
     def wait_for_input(self):
-        return self.detail_panel.win.getch()
+        return self.detail.win.getch()
 
-    def cache(self, key):
+    def view(self, key):
         # Load cache from disk
         if key == ord('L'):
             self.load_cache()
@@ -277,109 +287,114 @@ class Panel(object):
 
         # Display lookups
         elif key == curses.KEY_LEFT:
-            self.list_panel.videos = self.list_panel.lookups
+            self.cache.videos = self.cache.lookups
 
         # Display downloads
         elif key == curses.KEY_RIGHT:
-            self.list_panel.videos = self.list_panel.downloads
+            self.cache.videos = self.cache.downloads
 
         # Intra-cache navigation
         else:
             # Initialize cache
-            if self.list_panel.videos.index is None:
-                self.list_panel.videos.index = 0
-            v_index = self.list_panel.videos.index
+            if self.cache.videos.index is None:
+                self.cache.videos.index = 0
+            v_index = self.cache.videos.index
 
             # Move up the list
             if key == curses.KEY_UP:
                 if v_index > 0:
-                    self.list_panel.videos.index -= 1
+                    self.cache.videos.index -= 1
 
             # Move down the list
             elif key == curses.KEY_DOWN:
-                if v_index < len(self.list_panel.videos) -1:
-                    self.list_panel.videos.index += 1
+                if v_index < len(self.cache.videos) -1:
+                    self.cache.videos.index += 1
 
             # Selected cache entry action
             elif key == curses.KEY_ENTER or key == 10:
 
                 # Validate selected index
-                if v_index >= 0 and v_index < len(self.list_panel.videos):
+                if v_index >= 0 and v_index < len(self.cache.videos):
 
                     # Lookups action
-                    if self.list_panel.videos == self.list_panel.lookups:
-                        self.inquire(list(self.list_panel.videos)[v_index])
+                    if self.cache.videos == self.cache.lookups:
+                        self.inquire(list(self.cache.videos)[v_index])
 
                     # Downloads action
                     else:
-                        key = list(self.list_panel.videos)[v_index]
-                        filename = self.list_panel.videos[key].filename
-                        self.console.printstr(filename, wow=True)
+                        key = list(self.cache.videos)[v_index]
+                        filename = self.cache.videos[key].filename
+                        self.console.printstr('Playing {}'.format(filename))
                         subprocess.call(
                             ['mplayer', "{}".format(filename)],
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
-                        # try:
-                        # except Exception as e:
-                        #     import pdb; pdb.set_trace()
-                        #     self.console.printstr(e, error=True)
-
 
     def select(self):
-        self.detail_panel.streams = not self.detail_panel.streams
-        if self.detail_panel.video:
-            if self.detail_panel.streams:
-                self.console.printstr('Press one of the numbers above to download (0-{})'
-                    .format(len(self.detail_panel.video.allstreams)-1))
-        else:
-            console.printstr('No video to select streams, Inquire first', error=True)
+        self.detail.streams = not self.detail.streams
 
+        if self.detail.video:
+            if self.detail.streams:
+                self.console.printstr(
+                    'Press one of the numbers above to download (0-{})'
+                    .format(len(self.detail.video.allstreams)-1))
+        else:
+            self.console.printstr('No video to select streams, Inquire first',
+                error=True)
 
     def cancel(self):
-        if self.detail_panel.stream:
-            self.console.printstr('Canceling {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
-            if self.detail_panel.stream.cancel():
-                self.console.printstr('Canceled {} `{}`'.format(self.detail_panel.stream, self.detail_panel.stream.title))
+        stream = self.detail.stream
+
+        if stream:
+            self.console.printstr('Canceling {} `{}`'.format(stream, stream.title))
+            if stream.cancel():
+                self.console.printstr('Canceled {} `{}`'.format(stream, stream.title))
         else:
             self.console.printstr('Nothing to cancel')
 
-        self.detail_panel.stream = None
+        self.detail.stream = None
 
+    def progress(self, total, *progress_stats):
+        status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
+                         'KB/s].  ETA: [{:.0f} secs]')
+        status = status_string.format(*progress_stats)
+        self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
+        self.stdscr.noutrefresh()
+        curses.doupdate()
 
     def download(self, index=None):
 
-        def done(stream, filename, success):
+        def done_callback(stream, filename, success):
             if success:
-                self.list_panel.downloads[stream.url] = Stream(stream, filename)
-            self.list_panel.display()
+                self.cache.downloads[stream.url] = Stream(stream, filename)
+            self.cache.display()
             self.console.freshen()
-            if not self.testing:
-                curses.doupdate()
+            curses.doupdate()
 
-        if self.detail_panel.video is None:
+        if self.detail.video is None:
             self.console.printstr('No video to download, Inquire first', error=True)
             return
 
         if index is None:
             try:
-                self.detail_panel.stream = self.detail_panel.video.getbest(preftype="mp4")
+                self.detail.stream = self.detail.video.getbest(preftype="mp4")
             except (OSError, ValueError) as e:
                 self.console.printstr(e, error=True)
                 return
         else:
-            if index >= len(self.detail_panel.video.allstreams):
+            if index >= len(self.detail.video.allstreams):
                 self.console.printstr('Stream {} not available'.format(index), error=True)
                 return
-            self.detail_panel.stream = self.detail_panel.video.allstreams[index]
+            self.detail.stream = self.detail.video.allstreams[index]
 
         t = threading.Thread(
             target=clipy_request_download,
             args=(
-                self.detail_panel.stream,
-                self.detail_panel.target,
+                self.detail.stream,
+                self.detail.target,
                 self.console.printstr,
-                self.detail_panel.progress,
-                done,
+                self.progress,
+                done_callback,
             ))
         t.daemon = True
         t.start()
@@ -391,9 +406,9 @@ def loop(stdscr, panel):
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
     KEYS_HELP     = (ord('h'), ord('H'))
-    # KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_SELECT   = (ord('s'), ord('S'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
+    KEYS_RESET    = (ord('R'),)
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
         curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
 
@@ -402,8 +417,8 @@ def loop(stdscr, panel):
         # Refresh screen
         stdscr.noutrefresh()
         panel.display()
-        # panel.freshen()
-        curses.doupdate()
+        if not panel.testing:
+            curses.doupdate()
 
         # Blocking
         c = panel.wait_for_input()
@@ -411,17 +426,17 @@ def loop(stdscr, panel):
         if c in KEYS_QUIT:
             break
 
-        # if c in KEYS_PASTE:
+        if c in KEYS_RESET:
+            panel.reset()
+
         if c in KEYS_INQUIRE:
-            resource = pyperclip.paste().strip()
-            panel.console.printstr('Checking clipboard: {}'.format(resource))
-            panel.inquire(resource)
+            panel.inquire()
 
         if c in KEYS_SELECT:
             panel.select()
 
         if c in KEYS_CACHE:
-            panel.cache(c)
+            panel.view(c)
 
         if c in KEYS_DOWNLOAD:
             panel.download()
@@ -433,7 +448,9 @@ def loop(stdscr, panel):
             panel.cancel()
 
         if c in KEYS_HELP:
-            panel.console.printstr('Help is on the way')
+            panel.console.printstr(
+                'HELP: Load cache (L), save cache (C) and reset (R) commands '
+                'are all upper case only.', wow=True)
 
         # Debug
         stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}, t={}      '
@@ -457,11 +474,14 @@ def init(stdscr, video, stream, target):
     menu_options = (
         # ('P', 'paste'),
         ('I', 'inquire'),
-        ('S', 'select'),
+        ('S', 'streams'),
         ('↑↓', 'cache'),
         ('⏎ ', 'cache'),
+        ('L', 'load cache'),
+        ('C', 'save cache'),
         ('D', 'download'),
         ('X', 'cancel'),
+        ('R', 'reset'),
         ('H', 'help'),
         ('Q', 'quit'),
     )
@@ -470,15 +490,15 @@ def init(stdscr, video, stream, target):
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create the middle three windows
-    detail_panel  = DetailWindow(stdscr, curses.LINES-9, curses.COLS//2,              1, 0                           )
-    list_panel    = ListWindow  (stdscr, curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
-    console       = Window      (stdscr, 7             , curses.COLS   , curses.LINES-8, 0                           )
-    control_panel = Panel(detail_panel, list_panel, console)
+    detail  = DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
+    cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
+    console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
+    control_panel = Panel(stdscr, detail, cache, console)
 
     # Load command line options
-    detail_panel.video = video
-    detail_panel.stream = stream
-    detail_panel.target = target
+    detail.video = video
+    detail.stream = stream
+    detail.target = target
 
     # Enter event loop
     loop(stdscr, control_panel)
