@@ -17,7 +17,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.4'
+VERSION = '0.7.5'
 
 
 class Video(object):
@@ -46,6 +46,7 @@ class Window(object):
     """
     win = box = None
     testing = False
+    panel = None
 
     def __init__(self, lines, cols, y, x):
         # Border
@@ -95,8 +96,6 @@ class DetailWindow(Window):
     """
     Window with video info
     """
-    target = '~'
-
     video = None
     stream = None
     streams = False
@@ -134,55 +133,65 @@ class ListWindow(Window):
     """
     class CacheList(OrderedDict):
         """An ordered dictionary of videos"""
-        def __init__(self, name):
+        def __init__(self, name, title=None):
             super(self.__class__, self).__init__()
             # OrderedDict.__init__(self)
-            self.name = name
             self.index = None
+            self.name = name
+            self.title = title if title else name
 
-    caches = (
-        CacheList('Inquiries'),
-        CacheList('Downloaded'),
-        CacheList('Threads'),
-    )
+    caches = ()
     index = 0
-    lookups = caches[0]
-    downloads = caches[1]
-    threads = caches[2]
-    videos = caches[index]
+    lookups = downloads = files = threads = None
+    videos = None
 
     def reset(self):
         self.caches = (
             self.CacheList('Inquiries'),
             self.CacheList('Downloaded'),
+            self.CacheList('Files', 'Files: {}'.format(self.panel.target)),
             self.CacheList('Threads'),
         )
         self.index = 0
         self.lookups = self.caches[0]
         self.downloads = self.caches[1]
-        self.threads = self.caches[2]
+        self.files = self.caches[2]
+        self.threads = self.caches[3]
         self.videos = self.caches[self.index]
 
     def display(self):
         super(ListWindow, self).display()
 
+        # Setup our videos pointer
         self.videos = self.caches[self.index]
+
+        # Manually build the files list here real-time
+        if self.videos is self.files:
+            self.files.clear()
+            # self.panel.console.printstr(self.videos)
+            target_dir = os.path.expanduser(self.panel.target)
+            for filename in sorted(os.listdir(target_dir)):
+                path = os.path.join(target_dir, filename)
+                if os.path.isfile(path) and not filename.startswith('.'):
+                    self.files[path] = filename
+
+        # Manually build the threads list here real-time
         if self.videos == self.threads:
+            self.threads.clear()
             for thread in threading.enumerate():
                 self.threads[thread.name] = thread
 
         # Display list of video caches
         for i, cache in enumerate(self.caches):
-            # self.printstr('{}: {} {} {}'.format(i, cache.name, self.videos.name, cache.name == self.videos.name))
             attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
-            self.box.addstr(1, 20+20*i, cache.name.upper(), attr)
+            self.win.addstr(1, 20+20*i, cache.name.upper(), attr)
 
         # Display video list
-        self.box.addstr(2, 2, self.videos.name)
+        self.win.addstr(2, 2, self.videos.title)
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
-            self.box.addstr(3+i, 2, str(video), attr)
+            self.win.addstr(3+i, 0, str(video), attr)
 
         self.freshen()
 
@@ -193,7 +202,6 @@ class ListWindow(Window):
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
                 key, duration, title = line.split(maxsplit=2)
-                # self.printstr('{} {} {}.'.format(key, duration, title))
                 video = Cache()
                 video.videoid = key
                 video.duration = duration
@@ -215,12 +223,15 @@ class ListWindow(Window):
 class Panel(object):
     """docstring for Panel"""
     testing = False
+    target = '~'
 
     def __init__(self, stdscr, detail, cache, console):
         self.stdscr = stdscr
         self.detail = detail
         self.cache = cache
         self.console = console
+        detail.panel = cache.panel = self
+        cache.reset()
 
     def reset(self):
         self.detail.reset()
@@ -405,7 +416,7 @@ class Panel(object):
             target=clipy_request_download,
             args=(
                 self.detail.stream,
-                self.detail.target,
+                self.target,
                 self.console.printstr,
                 self.progress,
                 done_callback,
@@ -512,7 +523,7 @@ def init(stdscr, video, stream, target):
     # Load command line options
     detail.video = video
     detail.stream = stream
-    detail.target = target
+    control_panel.target = target
 
     # Enter event loop
     loop(stdscr, control_panel)
