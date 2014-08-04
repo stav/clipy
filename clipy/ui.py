@@ -17,15 +17,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.3'
-
-
-class CacheList(OrderedDict):
-    """docstring for CacheList"""
-    def __init__(self, name):
-        super(CacheList, self).__init__()
-        self.name = name
-        self.index = None
+VERSION = '0.7.4'
 
 
 class Video(object):
@@ -140,25 +132,44 @@ class ListWindow(Window):
     """
     Window with cache storage and list capabilities
     """
+    class CacheList(OrderedDict):
+        """An ordered dictionary of videos"""
+        def __init__(self, name):
+            super(self.__class__, self).__init__()
+            # OrderedDict.__init__(self)
+            self.name = name
+            self.index = None
+
     caches = (
-        CacheList('Lookups'),
-        CacheList('Downloads'),
+        CacheList('Inquiries'),
+        CacheList('Downloaded'),
+        CacheList('Threads'),
     )
+    index = 0
     lookups = caches[0]
     downloads = caches[1]
-    videos = lookups
+    threads = caches[2]
+    videos = caches[index]
 
     def reset(self):
         self.caches = (
-            CacheList('Lookups'),
-            CacheList('Downloads'),
+            self.CacheList('Inquiries'),
+            self.CacheList('Downloaded'),
+            self.CacheList('Threads'),
         )
+        self.index = 0
         self.lookups = self.caches[0]
         self.downloads = self.caches[1]
-        self.videos = self.lookups
+        self.threads = self.caches[2]
+        self.videos = self.caches[self.index]
 
     def display(self):
         super(ListWindow, self).display()
+
+        self.videos = self.caches[self.index]
+        if self.videos == self.threads:
+            for thread in threading.enumerate():
+                self.threads[thread.name] = thread
 
         # Display list of video caches
         for i, cache in enumerate(self.caches):
@@ -285,13 +296,15 @@ class Panel(object):
         elif key == ord('C'):
             self.save_cache()
 
-        # Display lookups
+        # Change cache view
         elif key == curses.KEY_LEFT:
-            self.cache.videos = self.cache.lookups
+            if self.cache.index > 0:
+                self.cache.index -= 1
 
-        # Display downloads
+        # Change cache view
         elif key == curses.KEY_RIGHT:
-            self.cache.videos = self.cache.downloads
+            if self.cache.index < len(self.cache.caches) - 1:
+                self.cache.index += 1
 
         # Intra-cache navigation
         else:
@@ -321,7 +334,7 @@ class Panel(object):
                         self.inquire(list(self.cache.videos)[v_index])
 
                     # Downloads action
-                    else:
+                    elif self.cache.videos == self.cache.downloads:
                         key = list(self.cache.videos)[v_index]
                         filename = self.cache.videos[key].filename
                         self.console.printstr('Playing {}'.format(filename))
@@ -388,6 +401,7 @@ class Panel(object):
             self.detail.stream = self.detail.video.allstreams[index]
 
         t = threading.Thread(
+            name=self.detail.video.videoid,
             target=clipy_request_download,
             args=(
                 self.detail.stream,
