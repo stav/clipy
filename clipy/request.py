@@ -14,7 +14,8 @@ def download(stream, target='~', logger=print, progress_callback=None, done_call
             logger(string, *a, **kw)
 
     try:
-        name = '{}-({}).{}'.format(stream.title, stream.quality, stream.extension)
+        name = '{}-({}).{}'.format(
+            stream.title, stream.quality, stream.extension).replace('/', '|')
         path = os.path.join(target_dir, name)
         # path = os.path.join(target_dir, stream.filename)
         log('Downloading {} `{}` to {}'.format(stream, stream.title, target_dir))

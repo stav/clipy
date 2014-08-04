@@ -4,6 +4,7 @@ Clipy YouTube video downloader user interface
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
 import curses
 import threading
 import subprocess
@@ -16,7 +17,7 @@ import pyperclip
 from .request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.1'
+VERSION = '0.7.2'
 
 
 class CacheList(OrderedDict):
@@ -80,37 +81,6 @@ class Window(object):
         self.win.erase()
         self.box.erase()
         self.box.box()
-
-    def load(self):
-        class Cache(): pass
-
-        with open('clipy.lookups', 'w+') as f:
-            for line in f.readlines():
-                key, duration, title = line.split(maxsplit=2)
-                # self.printstr('{} {} {}.'.format(key, duration, title))
-                video = Cache()
-                video.videoid = key
-                video.duration = duration
-                video.title = title.strip()
-                self.lookups[key] = Video(video)
-
-        with open('clipy.downloads', 'w+') as f:
-            for line in f.readlines():
-                url, filename = line.split(maxsplit=1)
-                stream = Cache()
-                stream.url = url
-                self.downloads[url] = Stream(stream, filename.strip())
-
-    def save(self):
-        with open('clipy.lookups', 'w') as f:
-            for key in self.lookups:
-                cache = self.lookups[key]
-                f.write('{} {}\n'.format(cache.video.videoid, cache))
-
-        with open('clipy.downloads', 'w') as f:
-            for key in self.downloads:
-                cache = self.downloads[key]
-                f.write('{} {}\n'.format(cache.stream.url, cache))
 
     def freshen(self):
         self.box.noutrefresh()
@@ -198,6 +168,31 @@ class ListWindow(Window):
 
         self.freshen()
 
+    def load_lookups(self):
+        """ Load file from disk into cache """
+        class Cache(): pass
+
+        with open('clipy.lookups', 'r') as f:
+            for line in f.readlines():
+                key, duration, title = line.split(maxsplit=2)
+                # self.printstr('{} {} {}.'.format(key, duration, title))
+                video = Cache()
+                video.videoid = key
+                video.duration = duration
+                video.title = title.strip()
+                self.lookups[key] = Video(video)
+
+    def load_downloads(self):
+        """ Load file from disk into cache """
+        class Cache(): pass
+
+        with open('clipy.downloads', 'r') as f:
+            for line in f.readlines():
+                url, filename = line.split(maxsplit=1)
+                stream = Cache()
+                stream.url = url
+                self.downloads[url] = Stream(stream, filename.strip())
+
 
 class Panel(object):
     """docstring for Panel"""
@@ -220,6 +215,32 @@ class Panel(object):
         # if not self.testing:
         #     curses.doupdate()
 
+    def load_cache(self):
+        if os.path.exists('clipy.lookups'):
+            self.list_panel.load_lookups()
+            self.console.printstr('Cache: lookups loaded')
+        else:
+            self.console.printstr('Cache: no lookups found, not loaded')
+
+        if os.path.exists('clipy.downloads'):
+            self.list_panel.load_downloads()
+            self.console.printstr('Cache: downloads loaded')
+        else:
+            self.console.printstr('Cache: no downloads found, not loaded')
+
+    def save_cache(self):
+        with open('clipy.lookups', 'w') as f:
+            for key in self.list_panel.lookups:
+                cache = self.list_panel.lookups[key]
+                f.write('{} {}\n'.format(cache.video.videoid, cache))
+
+        with open('clipy.downloads', 'w') as f:
+            for key in self.list_panel.downloads:
+                cache = self.list_panel.downloads[key]
+                f.write('{} {}\n'.format(cache.stream.url, cache))
+
+            self.console.printstr('Cache: saved')
+
     # def load_video(self, video):
     #     self.console.printstr('Loading video: {}'.format(video.title))
     #     self.detail_panel.video = video
@@ -229,7 +250,7 @@ class Panel(object):
 
     def inquire(self, resource):
         try:
-            self.console.printstr('Resourse: {}'.format(resource))
+            self.console.printstr('Resource: {}'.format(resource))
             self.detail_panel.video = pafy.new(resource)
 
         except (OSError, ValueError) as e:
@@ -248,11 +269,11 @@ class Panel(object):
     def cache(self, key):
         # Load cache from disk
         if key == ord('L'):
-            self.list_panel.load()
+            self.load_cache()
 
         # Save cache to disk
         elif key == ord('C'):
-            self.list_panel.save()
+            self.save_cache()
 
         # Display lookups
         elif key == curses.KEY_LEFT:
@@ -372,7 +393,7 @@ def loop(stdscr, panel):
     KEYS_HELP     = (ord('h'), ord('H'))
     # KEYS_PASTE    = (ord('p'), ord('P'))
     KEYS_SELECT   = (ord('s'), ord('S'))
-    KEYS_QUIT     = (ord('q'), ord('Q'), 27)  # 27 is escape
+    KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
         curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
 
