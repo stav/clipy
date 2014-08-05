@@ -1,1 +1,1 @@
-from .clipy import main
+from .clipy_app import main

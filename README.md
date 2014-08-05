@@ -10,7 +10,7 @@ Requirements
 
 The following third-party libraries are used:
 
-* Pafy (mandatory, YouTube API)
+* Pafy (YouTube API)
 * pyperclip (optional, uses Gtk to read the clipboard)
 
 Usage
@@ -18,7 +18,7 @@ Usage
 
 Command line:
 
-    clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d -s1
+    clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d
 
 User interface uses `curses`:
 
