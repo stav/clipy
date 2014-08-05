@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Clipy YouTube video downloader user interface
 """
@@ -15,10 +14,14 @@ from collections import OrderedDict
 import pafy
 import pyperclip
 
-from .request import download as clipy_request_download
+try:
+    import clipy.request
+    clipy_request_download = clipy.request.download
+except ImportError:
+    from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.7.6'
+VERSION = '0.8'
 
 
 class Video(object):
@@ -218,7 +221,7 @@ class ListWindow(Window):
 
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
-                key, duration, title = line.split(maxsplit=2)
+                key, duration, title = line.split(None, 2)
                 video = Cache()
                 video.videoid = key
                 video.duration = duration
@@ -231,7 +234,7 @@ class ListWindow(Window):
 
         with open('clipy.downloads', 'r') as f:
             for line in f.readlines():
-                url, filename = line.split(maxsplit=1)
+                url, filename = line.split(None, 1)
                 stream = Cache()
                 stream.url = url
                 self.downloads[url] = Stream(stream, filename.strip())
@@ -360,10 +363,13 @@ class Panel(object):
                         key = list(self.cache.videos)[v_index]
                         filename = self.cache.videos[key].filename
                         self.console.printstr('Playing {}'.format(filename))
-                        subprocess.call(
-                            ['mplayer', "{}".format(filename)],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
+                        try:
+                            subprocess.call(
+                                ['mplayer', "{}".format(filename)],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+                        except AttributeError:
+                            self.console.printstr("Can't play, maybe Python2?")
 
     def select(self):
         self.detail.streams = not self.detail.streams
@@ -392,7 +398,8 @@ class Panel(object):
         else:
             cprint('Nothing to cancel')
 
-    def progress(self, total, *progress_stats, name):
+    def progress(self, total, *progress_stats, **kw):
+        name = kw['name'] if 'name' in kw else None
         # Build status string
         status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
                          'KB/s].  ETA: [{:.0f} secs]  ')
@@ -531,8 +538,7 @@ def init(stdscr, video, stream, target):
         # ('P', 'paste'),
         ('I', 'inquire'),
         ('S', 'streams'),
-        ('↑↓', 'cache'),
-        ('⏎ ', 'cache'),
+        ('arrows', 'cache'),
         ('L', 'load cache'),
         ('C', 'save cache'),
         ('D', 'download'),

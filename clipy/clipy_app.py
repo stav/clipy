@@ -14,10 +14,10 @@ import argparse
 
 import pafy
 # import pyperclip - lazy import
+# import clipy.request - lazy import
 # import clipy.ui - lazy import
-from clipy.request import download
 
-VERSION = '0.7'
+VERSION = '0.8'
 
 
 def _get_commandline_options():
@@ -62,13 +62,14 @@ def _get_commandline_options():
     #                     help='output filename, def=stdout, const=/dev/null')
 
     command_line.add_argument('-V', '--version', action='version',
-                        version='%(prog)s version {}'.format(VERSION),
+                        version=VERSION,
                         help='print the version information and exit')
 
     return command_line.parse_args(sys.argv[1:])
 
 
 def _get_video(resource):
+    """ Create new Pafy video instance """
     try:
         return pafy.new(resource)
     except (OSError, ValueError) as ex:
@@ -110,7 +111,8 @@ def main():
             try:
                 stream = video.allstreams[options.stream]
             except IndexError:
-                print('Stream {} not found in {}'.format(options.stream, video.allstreams))
+                print('Stream {} not found in {}'.format(
+                    options.stream, video.allstreams))
             else:
                 for prop in dir(stream):
                     attr = getattr(stream, prop, None)
@@ -118,16 +120,26 @@ def main():
                         print('{}: {}'.format(prop, getattr(stream, prop, '')))
 
     if options.ui:
-        import clipy.ui
-        clipy.ui.main(video, stream, options.target)
+        try:
+            import clipy.ui
+            clipy.ui.main(video, stream, options.target)
+        except ImportError:
+            from ui import main
+            main(video, stream, options.target)
 
     elif options.download:
         if video is None:
-            print('No valid resource provided {} {}'.format(options.resource or '', resource or ''))
+            print('No valid resource provided {} {}'.format(
+                options.resource or '', resource or ''))
         elif stream is None:
             print('No stream selected for download')
         else:
-            download(stream, options.target)
+            try:
+                import clipy.request
+                clipy.request.download(stream, options.target)
+            except ImportError:
+                from request import download
+                download(stream, options.target)
 
     log('Clipy stopping')
 
