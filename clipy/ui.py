@@ -201,17 +201,20 @@ class ListWindow(Window):
                 if os.path.isfile(path) and not filename.startswith('.'):
                     self.files[path] = File(path)
 
-        # Display list of video caches
+        # Header: Display list of video caches
         for i, cache in enumerate(self.caches):
             attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
-            self.win.addstr(1, 20+20*i, cache.name.upper(), attr)
+            self.win.addstr(' {} '.format(cache.name.upper()), attr)
 
-        # Display video list
+        # Rows: Display video list
         self.win.addstr(2, 2, self.videos.title)
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
-            self.win.addstr(3+i, 0, str(video), attr)
+            try:
+                self.win.addstr(3+i, 0, str(video), attr)
+            except Exception as e:
+                break
 
         self.freshen()
 
@@ -251,6 +254,7 @@ class Panel(object):
         self.cache = cache
         self.console = console
         detail.panel = cache.panel = self
+        cache.win.scrollok(False)
         cache.reset()
 
     def reset(self):
