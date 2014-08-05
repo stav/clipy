@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import curses
+import functools
 import threading
 import subprocess
 
@@ -47,6 +48,19 @@ class File(object):
 
     def __str__(self):
         return str(self.filename)
+
+
+class Thread(object):
+    """thread encapsulation"""
+    status = None
+
+    def __init__(self, thread, stream):
+        self.stream = stream
+        self.thread = thread
+        self.name = thread.name
+
+    def __str__(self):
+        return str('{} {}'.format(self.name, self.status))
 
 
 class Window(object):
@@ -184,12 +198,6 @@ class ListWindow(Window):
                 if os.path.isfile(path) and not filename.startswith('.'):
                     self.files[path] = File(path)
 
-        # Manually build the threads list here real-time
-        if self.videos == self.threads:
-            self.threads.clear()
-            for thread in threading.enumerate():
-                self.threads[thread.name] = thread
-
         # Display list of video caches
         for i, cache in enumerate(self.caches):
             attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
@@ -277,13 +285,6 @@ class Panel(object):
                 f.write('{} {}\n'.format(cache.stream.url, cache))
 
             self.console.printstr('Cache: saved')
-
-    # def load_video(self, video):
-    #     self.console.printstr('Loading video: {}'.format(video.title))
-    #     self.detail.video = video
-
-    #     if self.detail.video.videoid not in self.cache.lookups:
-    #         self.cache.lookups[self.detail.video.videoid] = Video(self.detail.video)
 
     def inquire(self, resource=None):
         if resource is None:
@@ -377,60 +378,80 @@ class Panel(object):
                 error=True)
 
     def cancel(self):
-        stream = self.detail.stream
+        """ Cancel last spawned thread """
+        cprint = self.console.printstr
 
-        if stream:
-            self.console.printstr('Canceling {} `{}`'.format(stream, stream.title))
+        if self.cache.threads:
+            key = list(self.cache.threads).pop()
+            thread = self.cache.threads.pop(key)
+            stream = thread.stream
+            cprint('Canceling {} `{}`'.format(stream, stream.title))
             if stream.cancel():
-                self.console.printstr('Canceled {} `{}`'.format(stream, stream.title))
+                cprint('Canceled {} `{}`'.format(stream, stream.title))
+                self.detail.stream = None
         else:
-            self.console.printstr('Nothing to cancel')
+            cprint('Nothing to cancel')
 
-        self.detail.stream = None
-
-    def progress(self, total, *progress_stats):
+    def progress(self, total, *progress_stats, name):
+        # Build status string
         status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
-                         'KB/s].  ETA: [{:.0f} secs]')
+                         'KB/s].  ETA: [{:.0f} secs]  ')
         status = status_string.format(*progress_stats)
+
+        # Update main screen status
         self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
         self.stdscr.noutrefresh()
+
+        # Update threads status
+        if name in self.cache.threads:  # may have been cancelled
+            self.cache.threads[name].status = status
+            self.cache.display()
+
+        # Commit screen changes
         curses.doupdate()
 
     def download(self, index=None):
+        cprint = self.console.printstr
 
-        def done_callback(stream, filename, success):
+        def done_callback(stream, filename, success, name):
             if success:
                 self.cache.downloads[stream.url] = Stream(stream, filename)
             self.cache.display()
             self.console.freshen()
             curses.doupdate()
+            # Check if thread not already cancel'd
+            if name in self.cache.threads:
+                del self.cache.threads[name]
 
         if self.detail.video is None:
-            self.console.printstr('No video to download, Inquire first', error=True)
+            cprint('No video to download, Inquire first', error=True)
             return
 
         if index is None:
             try:
                 self.detail.stream = self.detail.video.getbest(preftype="mp4")
             except (OSError, ValueError) as e:
-                self.console.printstr(e, error=True)
+                cprint(e, error=True)
                 return
         else:
             if index >= len(self.detail.video.allstreams):
-                self.console.printstr('Stream {} not available'.format(index), error=True)
+                cprint('Stream {} not available'.format(index), error=True)
                 return
             self.detail.stream = self.detail.video.allstreams[index]
 
+        name = self.detail.video.videoid
+
         t = threading.Thread(
-            name=self.detail.video.videoid,
+            name=name,
             target=clipy_request_download,
             args=(
                 self.detail.stream,
                 self.target,
                 self.console.printstr,
-                self.progress,
-                done_callback,
+                functools.partial(self.progress, name=name),
+                functools.partial(done_callback, name=name),
             ))
+        self.cache.threads[name] = Thread(t, self.detail.stream)
         t.daemon = True
         t.start()
 
