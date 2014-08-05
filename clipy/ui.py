@@ -21,7 +21,7 @@ except ImportError:
     from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8'
+VERSION = '0.8.1'
 
 
 class Video(object):
@@ -207,7 +207,11 @@ class ListWindow(Window):
             self.win.addstr(' {} '.format(cache.name.upper()), attr)
 
         # Rows: Display video list
-        self.win.addstr(2, 2, self.videos.title)
+        title = self.videos.title
+        if self.videos is self.threads:
+            title = '{}: {}'.format(
+                self.videos.title, threading.active_count() - 1)
+        self.win.addstr(2, 2, title)
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
@@ -536,10 +540,11 @@ def init(stdscr, video, stream, target):
     # Title bar at top
     stdscr.addstr(TITLE, curses.A_REVERSE)
     stdscr.chgat(-1, curses.A_REVERSE)
+    version = 'UIv {} '.format(VERSION)
+    stdscr.addstr(0, curses.COLS-len(version), version, curses.A_REVERSE)
 
     # Menu options at bottom
     menu_options = (
-        # ('P', 'paste'),
         ('I', 'inquire'),
         ('S', 'streams'),
         ('arrows', 'cache'),
