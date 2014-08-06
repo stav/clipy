@@ -25,7 +25,7 @@ except ImportError:
     from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8.2'
+VERSION = '0.8.3'
 
 
 class Video(object):
@@ -252,9 +252,11 @@ class ListWindow(Window):
         videoids = re.findall('data-context-item-id="([^"]+)"', html)
         self.panel.console.printstr('Video Ids: {}'.format(videoids))
 
-        for videoid in videoids:
-            if videoid != '__video_id__':
-                self.searches[videoid] = videoid
+        if videoids:
+            self.searches.clear()
+            for videoid in videoids:
+                if videoid != '__video_id__':
+                    self.searches[videoid] = videoid
 
     def load_lookups(self):
         """ Load file from disk into cache """
@@ -291,6 +293,7 @@ class Panel(object):
         self.detail = detail
         self.cache = cache
         self.console = console
+        # Should be in respective inits
         detail.panel = cache.panel = self
         cache.win.scrollok(False)
         cache.reset()
