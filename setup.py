@@ -7,7 +7,7 @@ setup(
     url='https://github.com/stav/clipy',
     download_url='https://github.com/stav/clipy/archive/master.zip',
     description='YouTube video downloader',
-    long_description=open("README.md").read(),
+    long_description=open("README.rst").read(),
     author='Steven Almeroth',
     author_email='sroth77@gmail.com',
     keywords='video downloader',
@@ -20,7 +20,7 @@ setup(
         'Topic :: Utilities',
     ],
     packages=['clipy'],
-    package_data={"": ["LICENSE", "README.md", "CHANGELOG"]},
+    package_data={"": ["LICENSE", "README.rst", "CHANGELOG"]},
     install_requires=['Pafy', 'pyperclip'],
     #  dependency_links = [
     #     'http://github.com/gabrielgrant/django-ckeditor/tarball/master#egg=django-ckeditor-0.9.3',
