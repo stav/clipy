@@ -1,9 +1,9 @@
 clipy
 =====
 
-_Command Line Interface using Python for Youtube_
+*Command Line Interface using Python for Youtube*
 
-Python commmand-line YouTube video downloader.
+Python command-line YouTube video downloader.
 
 Requirements
 ------------
@@ -16,11 +16,11 @@ The following third-party libraries are used:
 Usage
 -----
 
-Command line:
+Command line::
 
-    clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d
+    clipy -d http://www.youtube.com/watch?v=fm78gjYkYKc
 
-User interface uses `curses`:
+User interface written with `curses` from the standard library:
 
 1. start script with `--ui` option
 2. copy youtube url into clipboard
@@ -31,7 +31,7 @@ Notes
 
 Developed with Python 3 but should also work with Python 2.
 
-Only tested on Ubuntu.
+Only tested on Ubuntu Trusty and Mac Lion.
 
 Python for Windows does not contain the needed `curses` library, perhaps
 UniCurses can help.
