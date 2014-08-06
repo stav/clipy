@@ -28,8 +28,8 @@ class ClipyUITest(unittest.TestCase):
     def test_2_clipboard_communication(self):
         """ Test that we can read info from the clipboard """
         vid = 'mxvLMEyCXR0'
-        pyperclip.copy( vid )
-        self.assertEqual( vid, pyperclip.paste() )
+        pyperclip.copy(vid)
+        self.assertEqual(vid, pyperclip.paste())
 
     def test_3_reset(self):
         """ Test that we can reset """

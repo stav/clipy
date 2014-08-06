@@ -83,7 +83,7 @@ class Window(object):
         Y, X = self.box.getmaxyx()
         self.box.box()
 
-       # Inner window
+        # Inner window
         Y, X = self.box.getmaxyx()
         self.win = self.box.subwin(Y-2, X-3, y+1, x+2)
         self.win.scrollok(True)
@@ -147,12 +147,11 @@ class DetailWindow(Window):
                 self.printstr('Streams:')
                 for i, stream in enumerate(self.video.allstreams):
                     self.printstr('{}: {} {} {} {} {}'.format(i,
-                        stream.mediatype,
-                        stream.quality,
-                        stream.extension,
-                        stream.notes,
-                        stream.bitrate or ''))
-
+                                  stream.mediatype,
+                                  stream.quality,
+                                  stream.extension,
+                                  stream.notes,
+                                  stream.bitrate or ''))
         self.freshen()
 
 
@@ -168,6 +167,9 @@ class ListWindow(Window):
             self.index = None
             self.name = name
             self.title = title if title else name
+
+    class CacheItem():
+        pass
 
     index = 0
     caches = ()
@@ -222,7 +224,7 @@ class ListWindow(Window):
             attr = curses.A_STANDOUT if i == self.videos.index else 0
             try:
                 self.win.addstr(3+i, 0, str(video), attr)
-            except Exception as e:
+            except Exception:
                 break
 
         self.freshen()
@@ -240,7 +242,7 @@ class ListWindow(Window):
         self.panel.console.printstr('Searching: {}'.format(url))
 
         user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
-        headers = { 'User-Agent' : user_agent }
+        headers = {'User-Agent': user_agent}
         request = urllib.request.Request(url, headers=headers)
         # self.panel.console.printstr('Request: {}'.format(request))
 
@@ -259,12 +261,10 @@ class ListWindow(Window):
 
     def load_lookups(self):
         """ Load file from disk into cache """
-        class Cache(): pass
-
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
                 key, duration, title = line.split(None, 2)
-                video = Cache()
+                video = self.CacheItem()
                 video.videoid = key
                 video.duration = duration
                 video.title = title.strip()
@@ -272,12 +272,10 @@ class ListWindow(Window):
 
     def load_downloads(self):
         """ Load file from disk into cache """
-        class Cache(): pass
-
         with open('clipy.downloads', 'r') as f:
             for line in f.readlines():
                 url, filename = line.split(None, 1)
-                stream = Cache()
+                stream = self.CacheItem()
                 stream.url = url
                 self.downloads[url] = Stream(stream, filename.strip())
 
@@ -416,7 +414,7 @@ class Panel(object):
 
             # Move down the list
             elif key == curses.KEY_DOWN:
-                if v_index < len(self.cache.videos) -1:
+                if v_index < len(self.cache.videos) - 1:
                     self.cache.videos.index += 1
 
             # Selected cache entry action
@@ -454,7 +452,7 @@ class Panel(object):
                     .format(len(self.detail.video.allstreams)-1))
         else:
             self.console.printstr('No video to show streams, Inquire first',
-                error=True)
+                                  error=True)
 
     def cancel(self):
         """ Cancel last spawned thread """
@@ -591,8 +589,9 @@ def loop(stdscr, panel):
                 'are all upper case only.', wow=True)
 
         # Debug
-        stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}, t={}      '
-            .format(c, threading.active_count()))
+        stdscr.addstr(
+            curses.LINES-1, curses.COLS-20,
+            'c={}, t={}      '.format(c, threading.active_count()))
 
 
 def init(stdscr, video, stream, target):

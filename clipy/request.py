@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 
 
-def download(stream, target='~', logger=print, progress_callback=None, done_callback=lambda *a: None):
+def download(stream, target='~', logger=print,
+             progress_callback=None, done_callback=lambda *a: None):
     """ Download a video from YouTube. """
     target_dir = os.path.expanduser(target)
     success = False
@@ -19,10 +20,11 @@ def download(stream, target='~', logger=print, progress_callback=None, done_call
         name = '{}-({}).{}'.format(
             stream.title, stream.quality, stream.extension).replace('/', '|')
         path = os.path.join(target_dir, name)
-        # path = os.path.join(target_dir, stream.filename)
-        log('Downloading {} `{}` to {}'.format(stream, stream.title, target_dir))
+        log('Downloading {} `{}` to {}'.format(
+            stream, stream.title, target_dir))
         if progress_callback:
-            filename = stream.download(filepath=path, quiet=True, callback=progress_callback)
+            cb = progress_callback
+            filename = stream.download(filepath=path, quiet=True, callback=cb)
         else:
             filename = stream.download(filepath=path, quiet=False)
 

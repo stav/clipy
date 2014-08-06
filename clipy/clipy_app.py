@@ -31,27 +31,34 @@ def _get_commandline_options():
         )
 
     # define the command-line arguments
-    command_line.add_argument('resource', metavar='RESOURCE', type=str, nargs='?',
-                        help='URL or video Id')
+    command_line.add_argument(
+        'resource', metavar='RESOURCE', type=str, nargs='?',
+        help='URL or video Id')
 
-    command_line.add_argument('-d', '--download', action='store_true',
-                        help='Downloaded a stream')
+    command_line.add_argument(
+        '-d', '--download', action='store_true',
+        help='Downloaded a stream')
 
-    command_line.add_argument('-s', '--stream', metavar='S', type=int,
-                        help='Select stream to download: 0, 1, 2, 3...')
+    command_line.add_argument(
+        '-s', '--stream', metavar='S', type=int,
+        help='Select stream to download: 0, 1, 2, 3...')
 
-    command_line.add_argument('-t', '--target', metavar='DIR', type=str,
-                        help='Target folder to save to', default='~')
+    command_line.add_argument(
+        '-t', '--target', metavar='DIR', type=str,
+        help='Target folder to save to', default='~')
 
-    command_line.add_argument('-c', '--clipboard', action='store_true',
-                        help='Check clipboard for resource')
+    command_line.add_argument(
+        '-c', '--clipboard', action='store_true',
+        help='Check clipboard for resource')
 
-    command_line.add_argument('-u', '--ui', action='store_true',
-                        help='Start the user interface menu')
+    command_line.add_argument(
+        '-u', '--ui', action='store_true',
+        help='Start the user interface menu')
 
-    command_line.add_argument('-l', dest='logger', metavar='LOGFILE',
-                        nargs='?', default=lambda *a: None, const=print,
-                        help='Logging enabled, option must follow RESOURCE')
+    command_line.add_argument(
+        '-l', dest='logger', metavar='LOGFILE',
+        nargs='?', default=lambda *a: None, const=print,
+        help='Logging enabled, option must follow RESOURCE')
 
     # command_line.add_argument('-i', dest='inputfile', nargs='?', metavar='INFL',
     #                     type=argparse.FileType('rU'), default=sys.stdin,
@@ -61,9 +68,10 @@ def _get_commandline_options():
     #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
     #                     help='output filename, def=stdout, const=/dev/null')
 
-    command_line.add_argument('-V', '--version', action='version',
-                        version=VERSION,
-                        help='print the version information and exit')
+    command_line.add_argument(
+        '-V', '--version', action='version',
+        version=VERSION,
+        help='print the version information and exit')
 
     return command_line.parse_args(sys.argv[1:])
 
@@ -101,11 +109,11 @@ def main():
         print(video)
         for i, stm in enumerate(video.allstreams):
             print('{}: {} {} {} {} {}'.format(i,
-                stm.mediatype,
-                stm.quality,
-                stm.extension,
-                stm.notes,
-                stm.bitrate or ''))
+                  stm.mediatype,
+                  stm.quality,
+                  stm.extension,
+                  stm.notes,
+                  stm.bitrate or ''))
         if options.stream is not None:
             log('Stream selected: {}'.format(options.stream))
             try:
@@ -114,10 +122,10 @@ def main():
                 print('Stream {} not found in {}'.format(
                     options.stream, video.allstreams))
             else:
-                for prop in dir(stream):
-                    attr = getattr(stream, prop, None)
-                    if not prop.startswith('_') and not hasattr(attr, '__call__'):
-                        print('{}: {}'.format(prop, getattr(stream, prop, '')))
+                for p in dir(stream):
+                    attr = getattr(stream, p, None)
+                    if not p.startswith('_') and not hasattr(attr, '__call__'):
+                        print('{}: {}'.format(p, getattr(stream, p, '')))
 
     if options.ui:
         try:
