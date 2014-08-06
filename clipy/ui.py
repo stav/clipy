@@ -25,7 +25,7 @@ except ImportError:
     from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8.3'
+VERSION = '0.8.4'
 
 
 class Video(object):
@@ -75,7 +75,6 @@ class Window(object):
     Window absraction with border
     """
     win = box = None
-    testing = False
     panel = None
 
     def __init__(self, lines, cols, y, x):
@@ -119,7 +118,7 @@ class Window(object):
             self.win.addstr(string)
         # Display immediately
         self.freshen()
-        curses.doupdate()
+        self.panel.update()
 
 
 class DetailWindow(Window):
@@ -170,8 +169,8 @@ class ListWindow(Window):
             self.name = name
             self.title = title if title else name
 
-    caches = ()
     index = 0
+    caches = ()
     lookups = downloads = files = threads = None
     videos = None
 
@@ -294,7 +293,7 @@ class Panel(object):
         self.cache = cache
         self.console = console
         # Should be in respective inits
-        detail.panel = cache.panel = self
+        detail.panel = cache.panel = console.panel = self
         cache.win.scrollok(False)
         cache.reset()
 
@@ -307,6 +306,11 @@ class Panel(object):
         self.detail.display()
         self.cache.display()
         self.console.freshen()
+        self.update()
+
+    def update(self):
+        if not self.testing:
+            curses.doupdate()
 
     def load_cache(self):
         if os.path.exists('clipy.lookups'):
@@ -351,7 +355,7 @@ class Panel(object):
                 if video:
                     searches[videoid] = Video(video)
                     self.cache.display()
-                    curses.doupdate()
+                    self.panel.update()
         else:
             self.console.printstr('No recent searches found, paste search url')
 
@@ -484,7 +488,7 @@ class Panel(object):
             self.cache.display()
 
         # Commit screen changes
-        curses.doupdate()
+        self.update()
 
     def download(self, index=None):
         cprint = self.console.printstr
@@ -494,7 +498,7 @@ class Panel(object):
                 self.cache.downloads[stream.url] = Stream(stream, filename)
             self.cache.display()
             self.console.freshen()
-            curses.doupdate()
+            self.update()
             # Check if thread not already cancel'd
             if name in self.cache.threads:
                 del self.cache.threads[name]
@@ -550,8 +554,6 @@ def loop(stdscr, panel):
         # Refresh screen
         stdscr.noutrefresh()
         panel.display()
-        if not panel.testing:
-            curses.doupdate()
 
         # Blocking
         c = panel.wait_for_input()

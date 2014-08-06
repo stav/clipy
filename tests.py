@@ -13,8 +13,9 @@ class ClipyUITest(unittest.TestCase):
             self.stdscr = stdscr
             win1 = clipy.ui.DetailWindow(6, 10, 0, 0)
             win2 = clipy.ui.ListWindow(6, 10, 10, 0)
-            win3 = clipy.ui.Window(6, 10, 20, 0)
+            win3 = clipy.ui.Window(6, 50, 20, 0)
             panl = clipy.ui.Panel(self.stdscr, win1, win2, win3)
+            panl.testing = True
             self.panel = panl
         curses.wrapper(main)
 
@@ -33,10 +34,20 @@ class ClipyUITest(unittest.TestCase):
     def test_3_reset(self):
         """ Test that we can reset """
         self.assertIsNone(self.panel.detail.video)
+        self.assertIsNotNone(self.panel.cache.videos)
         self.panel.detail.video = object()
+        self.panel.cache.videos = None
         self.assertIsNotNone(self.panel.detail.video)
+        self.assertIsNone(self.panel.cache.videos)
         self.panel.reset()
         self.assertIsNone(self.panel.detail.video)
+        self.assertIsNotNone(self.panel.cache.videos)
+
+    def test_4_streams(self):
+        """ Test that we can toggle streams display flag """
+        self.assertIs(self.panel.detail.streams, False)
+        self.panel.streams()
+        self.assertIs(self.panel.detail.streams, True)
 
 
 if __name__ == '__main__':
