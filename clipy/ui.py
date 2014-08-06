@@ -4,15 +4,19 @@ Clipy YouTube video downloader user interface
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import re
 import curses
 import functools
-import threading
 import subprocess
+import threading
+import urllib.request
 
 from collections import OrderedDict
 
+# import lxml
 import pafy
 import pyperclip
+# import requests
 
 try:
     import clipy.request
@@ -21,7 +25,7 @@ except ImportError:
     from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8.1'
+VERSION = '0.8.2'
 
 
 class Video(object):
@@ -173,16 +177,18 @@ class ListWindow(Window):
 
     def reset(self):
         self.caches = (
+            self.CacheList('Search'),
             self.CacheList('Inquiries'),
             self.CacheList('Downloaded'),
             self.CacheList('Files', 'Files: {}'.format(self.panel.target)),
             self.CacheList('Threads'),
         )
         self.index = 0
-        self.lookups = self.caches[0]
-        self.downloads = self.caches[1]
-        self.files = self.caches[2]
-        self.threads = self.caches[3]
+        self.searches = self.caches[0]
+        self.lookups = self.caches[1]
+        self.downloads = self.caches[2]
+        self.files = self.caches[3]
+        self.threads = self.caches[4]
         self.videos = self.caches[self.index]
 
     def display(self):
@@ -221,6 +227,34 @@ class ListWindow(Window):
                 break
 
         self.freshen()
+
+    def load_search(self, url):
+        # page = requests.get(resource)
+        # tree = html.fromstring(page.text)
+        # videos = tree.xpath('//div/@data-context-item-id')
+
+        # r = urllib2.Request(url='http://www.mysite.com')
+        # r.add_header('User-Agent', 'Clipy')
+        # # r.add_data(urllib.urlencode({'foo': 'bar'})
+        # response = urlopen(r)
+
+        self.panel.console.printstr('Searching: {}'.format(url))
+
+        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
+        headers = { 'User-Agent' : user_agent }
+        request = urllib.request.Request(url, headers=headers)
+        # self.panel.console.printstr('Request: {}'.format(request))
+
+        response = urllib.request.urlopen(request)
+        html = str(response.read())
+        # self.panel.console.printstr('Response: {} {}'.format(len(html), response))
+
+        videoids = re.findall('data-context-item-id="([^"]+)"', html)
+        self.panel.console.printstr('Video Ids: {}'.format(videoids))
+
+        for videoid in videoids:
+            if videoid != '__video_id__':
+                self.searches[videoid] = videoid
 
     def load_lookups(self):
         """ Load file from disk into cache """
@@ -297,24 +331,47 @@ class Panel(object):
 
             self.console.printstr('Cache: saved')
 
+    def get_video(self, resource):
+        """ Create new Pafy video instance """
+        try:
+            return pafy.new(resource)
+        except (OSError, ValueError) as ex:
+            self.console.printstr(ex, error=True)
+
+    def search(self):
+        searches = self.cache.searches
+        if searches:
+            self.console.printstr('Inquiring on all {} searches'.format(
+                len(searches)))
+            for videoid in searches:
+                video = self.get_video(videoid)
+                if video:
+                    searches[videoid] = Video(video)
+                    self.cache.display()
+                    curses.doupdate()
+        else:
+            self.console.printstr('No recent searches found, paste search url')
+
     def inquire(self, resource=None):
+        # Check if we have a supplied resoure, else check the clipboard
         if resource is None:
             resource = pyperclip.paste().strip()
             self.console.printstr('Checking clipboard: {}'.format(resource))
 
-        try:
-            self.console.printstr('Inquiring: {}'.format(resource))
-            self.detail.video = pafy.new(resource)
-
-        except (OSError, ValueError) as e:
-            self.console.printstr(e, error=True)
-
+        # We may want to search
+        if 'youtube.com/results?search' in resource:
+            self.cache.load_search(resource)
+        # We can try to inquire at YouTube now
         else:
-            # If entry not in Lookups
-            if self.detail.video.videoid not in self.cache.lookups:
-                # Add entry to Lookups
-                vid = self.detail.video.videoid
-                self.cache.lookups[vid] = Video(self.detail.video)
+            self.console.printstr('Inquiring: {}'.format(resource))
+            video = self.get_video(resource)
+            if video:
+                self.detail.video = video
+                # If entry not in Lookups
+                if video.videoid not in self.cache.lookups:
+                    # Add entry to Lookups
+                    vid = video.videoid
+                    self.cache.lookups[vid] = Video(video)
 
     def wait_for_input(self):
         return self.detail.win.getch()
@@ -361,8 +418,9 @@ class Panel(object):
                 # Validate selected index
                 if v_index >= 0 and v_index < len(self.cache.videos):
 
-                    # Lookups action
-                    if self.cache.videos is self.cache.lookups:
+                    # Search / Lookups action
+                    if self.cache.videos is self.cache.searches or \
+                       self.cache.videos is self.cache.lookups:
                         self.inquire(list(self.cache.videos)[v_index])
 
                     # Downloads action
@@ -379,7 +437,7 @@ class Panel(object):
                         except AttributeError:
                             self.console.printstr("Can't play, maybe Python2?")
 
-    def select(self):
+    def streams(self):
         self.detail.streams = not self.detail.streams
 
         if self.detail.video:
@@ -388,7 +446,7 @@ class Panel(object):
                     'Press one of the numbers above to download (0-{})'
                     .format(len(self.detail.video.allstreams)-1))
         else:
-            self.console.printstr('No video to select streams, Inquire first',
+            self.console.printstr('No video to show streams, Inquire first',
                 error=True)
 
     def cancel(self):
@@ -476,8 +534,9 @@ def loop(stdscr, panel):
     KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
+    KEYS_SEARCH   = (ord('s'), ord('S'))
     KEYS_HELP     = (ord('h'), ord('H'))
-    KEYS_SELECT   = (ord('s'), ord('S'))
+    KEYS_STREAMS  = (ord('v'), ord('V'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
@@ -503,8 +562,11 @@ def loop(stdscr, panel):
         if c in KEYS_INQUIRE:
             panel.inquire()
 
-        if c in KEYS_SELECT:
-            panel.select()
+        if c in KEYS_SEARCH:
+            panel.search()
+
+        if c in KEYS_STREAMS:
+            panel.streams()
 
         if c in KEYS_CACHE:
             panel.view(c)
@@ -546,7 +608,8 @@ def init(stdscr, video, stream, target):
     # Menu options at bottom
     menu_options = (
         ('I', 'inquire'),
-        ('S', 'streams'),
+        ('S', 'search'),
+        ('V', 'streams'),
         ('arrows', 'cache'),
         ('L', 'load cache'),
         ('C', 'save cache'),
