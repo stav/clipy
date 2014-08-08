@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import re
 import curses
+import asyncio
 import functools
 import subprocess
 import threading
@@ -25,7 +26,7 @@ except ImportError:
     from request import download as clipy_request_download
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8.4'
+VERSION = '0.9'
 
 
 class Video(object):
@@ -285,7 +286,8 @@ class Panel(object):
     testing = False
     target = '~'
 
-    def __init__(self, stdscr, detail, cache, console):
+    def __init__(self, loop, stdscr, detail, cache, console):
+        self.loop = loop
         self.stdscr = stdscr
         self.detail = detail
         self.cache = cache
@@ -534,7 +536,8 @@ class Panel(object):
         t.start()
 
 
-def loop(stdscr, panel):
+# @asyncio.coroutine
+def key_loop(stdscr, panel):
     KEYS_NUMERIC  = range(48, 58)
     KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
@@ -594,7 +597,7 @@ def loop(stdscr, panel):
             'c={}, t={}      '.format(c, threading.active_count()))
 
 
-def init(stdscr, video, stream, target):
+def init(stdscr, loop, video, stream, target):
 
     # Setup curses
     curses.curs_set(False)
@@ -631,7 +634,7 @@ def init(stdscr, video, stream, target):
     detail  = DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
     cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
     console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
-    control_panel = Panel(stdscr, detail, cache, console)
+    control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
     detail.video = video
@@ -639,14 +642,27 @@ def init(stdscr, video, stream, target):
     control_panel.target = target
 
     # Enter event loop
-    loop(stdscr, control_panel)
+    key_loop(stdscr, control_panel)
+    # loop = asyncio.get_event_loop()
+    # print("Event loop running (pid %s), press CTRL+c to interrupt." % os.getpid())
+    # try:
+    #     f = asyncio.wait([key_loop(stdscr, control_panel)])
+    #     # loop.run_forever()
+    #     loop.run_until_complete(f)
+    # finally:
+    #     loop.close()
+    loop.call_soon_threadsafe(loop.stop)
 
 
 def main(video=None, stream=None, target=None):
     """
     Single entry point
     """
-    curses.wrapper(init, video, stream, target)
+    loop = asyncio.get_event_loop()
+    threading.Thread(target=curses.wrapper, args=(init, loop, video, stream, target)).start()
+    loop.run_forever()
+    loop.close()
+
 
 if __name__ == '__main__':
     main()
