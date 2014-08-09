@@ -175,10 +175,15 @@ class ListWindow(Window):
     index = 0
     caches = ()
     lookups = downloads = files = threads = None
-    videos = None
+    videos = None   # mis-named as videos, s/b cache or something
 
     def reset(self):
-        self.caches = (
+        (self.searches,
+         self.lookups,
+         self.downloads,
+         self.files,
+         self.threads,
+        ) = self.caches = (
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
             self.CacheList('Downloaded'),
@@ -186,11 +191,6 @@ class ListWindow(Window):
             self.CacheList('Threads'),
         )
         self.index = 0
-        self.searches = self.caches[0]
-        self.lookups = self.caches[1]
-        self.downloads = self.caches[2]
-        self.files = self.caches[3]
-        self.threads = self.caches[4]
         self.videos = self.caches[self.index]
 
     def display(self):
@@ -199,7 +199,7 @@ class ListWindow(Window):
         # Setup our videos pointer
         self.videos = self.caches[self.index]
 
-        # Manually build the files list here real-time
+        # Files: manually build the files list here real-time
         if self.videos is self.files:
             self.files.clear()
             # self.panel.console.printstr(self.videos)
@@ -209,12 +209,12 @@ class ListWindow(Window):
                 if os.path.isfile(path) and not filename.startswith('.'):
                     self.files[path] = File(path)
 
-        # Header: Display list of video caches
+        # Header: Display list of caches
         for i, cache in enumerate(self.caches):
             attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
             self.win.addstr(' {} '.format(cache.name.upper()), attr)
 
-        # Rows: Display video list
+        # Rows: Display selected cache detail
         title = self.videos.title
         if self.videos is self.threads:
             title = '{}: {}'.format(
@@ -381,7 +381,8 @@ class Panel(object):
                     self.cache.lookups[vid] = Video(video)
 
     def wait_for_input(self):
-        return self.detail.win.getch()
+        # self.cache.win.nodelay(False)
+        return self.cache.win.getch()
 
     def view(self, key):
         # Load cache from disk
@@ -556,7 +557,7 @@ def key_loop(stdscr, panel):
         stdscr.noutrefresh()
         panel.display()
 
-        # Blocking
+        # Accept keyboard input
         c = panel.wait_for_input()
 
         if c in KEYS_QUIT:
