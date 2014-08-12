@@ -9,7 +9,7 @@ import curses
 import functools
 import subprocess
 import threading
-import urllib.request
+# import urllib.request - lazy import
 
 from collections import OrderedDict
 
@@ -238,6 +238,13 @@ class ListWindow(Window):
         # r.add_header('User-Agent', 'Clipy')
         # # r.add_data(urllib.urlencode({'foo': 'bar'})
         # response = urlopen(r)
+
+        try:
+            import urllib.request
+        except ImportError as ex:
+            self.panel.console.printstr('Cannot search: {}'.format(ex),
+                                        error=True)
+            return
 
         self.panel.console.printstr('Searching: {}'.format(url))
 
