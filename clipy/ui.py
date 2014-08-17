@@ -206,20 +206,13 @@ class ListWindow(Window):
         # Files: manually build the files list here real-time
         if self.videos is self.files:
             self.files.clear()
-            # self.panel.console.printstr(self.videos)
             target_dir = os.path.expanduser(self.panel.target)
             for filename in sorted(os.listdir(target_dir)):
                 path = os.path.join(target_dir, filename)
                 if os.path.isfile(path) and not filename.startswith('.'):
                     self.files[path] = File(path)
 
-        # Header: Display list of caches
-        for i, cache in enumerate(self.caches):
-            attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
-            self.win.addstr(' {} '.format(cache.name.upper()), attr)
-
-        # Rows: Display selected cache detail
-        title = self.videos.title
+        # Threads: manually build the threads list here real-time
         if self.videos is self.threads:
             title = '{}: {}'.format(
                 self.videos.title, threading.active_count())
@@ -227,7 +220,13 @@ class ListWindow(Window):
             for thread in threading.enumerate():
                 self.threads[thread.name] = Thread(thread)
 
-        self.win.addstr(2, 2, title)
+        # Header: Display list of caches
+        for i, cache in enumerate(self.caches):
+            attr = curses.A_STANDOUT if cache.name == self.videos.name else 0
+            self.win.addstr(' {} '.format(cache.name.upper()), attr)
+
+        # Rows: Display selected cache detail
+        self.win.addstr(2, 2, self.videos.title)
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
@@ -273,20 +272,27 @@ class ListWindow(Window):
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
                 key, duration, title = line.split(None, 2)
+
                 video = self.CacheItem()
                 video.videoid = key
                 video.duration = duration
                 video.title = title.strip()
+
                 self.lookups[key] = Video(video)
 
     def load_downloads(self):
         """ Load file from disk into cache """
         with open('clipy.downloads', 'r') as f:
             for line in f.readlines():
-                url, filename = line.split(None, 1)
+
+                url, path = line.split(None, 1)
+                path = path.strip()
+
                 stream = self.CacheItem()
                 stream.url = url
-                self.downloads[url] = Stream(stream, filename.strip())
+                stream.title = path
+
+                self.downloads[url] = Stream(stream, path)
 
 
 class Panel(object):
@@ -443,11 +449,11 @@ class Panel(object):
                     elif self.cache.videos is self.cache.downloads \
                       or self.cache.videos is self.cache.files:
                         key = list(self.cache.videos)[v_index]
-                        filename = self.cache.videos[key].filename
-                        self.console.printstr('Playing {}'.format(filename))
+                        path = self.cache.videos[key].path
+                        self.console.printstr('Playing {}'.format(path))
                         try:
                             subprocess.call(
-                                ['mplayer', "{}".format(filename)],
+                                ['mplayer', "{}".format(path)],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
                         except AttributeError:
