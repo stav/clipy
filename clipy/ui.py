@@ -7,26 +7,19 @@ import os
 import re
 import curses
 import asyncio
-import functools
-import subprocess
 import threading
+import subprocess
+import collections
 import urllib.request
 
-from collections import OrderedDict
-
-# import lxml
 import pafy
 import pyperclip
-# import requests
 
-try:
-    import clipy.request
-    clipy_request_download = clipy.request.download
-except ImportError:
-    from request import download as clipy_request_download
+import clipy.request
+
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9'
+VERSION = '0.9.1'
 
 
 class Video(object):
@@ -60,15 +53,12 @@ class File(object):
 
 class Thread(object):
     """thread encapsulation"""
-    status = None
-
-    def __init__(self, thread, stream):
-        self.stream = stream
+    def __init__(self, thread):
         self.thread = thread
         self.name = thread.name
 
     def __str__(self):
-        return str('{} {}'.format(self.name, self.status))
+        return str('{} {}'.format(self.name, self.thread.ident))
 
 
 class Window(object):
@@ -160,11 +150,10 @@ class ListWindow(Window):
     """
     Window with cache storage and list capabilities
     """
-    class CacheList(OrderedDict):
+    class CacheList(collections.OrderedDict):
         """An ordered dictionary of videos"""
         def __init__(self, name, title=None):
             super(self.__class__, self).__init__()
-            # OrderedDict.__init__(self)
             self.index = None
             self.name = name
             self.title = title if title else name
@@ -174,7 +163,7 @@ class ListWindow(Window):
 
     index = 0
     caches = ()
-    lookups = downloads = files = threads = None
+    lookups = downloads = files = threads = actives = None
     videos = None   # mis-named as videos, s/b cache or something
 
     def reset(self):
@@ -183,12 +172,14 @@ class ListWindow(Window):
          self.downloads,
          self.files,
          self.threads,
+         self.actives,
         ) = self.caches = (
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
             self.CacheList('Downloaded'),
             self.CacheList('Files', 'Files: {}'.format(self.panel.target)),
             self.CacheList('Threads'),
+            self.CacheList('Active'),
         )
         self.index = 0
         self.videos = self.caches[self.index]
@@ -218,7 +209,11 @@ class ListWindow(Window):
         title = self.videos.title
         if self.videos is self.threads:
             title = '{}: {}'.format(
-                self.videos.title, threading.active_count() - 1)
+                self.videos.title, threading.active_count())
+            self.threads.clear()
+            for thread in threading.enumerate():
+                self.threads[thread.name] = Thread(thread)
+
         self.win.addstr(2, 2, title)
         for i, key in enumerate(self.videos):
             video = self.videos[key]
@@ -460,17 +455,7 @@ class Panel(object):
     def cancel(self):
         """ Cancel last spawned thread """
         cprint = self.console.printstr
-
-        if self.cache.threads:
-            key = list(self.cache.threads).pop()
-            thread = self.cache.threads.pop(key)
-            stream = thread.stream
-            cprint('Canceling {} `{}`'.format(stream, stream.title))
-            if stream.cancel():
-                cprint('Canceled {} `{}`'.format(stream, stream.title))
-                self.detail.stream = None
-        else:
-            cprint('Nothing to cancel')
+        cprint('Cannot cancel yet')
 
     def progress(self, total, *progress_stats, **kw):
         name = kw['name'] if 'name' in kw else None
@@ -483,26 +468,28 @@ class Panel(object):
         self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
         self.stdscr.noutrefresh()
 
-        # Update threads status
-        if name in self.cache.threads:  # may have been cancelled
-            self.cache.threads[name].status = status
+        # Update actives status
+        if name in self.cache.actives:  # may have been cancelled
+            self.cache.actives[name].status = status
             self.cache.display()
 
         # Commit screen changes
         self.update()
 
+    @asyncio.coroutine
     def download(self, index=None):
         cprint = self.console.printstr
 
         def done_callback(stream, filename, success, name):
             if success:
                 self.cache.downloads[stream.url] = Stream(stream, filename)
+            # Check if thread not already cancel'd
+            if name in self.cache.actives:
+                del self.cache.actives[name]
+            # Update screen to show the active download is no longer active
             self.cache.display()
             self.console.freshen()
             self.update()
-            # Check if thread not already cancel'd
-            if name in self.cache.threads:
-                del self.cache.threads[name]
 
         if self.detail.video is None:
             cprint('No video to download, Inquire first', error=True)
@@ -520,24 +507,38 @@ class Panel(object):
                 return
             self.detail.stream = self.detail.video.allstreams[index]
 
-        name = self.detail.video.videoid
+        stream = self.detail.stream
 
-        t = threading.Thread(
-            name=name,
-            target=clipy_request_download,
-            args=(
-                self.detail.stream,
-                self.target,
-                self.console.printstr,
-                functools.partial(self.progress, name=name),
-                functools.partial(done_callback, name=name),
-            ))
-        self.cache.threads[name] = Thread(t, self.detail.stream)
-        t.daemon = True
-        t.start()
+        try:
+            name = '{}-({}).{}'.format(
+                stream.title, stream.quality, stream.extension).replace('/', '|')
+
+            target_dir = os.path.expanduser(self.target)
+
+            path = os.path.join(target_dir, name)
+
+            self.console.printstr('Downloading {} `{}` to {}'.format(
+                stream, stream.title, target_dir))
+
+        except (OSError, ValueError, FileNotFoundError) as e:
+            self.console.printstr(e, error=True)
+
+        else:
+            videoid = self.detail.video.videoid
+            self.cache.actives[videoid] = Stream(self.detail.stream, path)
+            length = yield from clipy.request.download(
+                stream.url,
+                filename=path,
+                progress_callback=self.progress,
+            )
+
+        finally:
+            done_callback(stream, path, length, self.detail.video.videoid)
+
+        self.console.printstr('Apparently {} bytes were saved to {}.'.format(
+            length, path))
 
 
-# @asyncio.coroutine
 def key_loop(stdscr, panel):
     KEYS_NUMERIC  = range(48, 58)
     KEYS_CANCEL   = (ord('x'), ord('X'))
@@ -579,7 +580,10 @@ def key_loop(stdscr, panel):
             panel.view(c)
 
         if c in KEYS_DOWNLOAD:
-            panel.download()
+            # panel.console.printstr('D selected, running `asyncio.async on loop {}`'.format(asyncio.get_event_loop()))
+            # asyncio.async(panel.download())
+            # yield from panel.download()
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download())
 
         if c in KEYS_NUMERIC:
             panel.download(c-48)
@@ -632,9 +636,9 @@ def init(stdscr, loop, video, stream, target):
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create the middle three windows
-    detail  = DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
-    cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
-    console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
+    detail  = DetailWindow(curses.LINES-29, curses.COLS//2,              1, 0                           )
+    cache   = ListWindow  (curses.LINES-29, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
+    console = Window      (27             , curses.COLS   , curses.LINES-28, 0                           )
     control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
@@ -642,17 +646,10 @@ def init(stdscr, loop, video, stream, target):
     detail.stream = stream
     control_panel.target = target
 
-    # Enter event loop
+    # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
-    # loop = asyncio.get_event_loop()
-    # print("Event loop running (pid %s), press CTRL+c to interrupt." % os.getpid())
-    # try:
-    #     f = asyncio.wait([key_loop(stdscr, control_panel)])
-    #     # loop.run_forever()
-    #     loop.run_until_complete(f)
-    # finally:
-    #     loop.close()
     loop.call_soon_threadsafe(loop.stop)
+    # loop.call_soon_threadsafe(asyncio.async, loop.stop())
 
 
 def main(video=None, stream=None, target=None):
@@ -660,7 +657,8 @@ def main(video=None, stream=None, target=None):
     Single entry point
     """
     loop = asyncio.get_event_loop()
-    threading.Thread(target=curses.wrapper, args=(init, loop, video, stream, target)).start()
+    loop.set_debug(True)
+    loop.run_in_executor(None, curses.wrapper, *(init, loop, video, stream, target))
     loop.run_forever()
     loop.close()
 
