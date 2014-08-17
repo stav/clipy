@@ -19,7 +19,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 
 class Video(object):
@@ -457,30 +457,34 @@ class Panel(object):
         cprint = self.console.printstr
         cprint('Cannot cancel yet')
 
-    def progress(self, total, *progress_stats, **kw):
-        name = kw['name'] if 'name' in kw else None
-        # Build status string
-        status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
-                         'KB/s].  ETA: [{:.0f} secs]  ')
-        status = status_string.format(*progress_stats)
-
-        # Update main screen status
-        self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
-        self.stdscr.noutrefresh()
-
-        # Update actives status
-        if name in self.cache.actives:  # may have been cancelled
-            self.cache.actives[name].status = status
-            self.cache.display()
-
-        # Commit screen changes
-        self.update()
-
     @asyncio.coroutine
     def download(self, index=None):
         cprint = self.console.printstr
 
+        def progress(total, *progress_stats, **kw):
+            name = kw['name'] if 'name' in kw else None
+            # Build status string
+            status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
+                             'KB/s].  ETA: [{:.0f} secs]  ')
+            status = status_string.format(*progress_stats)
+
+            # Update main screen status
+            self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
+            self.stdscr.noutrefresh()
+
+            # Update actives status
+            if name in self.cache.actives:  # may have been cancelled
+                self.cache.actives[name].status = status
+                self.cache.display()
+
+            # Commit screen changes
+            self.update()
+
+        def active_poll():
+            return False
+
         def done_callback(stream, filename, success, name):
+            # Add to downloaded list
             if success:
                 self.cache.downloads[stream.url] = Stream(stream, filename)
             # Check if thread not already cancel'd
@@ -507,33 +511,29 @@ class Panel(object):
                 return
             self.detail.stream = self.detail.video.allstreams[index]
 
-        stream = self.detail.stream
+        _stream = self.detail.stream
 
-        try:
-            name = '{}-({}).{}'.format(
-                stream.title, stream.quality, stream.extension).replace('/', '|')
+        name = '{}-({}).{}'.format(
+            _stream.title, _stream.quality, _stream.extension
+            ).replace('/', '|')
 
-            target_dir = os.path.expanduser(self.target)
+        target_dir = os.path.expanduser(self.target)
 
-            path = os.path.join(target_dir, name)
+        path = os.path.join(target_dir, name)
 
-            self.console.printstr('Downloading {} `{}` to {}'.format(
-                stream, stream.title, target_dir))
+        self.console.printstr('Downloading {} `{}` to {}'.format(
+            _stream, _stream.title, target_dir))
 
-        except (OSError, ValueError, FileNotFoundError) as e:
-            self.console.printstr(e, error=True)
+        videoid = self.detail.video.videoid
+        self.cache.actives[videoid] = Stream(self.detail.stream, path)
+        length = yield from clipy.request.download(
+            _stream.url,
+            filename=path,
+            active_poll=active_poll,
+            progress_callback=progress,
+        )
 
-        else:
-            videoid = self.detail.video.videoid
-            self.cache.actives[videoid] = Stream(self.detail.stream, path)
-            length = yield from clipy.request.download(
-                stream.url,
-                filename=path,
-                progress_callback=self.progress,
-            )
-
-        finally:
-            done_callback(stream, path, length, self.detail.video.videoid)
+        done_callback(_stream, path, length, self.detail.video.videoid)
 
         self.console.printstr('Apparently {} bytes were saved to {}.'.format(
             length, path))
