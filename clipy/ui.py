@@ -19,7 +19,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 
 class Video(object):
@@ -34,12 +34,12 @@ class Video(object):
 
 class Stream(object):
     """Pafy stream encapsulation"""
-    def __init__(self, stream, filename):
+    def __init__(self, stream, filename=None):
         self.stream = stream
         self.filename = filename
 
     def __str__(self):
-        return str(self.filename)
+        return str(self.filename or self.stream)
 
 
 class File(object):
@@ -460,6 +460,7 @@ class Panel(object):
     @asyncio.coroutine
     def download(self, index=None):
         cprint = self.console.printstr
+        target_dir = os.path.expanduser(self.target)
 
         def progress(total, *progress_stats, **kw):
             name = kw['name'] if 'name' in kw else None
@@ -481,15 +482,15 @@ class Panel(object):
             self.update()
 
         def active_poll():
-            return False
+            return True
 
-        def done_callback(stream, filename, success, name):
+        def done_callback():
             # Add to downloaded list
-            if success:
-                self.cache.downloads[stream.url] = Stream(stream, filename)
+            if _length:
+                self.cache.downloads[_stream.url] = Stream(_stream, _path)
             # Check if thread not already cancel'd
-            if name in self.cache.actives:
-                del self.cache.actives[name]
+            if _stream.url in self.cache.actives:
+                del self.cache.actives[_stream.url]
             # Update screen to show the active download is no longer active
             self.cache.display()
             self.console.freshen()
@@ -501,7 +502,7 @@ class Panel(object):
 
         if index is None:
             try:
-                self.detail.stream = self.detail.video.getbest(preftype="mp4")
+                self.detail.stream = Stream(self.detail.video.getbest(preftype="mp4"))
             except (OSError, ValueError) as e:
                 cprint(e, error=True)
                 return
@@ -509,34 +510,32 @@ class Panel(object):
             if index >= len(self.detail.video.allstreams):
                 cprint('Stream {} not available'.format(index), error=True)
                 return
-            self.detail.stream = self.detail.video.allstreams[index]
+            self.detail.stream = Stream(self.detail.video.allstreams[index])
 
-        _stream = self.detail.stream
+        _stream = self.detail.stream.stream
 
         name = '{}-({}).{}'.format(
             _stream.title, _stream.quality, _stream.extension
             ).replace('/', '|')
 
-        target_dir = os.path.expanduser(self.target)
-
-        path = os.path.join(target_dir, name)
+        _path = os.path.join(target_dir, name)
 
         self.console.printstr('Downloading {} `{}` to {}'.format(
             _stream, _stream.title, target_dir))
 
-        videoid = self.detail.video.videoid
-        self.cache.actives[videoid] = Stream(self.detail.stream, path)
-        length = yield from clipy.request.download(
+        self.cache.actives[_stream.url] = Stream(_stream, _path)
+
+        _length = yield from clipy.request.download(
             _stream.url,
-            filename=path,
+            filename=_path,
             active_poll=active_poll,
             progress_callback=progress,
         )
 
-        done_callback(_stream, path, length, self.detail.video.videoid)
+        done_callback()
 
         self.console.printstr('Apparently {} bytes were saved to {}.'.format(
-            length, path))
+            _length, _path))
 
 
 def key_loop(stdscr, panel):
@@ -643,7 +642,7 @@ def init(stdscr, loop, video, stream, target):
 
     # Load command line options
     detail.video = video
-    detail.stream = stream
+    detail.stream = Stream(stream)
     control_panel.target = target
 
     # Enter curses keyboard event loop
