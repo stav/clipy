@@ -16,6 +16,7 @@ setup(
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
         'Programming Language :: Python :: 3.4',
         'Topic :: Utilities',
     ],

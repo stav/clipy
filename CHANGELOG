@@ -1,3 +1,7 @@
+0.9     August 2014
+
+Use asyncio instead of threads
+
 0.5     23 July 2014
 
 Focussing on command-line.

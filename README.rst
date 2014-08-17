@@ -10,7 +10,8 @@ Requirements
 
 The following third-party libraries are used:
 
-* Pafy (YouTube API)
+* Pafy (synchronous YouTube API)
+* aiohttp (asynchronous HTTP communication)
 * pyperclip (optional, uses Gtk to read the clipboard)
 
 Usage
