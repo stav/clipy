@@ -19,7 +19,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.3'
+VERSION = '0.9.4'
 
 
 class Video(object):
@@ -34,12 +34,15 @@ class Video(object):
 
 class Stream(object):
     """Pafy stream encapsulation"""
-    def __init__(self, stream, filename=None):
+    status = None
+
+    def __init__(self, stream, path=None, name=None):
         self.stream = stream
-        self.filename = filename
+        self.path = path
+        self.name = name
 
     def __str__(self):
-        return str(self.filename or self.stream)
+        return '{} {}'.format(self.status, self.name or self.stream.title)
 
 
 class File(object):
@@ -462,20 +465,19 @@ class Panel(object):
         cprint = self.console.printstr
         target_dir = os.path.expanduser(self.target)
 
-        def progress(total, *progress_stats, **kw):
-            name = kw['name'] if 'name' in kw else None
+        def progress(url, total, *progress_stats):
             # Build status string
-            status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
-                             'KB/s].  ETA: [{:.0f} secs]  ')
-            status = status_string.format(*progress_stats)
+            status_string = (
+                '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  ')
+            status = status_string.format(*progress_stats, total=total)
 
             # Update main screen status
             self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
             self.stdscr.noutrefresh()
 
             # Update actives status
-            if name in self.cache.actives:  # may have been cancelled
-                self.cache.actives[name].status = status
+            if url in self.cache.actives:  # may have been cancelled
+                self.cache.actives[url].status = status
                 self.cache.display()
 
             # Commit screen changes
@@ -493,8 +495,6 @@ class Panel(object):
                 del self.cache.actives[_stream.url]
             # Update screen to show the active download is no longer active
             self.cache.display()
-            self.console.freshen()
-            self.update()
 
         if self.detail.video is None:
             cprint('No video to download, Inquire first', error=True)

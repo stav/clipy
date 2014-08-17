@@ -31,7 +31,7 @@ def download(url,
             rate = (bytesdone / 1024) / elapsed
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
-            progress_callback(total, *progress_stats)
+            progress_callback(url, total, *progress_stats)
 
     return bytesdone
 
