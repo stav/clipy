@@ -7,6 +7,7 @@ import os
 import re
 import curses
 import asyncio
+import functools
 import threading
 import subprocess
 import collections
@@ -19,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 
 
 class Video(object):
@@ -34,6 +35,7 @@ class Video(object):
 
 class Stream(object):
     """Pafy stream encapsulation"""
+    active = False
     status = None
 
     def __init__(self, stream, path=None, name=None):
@@ -43,6 +45,14 @@ class Stream(object):
 
     def __str__(self):
         return '{} {}'.format(self.status, self.name or self.stream.title)
+
+    def activate(self):
+        self.active = True
+
+    def cancel(self, logger=None):
+        self.active = False
+        if logger:
+            logger('Cancelled {}'.format(self.path))
 
 
 class File(object):
@@ -458,7 +468,10 @@ class Panel(object):
     def cancel(self):
         """ Cancel last spawned thread """
         cprint = self.console.printstr
-        cprint('Cannot cancel yet')
+        cprint('Cancelling most recent active download')
+        last_key = list(self.cache.actives).pop()
+        stream = self.cache.actives[last_key]
+        stream.cancel(cprint)
 
     @asyncio.coroutine
     def download(self, index=None):
@@ -483,8 +496,9 @@ class Panel(object):
             # Commit screen changes
             self.update()
 
-        def active_poll():
-            return True
+        def active_poll(url):
+            if url in self.cache.actives:
+                return self.cache.actives[url].active
 
         def done_callback():
             # Add to downloaded list
@@ -524,11 +538,12 @@ class Panel(object):
             _stream, _stream.title, target_dir))
 
         self.cache.actives[_stream.url] = Stream(_stream, _path)
+        self.cache.actives[_stream.url].activate()
 
         _length = yield from clipy.request.download(
             _stream.url,
             filename=_path,
-            active_poll=active_poll,
+            active_poll=functools.partial(active_poll, _stream.url),
             progress_callback=progress,
         )
 
@@ -540,7 +555,6 @@ class Panel(object):
 
 def key_loop(stdscr, panel):
     KEYS_NUMERIC  = range(48, 58)
-    KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
     KEYS_SEARCH   = (ord('s'), ord('S'))
@@ -548,6 +562,7 @@ def key_loop(stdscr, panel):
     KEYS_STREAMS  = (ord('v'), ord('V'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
+    KEYS_CANCEL   = (ord('X'),)
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
         curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
 
@@ -592,8 +607,8 @@ def key_loop(stdscr, panel):
 
         if c in KEYS_HELP:
             panel.console.printstr(
-                'HELP: Load cache (L), save cache (C) and reset (R) commands '
-                'are all upper case only.', wow=True)
+                'HELP: Load cache (L), save cache (C), reset (R) and cancel (X)'
+                ' commands are all upper case only.', wow=True)
 
         # Debug
         stdscr.addstr(
