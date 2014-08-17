@@ -8,6 +8,10 @@ Python command-line YouTube video downloader.
 Requirements
 ------------
 
+The following Python versions are supported:
+
+* Python 3.4
+
 The following third-party libraries are used:
 
 * Pafy (synchronous YouTube API)
@@ -30,9 +34,7 @@ User interface written with `curses` from the standard library:
 Notes
 -----
 
-Developed with Python 3 but should also work with Python 2.
-
 Only tested on Ubuntu Trusty and Mac Lion.
 
-Python for Windows does not contain the needed `curses` library, perhaps
-UniCurses can help.
+Python for Windows does not contain the needed `curses` library so the user
+interface will not work "out of the box", perhaps UniCurses can help.
