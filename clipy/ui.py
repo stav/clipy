@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.5'
+VERSION = '0.9.6'
 
 
 class Video(object):
@@ -72,7 +72,12 @@ class Thread(object):
         self.name = thread.name
 
     def __str__(self):
-        return str('{} {}'.format(self.name, self.thread.ident))
+        return str('{}: ident {}, {}'.format(
+            self.name,
+            self.thread.ident,
+            'Alive' if self.thread.is_alive() else 'Dead',
+            'Daemon' if self.thread.daemon else '',
+        ))
 
 
 class Window(object):
@@ -166,11 +171,14 @@ class ListWindow(Window):
     """
     class CacheList(collections.OrderedDict):
         """An ordered dictionary of videos"""
-        def __init__(self, name, title=None):
+        def __init__(self, name, title=''):
             super(self.__class__, self).__init__()
             self.index = None
             self.name = name
-            self.title = title if title else name
+            self.title = title
+
+        def __str__(self):
+            return '{}: {} {}'.format(self.name, len(self), self.title)
 
     class CacheItem():
         pass
@@ -191,7 +199,7 @@ class ListWindow(Window):
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
             self.CacheList('Downloaded'),
-            self.CacheList('Files', 'Files: {}'.format(self.panel.target)),
+            self.CacheList('Files', self.panel.target),
             self.CacheList('Threads'),
             self.CacheList('Active'),
         )
@@ -215,8 +223,6 @@ class ListWindow(Window):
 
         # Threads: manually build the threads list here real-time
         if self.videos is self.threads:
-            title = '{}: {}'.format(
-                self.videos.title, threading.active_count())
             self.threads.clear()
             for thread in threading.enumerate():
                 self.threads[thread.name] = Thread(thread)
@@ -227,7 +233,7 @@ class ListWindow(Window):
             self.win.addstr(' {} '.format(cache.name.upper()), attr)
 
         # Rows: Display selected cache detail
-        self.win.addstr(2, 2, self.videos.title)
+        self.win.addstr(2, 2, str(self.videos))
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
@@ -420,19 +426,20 @@ class Panel(object):
 
         # Intra-cache navigation
         else:
-            # Initialize cache
-            if self.cache.videos.index is None:
-                self.cache.videos.index = 0
             v_index = self.cache.videos.index
 
             # Move up the list
             if key == curses.KEY_UP:
-                if v_index > 0:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index > 0:
                     self.cache.videos.index -= 1
 
             # Move down the list
             elif key == curses.KEY_DOWN:
-                if v_index < len(self.cache.videos) - 1:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index < len(self.cache.videos) - 1:
                     self.cache.videos.index += 1
 
             # Selected cache entry action
