@@ -9,7 +9,7 @@ import urllib
 
 @asyncio.coroutine
 def download(url,
-             port=80, filename='~', active_poll=lambda: True,
+             port=80, path='~', active_poll=lambda: True,
              progress_callback=lambda *a: None):
 
     bytesdone = 0
@@ -19,7 +19,7 @@ def download(url,
     response = yield from aiohttp.request('GET', url)
     total = int(response.headers.get('Content-Length', 0).strip())
 
-    with open(filename, 'wb') as fd:
+    with open(path, 'wb') as fd:
         while active_poll():
             chunk = yield from response.content.read(chunk_size)
             if not chunk:

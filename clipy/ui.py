@@ -57,11 +57,12 @@ class Stream(object):
 
 class File(object):
     """file encapsulation"""
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
 
     def __str__(self):
-        return str(self.filename)
+        return str(self.name)
 
 
 class Thread(object):
@@ -210,7 +211,7 @@ class ListWindow(Window):
             for filename in sorted(os.listdir(target_dir)):
                 path = os.path.join(target_dir, filename)
                 if os.path.isfile(path) and not filename.startswith('.'):
-                    self.files[path] = File(path)
+                    self.files[path] = File(filename, path)
 
         # Threads: manually build the threads list here real-time
         if self.videos is self.threads:
@@ -548,7 +549,7 @@ class Panel(object):
 
         _length = yield from clipy.request.download(
             _stream.url,
-            filename=_path,
+            path=_path,
             active_poll=functools.partial(active_poll, _stream.url),
             progress_callback=progress,
         )
