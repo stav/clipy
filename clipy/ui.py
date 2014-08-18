@@ -376,7 +376,7 @@ class Panel(object):
                 if video:
                     searches[videoid] = Video(video)
                     self.cache.display()
-                    self.panel.update()
+                    self.update()
         else:
             self.console.printstr('No recent searches found, paste search url')
 
@@ -664,9 +664,9 @@ def init(stdscr, loop, video, stream, target):
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create the middle three windows
-    detail  = DetailWindow(curses.LINES-29, curses.COLS//2,              1, 0                           )
-    cache   = ListWindow  (curses.LINES-29, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
-    console = Window      (27             , curses.COLS   , curses.LINES-28, 0                           )
+    detail  = DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
+    cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
+    console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
     control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
