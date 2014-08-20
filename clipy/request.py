@@ -1,10 +1,18 @@
+"""
+Clipy YouTube video downloader network communications
+
+g79HokJTfPU
+g79HokJTfP!
+g79HokJTfP
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
 import time
 import aiohttp
 import asyncio
 import urllib
+
+from . import utils
 
 
 @asyncio.coroutine
@@ -37,41 +45,41 @@ def download(url,
 
 
 @asyncio.coroutine
-def fetch(url, port=80, logger=print):
+def fetch(url, **kw):
+    try:
+        response = yield from aiohttp.request('GET', url, **kw)
+        # loop = asyncio.get_event_loop()
+        # loop.call_soon_threadsafe(asyncio.wait_for(aiohttp.request('GET', url, **kw), 5.0))
+        # response = yield from asyncio.wait_for(aiohttp.request('GET', url, **kw), 5.0)
 
-    def _log(string, *a, **kw):
-        if logger is print:
-            logger(string)
-        else:
-            logger(string, *a, **kw)
+    except aiohttp.errors.OsConnectionError as ex:
+        raise ConnectionError from ex
 
-    _log('* url: ({}) {}'.format(len(url), url))
+    # Debug
+    # data = yield from response.text()
+    # with open('fetch', 'w') as f:
+    #     f.write('Url:       '); f.write(url);                   f.write('\n\n')
+    #     f.write('Response:  '); f.write(str(response));         f.write('\n\n')
+    #     f.write('Status:    '); f.write(str(response.status));  f.write('\n\n')
+    #     f.write('Header:    '); f.write(str(response.headers)); f.write('\n\n')
+    #     f.write('Data:      '); f.write(data);                  f.write('\n\n')
 
-    host = urllib.parse.urlparse(url).hostname
+    return response
 
-    # opener = build_opener()
-    # response = opener.open(url)
-    # total = int(response.info()['Content-Length'].strip())
-    # _log('* total: {}'.format(total))
 
-    r, w = yield from asyncio.open_connection(host, port)
-    request = '''GET {url} HTTP/1.1
-Host: {host}
-User-Agent: Python asyncio clipy
+@asyncio.coroutine
+def get_youtube_info(resource):
+    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
+    response = yield from fetch(url)
 
-'''.format(url=url, host=host)
-    _log('> request: {}'.format(request))
+    if response.status < 200 or response.status > 299:
+        raise ConnectionError('Bad response status: {}, {}'.format(response.status, url))
 
-    w.write(request.encode('latin-1'))
+    data = yield from response.text()
+    info = urllib.parse.parse_qs(data)
 
-    while True:
-        line = yield from r.readline()
-        line = line.decode('latin-1').rstrip()
-        if not line:
-            break
-        _log('< {}'.format(line))
-
-    # print(file=sys.stderr)
-    body = yield from r.read()
-
-    return body
+    status = utils.take_first(info['status'])
+    if status == 'ok':
+        return data
+    else:
+        raise ConnectionError('Invalid video Id "{}" {}'.format(resource, info))

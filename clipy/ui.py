@@ -6,21 +6,22 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import re
 import curses
+import urllib
 import asyncio
 import functools
 import threading
 import subprocess
 import collections
-import urllib.request
 
 import pafy
 import pyperclip
 
+import clipy.utils
 import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 
 class Video(object):
@@ -366,40 +367,134 @@ class Panel(object):
         except (OSError, ValueError) as ex:
             self.console.printstr(ex, error=True)
 
+    @asyncio.coroutine
+    def get_video_async(self, resource):
+        try:
+            return pafy.new(resource)
+        except (OSError, ValueError) as ex:
+            self.console.printstr(ex, error=True)
+
+    @asyncio.coroutine
+    def get_video_homebrew(self, resource):
+        try:
+            data = yield from clipy.request.get_youtube_info(resource)
+        except ConnectionError as ex:
+            self.console.printstr(ex, error=True)
+            return
+        if data is None:
+            self.console.printstr('No data returned', error=True)
+            return
+        self.console.printstr('Got {} bytes as {}'.format(len(data), type(data)))
+        # self.console.printstr(data)
+
+        class VideoInner(object):
+            def __str__(self):
+                return '<<{}>>'.format(self)
+
+        class VideoDetail(object):
+            # def __init__(self, video):
+            #     self.video = video
+            def __str__(self):
+                # import pprint
+                # p = pprint.pformat(self.info)
+                return '''
+Id:     {}
+Title:  {}
+Author: {}
+Length: {} seconds
+Views:  {}
+
+Streams: {}
+                '''.format(
+                    clipy.utils.take_first(self.info['video_id']),
+                    clipy.utils.take_first(self.info['title']),
+                    clipy.utils.take_first(self.info['author']),
+                    clipy.utils.take_first(self.info['length_seconds']),
+                    clipy.utils.take_first(self.info['view_count']),
+                    len(self.info['url_encoded_fmt_stream_map']),
+                )
+                # with open('qs', 'w') as f:
+                #     f.write(output)
+
+            @property
+            def videoid(self):
+                return clipy.utils.take_first(self.info.get('video_id', None))
+
+        video = VideoInner()
+        video.title = '<title>'
+        video.videoid = '<videoid>'
+        video.duration = '<duration>'
+
+        storage = VideoDetail()
+        storage.info = urllib.parse.parse_qs(data)
+        storage.video = video
+
+        return storage
+
+    @asyncio.coroutine
+    def inquire(self, resource=None):
+        video_id = None
+
+        if resource is None:
+            resource = pyperclip.paste().strip()
+            self.console.printstr('Checking clipboard: {}'.format(resource))
+
+        if len(resource) == 11:
+            video_id = resource
+        elif 'youtube.com/results?search' in resource:
+            self.cache.load_search(resource)
+        elif 'youtube.com/watch' in resource:
+            video_id = re  # ToDo
+        else:
+            self.console.printstr('Resource not valid: "{}"'.format(resource), error=True)
+
+        if video_id is None:
+            return
+
+        self.console.printstr('Inquiring homeBrew: {}'.format(resource))
+        video = yield from self.get_video_homebrew(resource)
+        if video:
+            self.detail.video = video
+            if video.videoid not in self.cache.lookups:
+                vid = video.videoid
+                self.cache.lookups[vid] = Video(video.video)
+
+        self.display()
+
+    # def inquire(self, resource=None):
+    #     # Check if we have a supplied resoure, else check the clipboard
+    #     if resource is None:
+    #         resource = pyperclip.paste().strip()
+    #         self.console.printstr('Checking clipboard: {}'.format(resource))
+    #     # We may want to search
+    #     if 'youtube.com/results?search' in resource:
+    #         self.cache.load_search(resource)
+    #     # We can try at YouTube now
+    #     else:
+    #         self.console.printstr('Inquiring: {}'.format(resource))
+    #         video = self.get_video(resource)
+    #         if video:
+    #             self.detail.video = video
+    #             # If entry not in Lookups
+    #             if video.videoid not in self.cache.lookups:
+    #                 # Add entry to Lookups
+    #                 vid = video.videoid
+    #                 self.cache.lookups[vid] = Video(video)
+
+    @asyncio.coroutine
     def search(self):
         searches = self.cache.searches
         if searches:
             self.console.printstr('Inquiring on all {} searches'.format(
                 len(searches)))
             for videoid in searches:
-                video = self.get_video(videoid)
+                video = yield from self.get_video_async(videoid)
                 if video:
                     searches[videoid] = Video(video)
                     self.cache.display()
                     self.update()
         else:
             self.console.printstr('No recent searches found, paste search url')
-
-    def inquire(self, resource=None):
-        # Check if we have a supplied resoure, else check the clipboard
-        if resource is None:
-            resource = pyperclip.paste().strip()
-            self.console.printstr('Checking clipboard: {}'.format(resource))
-
-        # We may want to search
-        if 'youtube.com/results?search' in resource:
-            self.cache.load_search(resource)
-        # We can try to inquire at YouTube now
-        else:
-            self.console.printstr('Inquiring: {}'.format(resource))
-            video = self.get_video(resource)
-            if video:
-                self.detail.video = video
-                # If entry not in Lookups
-                if video.videoid not in self.cache.lookups:
-                    # Add entry to Lookups
-                    vid = video.videoid
-                    self.cache.lookups[vid] = Video(video)
 
     def wait_for_input(self):
         # self.cache.win.nodelay(False)
@@ -482,10 +577,13 @@ class Panel(object):
     def cancel(self):
         """ Cancel last spawned thread """
         cprint = self.console.printstr
-        cprint('Cancelling most recent active download')
-        last_key = list(self.cache.actives).pop()
-        stream = self.cache.actives[last_key]
-        stream.cancel(cprint)
+        if self.cache.actives:
+            last_key = list(self.cache.actives).pop()
+            cprint('Cancelling most recent active download: {}'.format(last_key))
+            stream = self.cache.actives[last_key]
+            stream.cancel(cprint)
+        else:
+            cprint('Nothing to cancel')
 
     @asyncio.coroutine
     def download(self, index=None):
@@ -595,23 +693,24 @@ def key_loop(stdscr, panel):
         if c in KEYS_RESET:
             panel.reset()
 
+        # Debug
+        if c in (ord('Z'),):
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
+
         if c in KEYS_INQUIRE:
-            panel.inquire()
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire())
 
         if c in KEYS_SEARCH:
-            panel.search()
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.search())
+
+        if c in KEYS_DOWNLOAD:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download())
 
         if c in KEYS_STREAMS:
             panel.streams()
 
         if c in KEYS_CACHE:
             panel.view(c)
-
-        if c in KEYS_DOWNLOAD:
-            # panel.console.printstr('D selected, running `asyncio.async on loop {}`'.format(asyncio.get_event_loop()))
-            # asyncio.async(panel.download())
-            # yield from panel.download()
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.download())
 
         if c in KEYS_NUMERIC:
             panel.download(c-48)
@@ -677,19 +776,18 @@ def init(stdscr, loop, video, stream, target):
     # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
     loop.call_soon_threadsafe(loop.stop)
-    # loop.call_soon_threadsafe(asyncio.async, loop.stop())
 
 
 def main(video=None, stream=None, target=None):
     """
     Single entry point
     """
+    # Python event loop
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
     loop.run_in_executor(None, curses.wrapper, *(init, loop, video, stream, target))
     loop.run_forever()
     loop.close()
-
 
 if __name__ == '__main__':
     main()
