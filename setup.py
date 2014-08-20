@@ -22,7 +22,7 @@ setup(
     ],
     packages=['clipy'],
     package_data={"": ["CHANGELOG", "LICENSE", "README.rst"]},
-    install_requires=['Pafy', 'pyperclip', 'aiohttp'],
+    install_requires=['aiohttp', 'pyperclip'],
     #  dependency_links = [
     #     'http://github.com/gabrielgrant/django-ckeditor/tarball/master#egg=django-ckeditor-0.9.3',
     #     'git+https://github.com/np1/pafy.git@develop',

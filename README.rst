@@ -14,7 +14,6 @@ The following Python versions are supported:
 
 The following third-party libraries are used:
 
-* Pafy (synchronous YouTube API)
 * aiohttp (asynchronous HTTP communication)
 * pyperclip (optional, uses Gtk to read the clipboard)
 

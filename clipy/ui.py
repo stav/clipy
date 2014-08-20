@@ -13,7 +13,6 @@ import threading
 import subprocess
 import collections
 
-import pafy
 import pyperclip
 
 import clipy.utils
@@ -21,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.8'
+VERSION = '0.9.9'
 
 
 class Video(object):
@@ -245,18 +244,10 @@ class ListWindow(Window):
 
         self.freshen()
 
+    @asyncio.coroutine
     def load_search(self, url):
         self.panel.console.printstr('Searching: {}'.format(url))
-
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
-        headers = {'User-Agent': user_agent}
-        request = urllib.request.Request(url, headers=headers)
-        # self.panel.console.printstr('Request: {}'.format(request))
-
-        response = urllib.request.urlopen(request)
-        html = str(response.read())
-        # self.panel.console.printstr('Response: {} {}'.format(len(html), response))
-
+        html = yield from clipy.request.get_text(url)
         videoids = re.findall('data-context-item-id="([^"]+)"', html)
         self.panel.console.printstr('Video Ids: {}'.format(videoids))
 
@@ -264,7 +255,11 @@ class ListWindow(Window):
             self.searches.clear()
             for videoid in videoids:
                 if videoid != '__video_id__':
-                    self.searches[videoid] = videoid
+                    video = yield from self.panel.get_video(videoid)
+                    if video:
+                        self.searches[videoid] = Video(video.video)
+                        self.display()
+                        self.panel.update()
 
     def load_lookups(self):
         """ Load file from disk into cache """
@@ -351,22 +346,10 @@ class Panel(object):
 
             self.console.printstr('Cache: saved')
 
+
+
+    @asyncio.coroutine
     def get_video(self, resource):
-        """ Create new Pafy video instance """
-        try:
-            return pafy.new(resource)
-        except (OSError, ValueError) as ex:
-            self.console.printstr(ex, error=True)
-
-    @asyncio.coroutine
-    def get_video_async(self, resource):
-        try:
-            return pafy.new(resource)
-        except (OSError, ValueError) as ex:
-            self.console.printstr(ex, error=True)
-
-    @asyncio.coroutine
-    def get_video_homebrew(self, resource):
         try:
             data = yield from clipy.request.get_youtube_info(resource)
         except ConnectionError as ex:
@@ -375,8 +358,7 @@ class Panel(object):
         if data is None:
             self.console.printstr('No data returned', error=True)
             return
-        self.console.printstr('Got {} bytes as {}'.format(len(data), type(data)))
-        # self.console.printstr(data)
+        # self.console.printstr('Got {} bytes as {}'.format(len(data), type(data)))
 
         class VideoInner(object):
             def __str__(self):
@@ -433,7 +415,7 @@ Streams: {}
         if len(resource) == 11:
             video_id = resource
         elif 'youtube.com/results?search' in resource:
-            self.cache.load_search(resource)
+            yield from self.cache.load_search(resource)
         elif 'youtube.com/watch' in resource:
             video_id = re  # ToDo
         else:
@@ -442,8 +424,8 @@ Streams: {}
         if video_id is None:
             return
 
-        self.console.printstr('Inquiring homeBrew: {}'.format(resource))
-        video = yield from self.get_video_homebrew(resource)
+        self.console.printstr('Inquiring: {}'.format(resource))
+        video = yield from self.get_video(resource)
         if video:
             self.detail.video = video
             if video.videoid not in self.cache.lookups:
@@ -451,41 +433,6 @@ Streams: {}
                 self.cache.lookups[vid] = Video(video.video)
 
         self.display()
-
-    # def inquire(self, resource=None):
-    #     # Check if we have a supplied resoure, else check the clipboard
-    #     if resource is None:
-    #         resource = pyperclip.paste().strip()
-    #         self.console.printstr('Checking clipboard: {}'.format(resource))
-    #     # We may want to search
-    #     if 'youtube.com/results?search' in resource:
-    #         self.cache.load_search(resource)
-    #     # We can try at YouTube now
-    #     else:
-    #         self.console.printstr('Inquiring: {}'.format(resource))
-    #         video = self.get_video(resource)
-    #         if video:
-    #             self.detail.video = video
-    #             # If entry not in Lookups
-    #             if video.videoid not in self.cache.lookups:
-    #                 # Add entry to Lookups
-    #                 vid = video.videoid
-    #                 self.cache.lookups[vid] = Video(video)
-
-    @asyncio.coroutine
-    def search(self):
-        searches = self.cache.searches
-        if searches:
-            self.console.printstr('Inquiring on all {} searches'.format(
-                len(searches)))
-            for videoid in searches:
-                video = yield from self.get_video_async(videoid)
-                if video:
-                    searches[videoid] = Video(video)
-                    self.cache.display()
-                    # self.update()
-        else:
-            self.console.printstr('No recent searches found, paste search url')
 
     def wait_for_input(self):
         # self.cache.win.nodelay(False)

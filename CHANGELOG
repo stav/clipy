@@ -1,3 +1,7 @@
+0.9.9   August 2014
+
+Pafy YouTube API library no longer used
+
 0.9     August 2014
 
 Use asyncio instead of threads
