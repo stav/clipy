@@ -1,0 +1,15 @@
+TODO
+
+Application
+
+    #!/usr/bin/env python
+
+    rename clipy/clipy_app.py -> clipy
+
+UI
+
+    class Video
+    class VideoDetail (this is all we need?)
+    class VideoInner
+
+    waiting spinner, for example when waiting for inquiry/searching
