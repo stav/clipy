@@ -68,18 +68,39 @@ def fetch(url, **kw):
 
 
 @asyncio.coroutine
-def get_youtube_info(resource):
-    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
+def get(url):
     response = yield from fetch(url)
 
     if response.status < 200 or response.status > 299:
         raise ConnectionError('Bad response status: {}, {}'.format(response.status, url))
 
+    return response
+
+
+@asyncio.coroutine
+def get_text(url):
+    try:
+        response = yield from get(url)
+    except:
+        raise
+
     data = yield from response.text()
+    return data
+
+
+@asyncio.coroutine
+def get_youtube_info(resource):
+    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
+    try:
+        data = yield from get_text(url)
+    except:
+        raise
+
     info = urllib.parse.parse_qs(data)
 
-    status = utils.take_first(info['status'])
+    status = utils.take_first(info.get('status', None))
     if status == 'ok':
         return data
     else:
         raise ConnectionError('Invalid video Id "{}" {}'.format(resource, info))
+

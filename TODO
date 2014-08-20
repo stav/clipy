@@ -13,3 +13,7 @@ UI
     class VideoInner
 
     waiting spinner, for example when waiting for inquiry/searching
+
+Request
+
+    user agent

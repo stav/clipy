@@ -21,7 +21,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.7'
+VERSION = '0.9.8'
 
 
 class Video(object):
@@ -246,15 +246,6 @@ class ListWindow(Window):
         self.freshen()
 
     def load_search(self, url):
-        # page = requests.get(resource)
-        # tree = html.fromstring(page.text)
-        # videos = tree.xpath('//div/@data-context-item-id')
-
-        # r = urllib2.Request(url='http://www.mysite.com')
-        # r.add_header('User-Agent', 'Clipy')
-        # # r.add_data(urllib.urlencode({'foo': 'bar'})
-        # response = urlopen(r)
-
         self.panel.console.printstr('Searching: {}'.format(url))
 
         user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
@@ -492,7 +483,7 @@ Streams: {}
                 if video:
                     searches[videoid] = Video(video)
                     self.cache.display()
-                    self.update()
+                    # self.update()
         else:
             self.console.printstr('No recent searches found, paste search url')
 

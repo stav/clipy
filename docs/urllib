@@ -1,0 +1,16 @@
+urllib notes
+
+    # page = requests.get(resource)
+    # tree = html.fromstring(page.text)
+    # videos = tree.xpath('//div/@data-context-item-id')
+    # r = urllib2.Request(url='http://www.mysite.com')
+    # r.add_header('User-Agent', 'Clipy')
+    # # r.add_data(urllib.urlencode({'foo': 'bar'})
+    # response = urlopen(r)
+
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
+    headers = {'User-Agent': user_agent}
+    request = urllib.request.Request(url, headers=headers)
+    # self.panel.console.printstr('Request: {}'.format(request))
+    response = urllib.request.urlopen(request)
+    html = str(response.read())
