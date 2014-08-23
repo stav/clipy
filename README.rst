@@ -3,7 +3,7 @@ clipy
 
 *Command Line Interface using Python for Youtube*
 
-Python command-line YouTube video downloader.
+Asynchronous Python command-line YouTube video downloader.
 
 Requirements
 ------------

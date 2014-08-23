@@ -6,13 +6,20 @@ Application
 
     rename clipy/clipy_app.py -> clipy
 
+    remove external API usage
+
 UI
 
-    class Video
+    downloads!
+
     class VideoDetail (this is all we need?)
-    class VideoInner
+    class Thread
+    class Stream
+    class File
 
     waiting spinner, for example when waiting for inquiry/searching
+
+    move clipy.downloads, clipy.lookups to /data/
 
 Request
 

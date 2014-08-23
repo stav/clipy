@@ -20,22 +20,109 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.10'
+VERSION = '0.9.11'
+
+# Borrowed from Pafy https://github.com/np1/pafy
+ITAGS = {
+    '5': ('320x240', 'flv', "normal", ''),
+    '17': ('176x144', '3gp', "normal", ''),
+    '18': ('640x360', 'mp4', "normal", ''),
+    '22': ('1280x720', 'mp4', "normal", ''),
+    '34': ('640x360', 'flv', "normal", ''),
+    '35': ('854x480', 'flv', "normal", ''),
+    '36': ('320x240', '3gp', "normal", ''),
+    '37': ('1920x1080', 'mp4', "normal", ''),
+    '38': ('4096x3072', 'mp4', "normal", '4:3 hi-res'),
+    '43': ('640x360', 'webm', "normal", ''),
+    '44': ('854x480', 'webm', "normal", ''),
+    '45': ('1280x720', 'webm', "normal", ''),
+    '46': ('1920x1080', 'webm', "normal", ''),
+
+    # '59': ('1x1', 'mp4', 'normal', ''),
+    # '78': ('1x1', 'mp4', 'normal', ''),
+
+    '82': ('640x360-3D', 'mp4', "normal", ''),
+    '83': ('640x480-3D', 'mp4', 'normal', ''),
+    '84': ('1280x720-3D', 'mp4', "normal", ''),
+    '100': ('640x360-3D', 'webm', "normal", ''),
+    '102': ('1280x720-3D', 'webm', "normal", ''),
+    '133': ('426x240', 'm4v', 'video', ''),
+    '134': ('640x360', 'm4v', 'video', ''),
+    '135': ('854x480', 'm4v', 'video', ''),
+    '136': ('1280x720', 'm4v', 'video', ''),
+    '137': ('1920x1080', 'm4v', 'video', ''),
+    '138': ('4096x3072', 'm4v', 'video', ''),
+    '139': ('48k', 'm4a', 'audio', ''),
+    '140': ('128k', 'm4a', 'audio', ''),
+    '141': ('256k', 'm4a', 'audio', ''),
+    '160': ('256x144', 'm4v', 'video', ''),
+    '167': ('640x480', 'webm', 'video', ''),
+    '168': ('854x480', 'webm', 'video', ''),
+    '169': ('1280x720', 'webm', 'video', ''),
+    '170': ('1920x1080', 'webm', 'video', ''),
+    '171': ('128k', 'ogg', 'audio', ''),
+    '172': ('192k', 'ogg', 'audio', ''),
+    '218': ('854x480', 'webm', 'video', 'VP8'),
+    '219': ('854x480', 'webm', 'video', 'VP8'),
+    '242': ('360x240', 'webm', 'video', 'VP9'),
+    '243': ('480x360', 'webm', 'video', 'VP9'),
+    '244': ('640x480', 'webm', 'video', 'VP9'),
+    '245': ('640x480', 'webm', 'video', 'VP9'),
+    '246': ('640x480', 'webm', 'video', 'VP9'),
+    '247': ('720x480', 'webm', 'video', 'VP9'),
+    '248': ('1920x1080', 'webm', 'video', 'VP9'),
+    '256': ('192k', 'm4a', 'audio', '6-channel'),
+    '258': ('320k', 'm4a', 'audio', '6-channel'),
+    '264': ('2560x1440', 'm4v', 'video', ''),
+    '271': ('1920x1280', 'webm', 'video', 'VP9'),
+    '272': ('3414x1080', 'webm', 'video', 'VP9')
+}
 
 
 class VideoDetail(object):
     # _videoid = _duration = None
     # duration = title = path = ''
     info = {}
-    map = dict(videoid='video_id', duration='length_seconds')
+    streams =[]
+    info_map = dict(videoid='video_id', duration='length_seconds')
 
     def __init__(self, data=None):
         if data is not None:
+            # data is a url querystring, so we need to parse it
             self.info = urllib.parse.parse_qs(data)
 
+            # first we split the mapping on the commas
+            stream_map = clipy.utils.take_first(
+                self.info.get('url_encoded_fmt_stream_map', ())).split(',')
+
+            # then we zip/map the values into our streams list
+            self.streams = [{k: clipy.utils.take_first(v)
+                for k, v in sdic.items()}
+                for sdic in [urllib.parse.parse_qs(mapp)
+                for mapp in stream_map]]
+
+            # now add in our printing convenience field
+            for stream in self.streams:
+                itags = (t for t in ITAGS.get(stream.get('itag', None)) if t)
+                resolution = '{} ({}) {}'.format(
+                    ', '.join(itags),
+                    stream.get('quality', 'unknown'),
+                    stream.get('type', ''))
+                stream.update(dict(resolution=resolution))
+
+            # from pprint import pformat
+            # info = pformat(self.info)
+            # strm = pformat(self.streams)
+            # with open('INIT', 'w') as f:
+            #     f.write('data: '); f.write(data); f.write('\n\n')
+            #     f.write('info: '); f.write(info); f.write('\n\n')
+            #     f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
+            #     f.write('strm: '); f.write(strm); f.write('\n\n')
+            #     f.write('------------------------------------\n\n')
+
     def __str__(self):
-        return '> {dur}  {title}  {path}'.format(
-            dur=self.duration, title=self.title, path=self.path)
+        return '> {duration}  {title}  {path}'.format(
+            duration=self.duration, title=self.title, path=self.path)
 
     @property
     def detail(self):
@@ -49,13 +136,15 @@ Length: {} seconds
 Views:  {}
 
 Streams: {}
+* {}
         '''.format(
             clipy.utils.take_first(self.info['video_id']),
             clipy.utils.take_first(self.info['title']),
             clipy.utils.take_first(self.info['author']),
             clipy.utils.take_first(self.info['length_seconds']),
             clipy.utils.take_first(self.info['view_count']),
-            len(self.info['url_encoded_fmt_stream_map']),
+            len(self.streams),
+            '\n* '.join([stream['resolution'] for stream in self.streams]),
         )
         # with open('qs', 'w') as f:
         #     f.write(output)
@@ -70,7 +159,7 @@ Streams: {}
         # # import pdb; pdb.set_trace()
         # sdict = pformat(self.__dict__)
         # dname = self.__dict__.get(name, '?.')
-        # mname = self.map.get(name, name)
+        # mname = self.info_map.get(name, name)
         # ninfo = self.info.get(mname)
         # finfo = clipy.utils.take_first(ninfo)
         # with open('getattr.{}'.format(name), 'w') as f:
@@ -83,7 +172,7 @@ Streams: {}
         return self.__dict__.get(name,
             clipy.utils.take_first(
                self.info.get(
-                    self.map.get(name, name))))
+                    self.info_map.get(name, name))))
 
     # def __setattr__(self, name, value):
     #     pass
