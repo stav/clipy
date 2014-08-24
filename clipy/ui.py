@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.11'
+VERSION = '0.9.12'
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -80,15 +80,17 @@ ITAGS = {
 
 
 class VideoDetail(object):
-    # _videoid = _duration = None
-    # duration = title = path = ''
-    info = {}
-    streams =[]
-    info_map = dict(videoid='video_id', duration='length_seconds')
+    info = dict()
+    stream = None
+    streams =list()
+    info_map = dict(
+        videoid='video_id',
+        duration='length_seconds',
+    )
 
     def __init__(self, data=None):
         if data is not None:
-            # data is a url querystring, so we need to parse it
+            # data is url querystring format, so we need to parse it
             self.info = urllib.parse.parse_qs(data)
 
             # first we split the mapping on the commas
@@ -101,14 +103,21 @@ class VideoDetail(object):
                 for sdic in [urllib.parse.parse_qs(mapp)
                 for mapp in stream_map]]
 
-            # now add in our printing convenience field
+            # now add in our new fields
             for stream in self.streams:
-                itags = (t for t in ITAGS.get(stream.get('itag', None)) if t)
-                resolution = '{} ({}) {}'.format(
+
+                itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
+
+                display = '{} ({}) {}'.format(
                     ', '.join(itags),
                     stream.get('quality', 'unknown'),
                     stream.get('type', ''))
-                stream.update(dict(resolution=resolution))
+
+                stream.update(dict(
+                    display=display,
+                    resolution=itags[0]),
+                    extension=itags[1],
+                )
 
             # from pprint import pformat
             # info = pformat(self.info)
@@ -119,35 +128,6 @@ class VideoDetail(object):
             #     f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
             #     f.write('strm: '); f.write(strm); f.write('\n\n')
             #     f.write('------------------------------------\n\n')
-
-    def __str__(self):
-        return '> {duration}  {title}  {path}'.format(
-            duration=self.duration, title=self.title, path=self.path)
-
-    @property
-    def detail(self):
-        # import pprint
-        # p = pprint.pformat(self.info)
-        return '''
-Id:     {}
-Title:  {}
-Author: {}
-Length: {} seconds
-Views:  {}
-
-Streams: {}
-* {}
-        '''.format(
-            clipy.utils.take_first(self.info['video_id']),
-            clipy.utils.take_first(self.info['title']),
-            clipy.utils.take_first(self.info['author']),
-            clipy.utils.take_first(self.info['length_seconds']),
-            clipy.utils.take_first(self.info['view_count']),
-            len(self.streams),
-            '\n* '.join([stream['resolution'] for stream in self.streams]),
-        )
-        # with open('qs', 'w') as f:
-        #     f.write(output)
 
     def __getattr__(self, name):
         """
@@ -174,32 +154,38 @@ Streams: {}
                self.info.get(
                     self.info_map.get(name, name))))
 
-    # def __setattr__(self, name, value):
-    #     pass
+    def __str__(self):
+        return '> {duration}  {title}  {path}'.format(
+            duration=self.duration, title=self.title, path=self.path)
 
-    # @property
-    # def videoid(self):
-    #     if self._videoid:
-    #         return self._videoid
-    #     else:
-    #         return clipy.utils.take_first(self.info.get('video_id', None))
-    # @videoid.setter
-    # def videoid(self, value):
-    #     self._videoid = value
+    @property
+    def detail(self):
+        # import pprint
+        # p = pprint.pformat(self.info)
+        return '''
+Id:     {}
+Title:  {}
+Author: {}
+Length: {} seconds
+Views:  {}
 
-    # @property
-    # def duration(self):
-    #     if self._duration:
-    #         return self._duration
-    #     else:
-    #         return clipy.utils.take_first(self.info.get('length_seconds', None))
-    # @duration.setter
-    # def duration(self, value):
-    #     self._duration = value
+Streams: {}
+* {}
+        '''.format(
+            clipy.utils.take_first(self.info['video_id']),
+            clipy.utils.take_first(self.info['title']),
+            clipy.utils.take_first(self.info['author']),
+            clipy.utils.take_first(self.info['length_seconds']),
+            clipy.utils.take_first(self.info['view_count']),
+            len(self.streams),
+            '\n* '.join([stream['display'] for stream in self.streams]),
+        )
+        # with open('qs', 'w') as f:
+        #     f.write(output)
 
 
-class Stream(object):
-    """Pafy stream encapsulation"""
+class Stream(VideoDetail):
+    """Video stream """
     active = False
     status = None
 
@@ -644,7 +630,7 @@ class Panel(object):
             cprint('Nothing to cancel')
 
     @asyncio.coroutine
-    def download(self, index=None):
+    def download(self, video, index=None):
         cprint = self.console.printstr
         target_dir = os.path.expanduser(self.target)
 
@@ -670,57 +656,43 @@ class Panel(object):
             if url in self.cache.actives:
                 return self.cache.actives[url].active
 
-        def done_callback():
-            # Add to downloaded list
-            if _length:
-                self.cache.downloads[_stream.url] = Stream(_stream, _path)
-            # Check if thread not already cancel'd
-            if _stream.url in self.cache.actives:
-                del self.cache.actives[_stream.url]
-            # Update screen to show the active download is no longer active
-            self.cache.display()
-
-        if self.detail.video is None:
+        if video is None:
             cprint('No video to download, Inquire first', error=True)
             return
 
-        if index is None:
-            try:
-                self.detail.stream = Stream(self.detail.video.getbest(preftype="mp4"))
-            except (OSError, ValueError) as e:
-                cprint(e, error=True)
-                return
-        else:
-            if index >= len(self.detail.video.allstreams):
-                cprint('Stream {} not available'.format(index), error=True)
-                return
-            self.detail.stream = Stream(self.detail.video.allstreams[index])
-
-        _stream = self.detail.stream.stream
+        _stream = video.stream = video.streams[index or 0]
 
         name = '{}-({}).{}'.format(
-            _stream.title, _stream.quality, _stream.extension
+            self.detail.video.title, _stream['resolution'], _stream['extension']
             ).replace('/', '|')
 
         _path = os.path.join(target_dir, name)
 
-        self.console.printstr('Downloading {} `{}` to {}'.format(
-            _stream, _stream.title, target_dir))
+        cprint('Downloading {}'.format(_path))
 
-        self.cache.actives[_stream.url] = Stream(_stream, _path)
-        self.cache.actives[_stream.url].activate()
+        self.cache.actives[_stream['url']] = Stream(_stream, _path, name)
+        self.cache.actives[_stream['url']].activate()
 
-        _length = yield from clipy.request.download(
-            _stream.url,
+        # here is the magic goodness
+        _success, _length = yield from clipy.request.download(
+            _stream['url'],
             path=_path,
-            active_poll=functools.partial(active_poll, _stream.url),
+            active_poll=functools.partial(active_poll, _stream['url']),
             progress_callback=progress,
         )
+        # and here we start our inline that would "normally" be in a callback
 
-        done_callback()
+        # Add to downloaded list
+        if _success:
+            self.cache.downloads[_stream['url']] = Stream(_stream, _path)
 
-        self.console.printstr('Apparently {} bytes were saved to {}.'.format(
-            _length, _path))
+        # Check if thread not already cancel'd
+        if _stream['url'] in self.cache.actives:
+            del self.cache.actives[_stream['url']]
+
+        # Update screen to show the active download is no longer active
+        self.cache.display()
+        cprint('Perhaps {} bytes were saved to {}'.format(_length, _path))
 
 
 def key_loop(stdscr, panel):
@@ -758,7 +730,7 @@ def key_loop(stdscr, panel):
         #     panel.loop.call_soon_threadsafe(asyncio.async, panel.search())
 
         if c in KEYS_DOWNLOAD:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.download())
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(panel.detail.video))
 
         if c in KEYS_ACTION:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.action())

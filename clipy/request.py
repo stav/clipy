@@ -26,11 +26,13 @@ def download(url,
 
     response = yield from aiohttp.request('GET', url)
     total = int(response.headers.get('Content-Length', 0).strip())
+    complete = False
 
     with open(path, 'wb') as fd:
         while active_poll():
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
+                complete = True
                 break
             fd.write(chunk)
 
@@ -41,7 +43,7 @@ def download(url,
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
             progress_callback(url, total, *progress_stats)
 
-    return bytesdone
+    return complete, bytesdone
 
 
 @asyncio.coroutine

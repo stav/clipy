@@ -5,6 +5,8 @@ clipy
 
 Asynchronous Python command-line YouTube video downloader.
 
+This project was created so I could learn Python's `asyncio` library.
+
 Requirements
 ------------
 

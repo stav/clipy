@@ -11,6 +11,7 @@ Application
 UI
 
     downloads!
+        use .temp for resuming
 
     class VideoDetail (this is all we need?)
     class Thread
@@ -20,6 +21,8 @@ UI
     waiting spinner, for example when waiting for inquiry/searching
 
     move clipy.downloads, clipy.lookups to /data/
+
+    duration (like pafy using length_seconds)
 
 Request
 
