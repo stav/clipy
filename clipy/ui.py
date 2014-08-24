@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.13'
+VERSION = '0.9.14'
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -296,21 +296,9 @@ class DetailWindow(Window):
     def display(self):
         super(DetailWindow, self).display()
 
-        # Display video detail
         if self.video:
             self.printstr(self.video.detail)
 
-            # Display streams only if toggled
-            if self.streams:
-                self.printstr('')
-                self.printstr('Streams:')
-                for i, stream in enumerate(self.video.allstreams):
-                    self.printstr('{}: {} {} {} {} {}'.format(i,
-                                  stream.mediatype,
-                                  stream.quality,
-                                  stream.extension,
-                                  stream.notes,
-                                  stream.bitrate or ''))
         self.freshen()
 
 
@@ -595,26 +583,18 @@ class Panel(object):
                   or self.cache.videos is self.cache.files:
                     key = list(self.cache.videos)[v_index]
                     path = self.cache.videos[key].path
-                    self.console.printstr('Playing {}'.format(path))
-                    try:
-                        subprocess.call(
-                            ['mplayer', "{}".format(path)],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-                    except AttributeError:
-                        self.console.printstr("Can't play, Python2?")
-
-    def streams(self):
-        self.detail.streams = not self.detail.streams
-
-        if self.detail.video:
-            if self.detail.streams:
-                self.console.printstr(
-                    'Press one of the numbers above to download (0-{})'
-                    .format(len(self.detail.video.allstreams)-1))
-        else:
-            self.console.printstr('No video to show streams, Inquire first',
-                                  error=True)
+                    if not os.path.exists(path):
+                        self.console.printstr('File no longer exists {}'.format(
+                            path), error=True)
+                    else:
+                        self.console.printstr('Playing {}'.format(path))
+                        try:
+                            subprocess.call(
+                                ['mplayer', "{}".format(path)],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+                        except AttributeError:
+                            self.console.printstr("Can't play, Python2?")
 
     def cancel(self):
         """ Cancel last spawned thread """
@@ -697,7 +677,6 @@ def key_loop(stdscr, panel):
     KEYS_NUMERIC  = range(48, 58)
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
-    KEYS_STREAMS  = (ord('s'), ord('S'))
     KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
@@ -732,9 +711,6 @@ def key_loop(stdscr, panel):
 
         if c in KEYS_ACTION:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
-
-        if c in KEYS_STREAMS:
-            panel.streams()
 
         if c in KEYS_CACHE:
             panel.view(c)
@@ -778,7 +754,6 @@ def init(stdscr, loop, video, stream, target):
     # Menu options at bottom
     menu_options = (
         ('I', 'inquire'),
-        ('S', 'streams'),
         ('arrows', 'cache'),
         ('L', 'load cache'),
         ('C', 'save cache'),
