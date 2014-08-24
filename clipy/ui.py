@@ -155,7 +155,7 @@ class VideoDetail(object):
                     self.info_map.get(name, name))))
 
     def __str__(self):
-        return '> {duration}  {title}  {path}'.format(
+        return 'V> {duration}  {title}  {path}'.format(
             duration=self.duration, title=self.title, path=self.path)
 
     @property
@@ -184,7 +184,7 @@ Streams: {}
         #     f.write(output)
 
 
-class Stream(VideoDetail):
+class Stream(object ):
     """Video stream """
     active = False
     status = None
@@ -194,8 +194,15 @@ class Stream(VideoDetail):
         self.path = path
         self.name = name
 
+    def __getattr__(self, name):
+        """
+        Check if our attribute exists for the object, otherwise return the
+        corresponding entry from our 'stream'.
+        """
+        return self.__dict__.get(name, self.stream.get(name))
+
     def __str__(self):
-        return '{} {}'.format(self.status, self.name or self.stream.title)
+        return 'S> {} {}'.format(self.status, self.name or self.stream.title)
 
     def activate(self):
         self.active = True
@@ -624,8 +631,7 @@ class Panel(object):
         if self.cache.actives:
             last_key = list(self.cache.actives).pop()
             cprint('Cancelling most recent active download: {}'.format(last_key))
-            stream = self.cache.actives[last_key]
-            stream.cancel(cprint)
+            del self.cache.actives[last_key]
         else:
             cprint('Nothing to cancel')
 
@@ -633,8 +639,12 @@ class Panel(object):
     def download(self, video, index=None):
         cprint = self.console.printstr
         target_dir = os.path.expanduser(self.target)
+        if video is None:
+            cprint('No video to download, Inquire first', error=True)
+            return
 
-        def progress(url, total, *progress_stats):
+        def progress_poll(url, total, *progress_stats):
+            """" The downloader will poll this after each chunk """
             # Build status string
             status_string = (
                 '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  ')
@@ -653,46 +663,43 @@ class Panel(object):
             self.update()
 
         def active_poll(url):
-            if url in self.cache.actives:
-                return self.cache.actives[url].active
+            """" The downloader will poll this after each chunk """
+            return url in self.cache.actives
 
-        if video is None:
-            cprint('No video to download, Inquire first', error=True)
-            return
+        # get the stream we want
+        stream = video.stream = Stream(video.streams[index or 0])
 
-        _stream = video.stream = video.streams[index or 0]
-
-        name = '{}-({}).{}'.format(
-            self.detail.video.title, _stream['resolution'], _stream['extension']
+        # think of a good name
+        stream.name = '{}-({}).{}'.format(
+            video.title, stream.resolution, stream.extension
             ).replace('/', '|')
+        stream.path = os.path.join(target_dir, stream.name)
 
-        _path = os.path.join(target_dir, name)
+        cprint('Downloading {}'.format(stream.path))
 
-        cprint('Downloading {}'.format(_path))
-
-        self.cache.actives[_stream['url']] = Stream(_stream, _path, name)
-        self.cache.actives[_stream['url']].activate()
+        # add to actives list
+        self.cache.actives[stream.url] = stream
 
         # here is the magic goodness
         _success, _length = yield from clipy.request.download(
-            _stream['url'],
-            path=_path,
-            active_poll=functools.partial(active_poll, _stream['url']),
-            progress_callback=progress,
+            stream.url,
+            path=stream.path,
+            active_poll=functools.partial(active_poll, stream.url),
+            progress_callback=progress_poll,
         )
         # and here we start our inline that would "normally" be in a callback
 
         # Add to downloaded list
         if _success:
-            self.cache.downloads[_stream['url']] = Stream(_stream, _path)
+            self.cache.downloads[stream.url] = stream
 
-        # Check if thread not already cancel'd
-        if _stream['url'] in self.cache.actives:
-            del self.cache.actives[_stream['url']]
+        # Remove from actives list if not already cencelled
+        if stream.url in self.cache.actives:
+            del self.cache.actives[stream.url]
 
         # Update screen to show the active download is no longer active
         self.cache.display()
-        cprint('Perhaps {} bytes were saved to {}'.format(_length, _path))
+        cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
 
 
 def key_loop(stdscr, panel):
