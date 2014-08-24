@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.12'
+VERSION = '0.9.13'
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -186,7 +186,6 @@ Streams: {}
 
 class Stream(object ):
     """Video stream """
-    active = False
     status = None
 
     def __init__(self, stream, path=None, name=None):
@@ -203,14 +202,6 @@ class Stream(object ):
 
     def __str__(self):
         return 'S> {} {}'.format(self.status, self.name or self.stream.title)
-
-    def activate(self):
-        self.active = True
-
-    def cancel(self, logger=None):
-        self.active = False
-        if logger:
-            logger('Cancelled {}'.format(self.path))
 
 
 class File(object):
