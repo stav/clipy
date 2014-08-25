@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.14'
+VERSION = '0.9.15'
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -98,36 +98,34 @@ class VideoDetail(object):
                 self.info.get('url_encoded_fmt_stream_map', ())).split(',')
 
             # then we zip/map the values into our streams list
-            self.streams = [{k: clipy.utils.take_first(v)
+            streams = [{k: clipy.utils.take_first(v)
                 for k, v in sdic.items()}
                 for sdic in [urllib.parse.parse_qs(mapp)
                 for mapp in stream_map]]
 
             # now add in our new fields
-            for stream in self.streams:
+            self.streams = []
+            for stream in streams:
 
                 itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
 
-                display = '{} ({}) {}'.format(
-                    ', '.join(itags),
-                    stream.get('quality', 'unknown'),
-                    stream.get('type', ''))
-
                 stream.update(dict(
-                    display=display,
                     resolution=itags[0]),
                     extension=itags[1],
+                    title=self.info.get('title', '<NOTITLE>'),
                 )
+                self.streams.append(Stream(stream))
 
-            # from pprint import pformat
-            # info = pformat(self.info)
-            # strm = pformat(self.streams)
-            # with open('INIT', 'w') as f:
-            #     f.write('data: '); f.write(data); f.write('\n\n')
-            #     f.write('info: '); f.write(info); f.write('\n\n')
-            #     f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
-            #     f.write('strm: '); f.write(strm); f.write('\n\n')
-            #     f.write('------------------------------------\n\n')
+                # from pprint import pformat
+                # # info = pformat(self.info)
+                # # strm = pformat(self.streams)
+                # strm = pformat([str(s) for s in self.streams])
+                # with open('INIT', 'a') as f:
+                #     # f.write('data: '); f.write(data); f.write('\n\n')
+                #     # f.write('info: '); f.write(info); f.write('\n\n')
+                #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
+                #     f.write('strm: '); f.write(strm); f.write('\n\n')
+                #     f.write('------------------------------------\n\n')
 
     def __getattr__(self, name):
         """
@@ -178,20 +176,23 @@ Streams: {}
             clipy.utils.take_first(self.info['length_seconds']),
             clipy.utils.take_first(self.info['view_count']),
             len(self.streams),
-            '\n* '.join([stream['display'] for stream in self.streams]),
+            '\n* '.join([stream.display for stream in self.streams]),
         )
         # with open('qs', 'w') as f:
         #     f.write(output)
 
 
-class Stream(object ):
+class Stream(object):
     """Video stream """
-    status = None
+    name = None
+    path = None
+    itags = []
+    stream = None
+    status = ''
 
-    def __init__(self, stream, path=None, name=None):
+    def __init__(self, stream):
         self.stream = stream
-        self.path = path
-        self.name = name
+        self.itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
 
     def __getattr__(self, name):
         """
@@ -201,7 +202,23 @@ class Stream(object ):
         return self.__dict__.get(name, self.stream.get(name))
 
     def __str__(self):
-        return 'S> {} {}'.format(self.status, self.name or self.stream.title)
+        # from pprint import pformat
+        # # info = pformat(self.info)
+        # strm = pformat(self.stream)
+        # with open('Stream.__str__', 'a') as f:
+        #     # f.write('data: '); f.write(data); f.write('\n\n')
+        #     # f.write('info: '); f.write(info); f.write('\n\n')
+        #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
+        #     f.write('strm: '); f.write(strm); f.write('\n\n')
+        #     f.write('------------------------------------\n\n')
+
+        return 'S> {} {}'.format(self.status, self.display or self.name or self.title)
+
+    @property
+    def display(self):
+        return '{} ({}) {}'.format(', '.join(self.itags),
+                                   self.stream.get('quality', 'unknown'),
+                                   self.stream.get('type', ''))
 
 
 class File(object):
@@ -285,19 +302,18 @@ class DetailWindow(Window):
     Window with video info
     """
     video = None
-    stream = None
-    streams = False
 
     def reset(self):
         self.video = None
-        self.stream = None
-        self.streams = False
 
     def display(self):
         super(DetailWindow, self).display()
 
         if self.video:
             self.printstr(self.video.detail)
+            self.panel.cache.streams.clear()
+            for stream in self.video.streams:
+                self.panel.cache.streams[stream.url] = stream
 
         self.freshen()
 
@@ -319,12 +335,13 @@ class ListWindow(Window):
 
     index = 0
     caches = ()
-    lookups = downloads = files = threads = actives = None
+    searches= lookups = streams = downloads = files = threads = actives = None
     videos = None   # mis-named as videos, s/b cache or something
 
     def reset(self):
         (self.searches,
          self.lookups,
+         self.streams,
          self.downloads,
          self.files,
          self.threads,
@@ -332,6 +349,7 @@ class ListWindow(Window):
         ) = self.caches = (
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
+            self.CacheList('Streams'),
             self.CacheList('Downloaded'),
             self.CacheList('Files', self.panel.target),
             self.CacheList('Threads'),
@@ -638,7 +656,7 @@ class Panel(object):
             return url in self.cache.actives
 
         # get the stream we want
-        stream = video.stream = Stream(video.streams[index or 0])
+        stream = video.stream = video.streams[index or 0]
 
         # think of a good name
         stream.name = '{}-({}).{}'.format(
@@ -774,9 +792,9 @@ def init(stdscr, loop, video, stream, target):
     control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
-    detail.video = video
-    detail.stream = Stream(stream)
-    control_panel.target = target
+    # detail.video = video
+    # detail.stream = Stream(stream)
+    # control_panel.target = target
 
     # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
@@ -785,7 +803,10 @@ def init(stdscr, loop, video, stream, target):
 
 def main(video=None, stream=None, target=None):
     """
-    Single entry point
+    Single entry point to run two event loops:
+
+    1. Python `asyncio` event loop
+    2. Curses wrapper runs init in another thread which in-turn runs `key_loop`
     """
     # Python event loop
     loop = asyncio.get_event_loop()

@@ -1,0 +1,783 @@
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?ip=189.132.144.35&ratebypass=yes&ipbits=0&fexp=902408%2C914048%2C924613%2C927622%2C931983%2C934024%2C934030%2C939958%2C945118%2C945247%2C946023&id=o-ADlYyTxhDY16DYZIUAdEVK6vARO2yd70B9-JbM5pGEjX&expire=1408944832&mt=1408923177&signature=125A62D73EDBC73AB60963051CF8F5C1175EBC3C.511FC5E2BD551E6C7D15698AC60E0F675012558F&mm=31&upn=C2VAUmj_Blw&key=yt5&itag=22&source=youtube&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&mv=m&initcwndbps=274000&ms=au&sver=3'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '1280x720, mp4, normal (hd720) video/mp4; codecs="avc1.64001F, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v17.cache7.googlevideo.com',
+ 'itag': '22',
+ 'quality': 'hd720',
+ 'resolution': '1280x720',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.64001F, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=22&signature=C47A9641132C4489C1B143D4F55CF7323DAEAA2B.B4ABF42F5DCE0A09E607B8533AC3D5A901F2451A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, webm, normal (medium) video/webm; codecs="vp8.0, '
+            'vorbis"',
+ 'extension': 'webm',
+ 'fallback_host': 'tc.v24.cache5.googlevideo.com',
+ 'itag': '43',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/webm; codecs="vp8.0, vorbis"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=43&signature=4AC3E6075E4EE6C8E4B8316A9931B849D30D3847.B990ABF223CE1482514121312C9A9D7FA1A12B16&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '640x360, mp4, normal (medium) video/mp4; codecs="avc1.42001E, '
+            'mp4a.40.2"',
+ 'extension': 'mp4',
+ 'fallback_host': 'tc.v10.cache4.googlevideo.com',
+ 'itag': '18',
+ 'quality': 'medium',
+ 'resolution': '640x360',
+ 'title': '',
+ 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&ratebypass=yes&ipbits=0&itag=18&signature=AD9BAA10A5F429D9EE83C0497778E801B7E4A82F.54BC603F60D9C71947B8A4F46E8AAB42718B8133&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, flv, normal (small) video/x-flv',
+ 'extension': 'flv',
+ 'fallback_host': 'tc.v22.cache7.googlevideo.com',
+ 'itag': '5',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/x-flv',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=5&signature=73F352A807D939824011F1D887137150FD9FF08A.45A29385C699D63378FA009A59ABBA46FC10450C&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '320x240, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v13.cache5.googlevideo.com',
+ 'itag': '36',
+ 'quality': 'small',
+ 'resolution': '320x240',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=36&signature=3D74734EE4A94BCD0D83C2AEE2A6F86C849F9A9B.562A08F2AF5F21050A11CE1834F987A1315D904A&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
+strm: {'display': '176x144, 3gp, normal (small) video/3gpp; codecs="mp4v.20.3, '
+            'mp4a.40.2"',
+ 'extension': '3gp',
+ 'fallback_host': 'tc.v10.cache3.googlevideo.com',
+ 'itag': '17',
+ 'quality': 'small',
+ 'resolution': '176x144',
+ 'title': '',
+ 'type': 'video/3gpp; codecs="mp4v.20.3, mp4a.40.2"',
+ 'url': 'http://r8---sn-0opoxu-2cjd.googlevideo.com/videoplayback?initcwndbps=273000&ip=189.132.144.35&mm=31&source=youtube&mv=m&mt=1408923337&ms=au&id=o-ALDSDy6Q3A3kwl7BSNmZ79D8ZT5uzfK_WggnKYW-9SsQ&sver=3&expire=1408944961&key=yt5&upn=3o1upbUvI8s&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Csource%2Cupn%2Cexpire&ipbits=0&itag=17&signature=B967C9DD51F46BFBA17B0CF163EB9E5517DF4189.DE9D3A0694AC9FF839912E833EFE2309CD001D6B&fexp=902408%2C927622%2C931983%2C934024%2C934030%2C936217%2C937821%2C939936%2C939937%2C942901%2C945005%2C945066%2C946022%2C952700'}
+
+------------------------------------
+
