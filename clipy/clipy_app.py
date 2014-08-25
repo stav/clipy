@@ -17,7 +17,7 @@ import pafy
 # import clipy.request - lazy import
 # import clipy.ui - lazy import
 
-VERSION = '0.8'
+VERSION = '0.9'
 
 
 def _get_commandline_options():

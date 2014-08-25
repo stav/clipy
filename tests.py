@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import curses
+import asyncio
 import unittest
 import pyperclip
 import clipy.ui
@@ -48,6 +49,35 @@ class ClipyUITest(unittest.TestCase):
         self.assertIs(self.panel.detail.streams, False)
         self.panel.streams()
         self.assertIs(self.panel.detail.streams, True)
+
+
+class ClipyAsyncTest(unittest.TestCase):
+
+    def setUp(self):
+        asyncio.get_event_loop().set_debug(True)
+
+    def test_primera(self):
+        self.assertIs(asyncio.get_event_loop().get_debug(), True)
+
+    def test_coroutine(self):
+        @asyncio.coroutine
+        def print_and_repeat():
+            return 'asdf'
+
+        loop = asyncio.get_event_loop()
+        result = yield from print_and_repeat()
+        # loop.call_soon(print_and_repeat)
+        asdf
+
+        # # future = asyncio.Future()
+        # # loop.create_task(print_and_repeat(future))
+
+        # try:
+        #     loop.run_until_complete(print_and_repeat())
+        # finally:
+        #     loop.close()
+
+        # self.assertEqual(result, 'qwer')
 
 
 if __name__ == '__main__':

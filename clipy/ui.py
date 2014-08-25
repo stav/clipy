@@ -6,68 +6,244 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import re
 import curses
+import urllib
+import asyncio
 import functools
-import subprocess
 import threading
-# import urllib.request - lazy import
+import subprocess
+import collections
 
-from collections import OrderedDict
-
-# import lxml
-import pafy
 import pyperclip
-# import requests
 
-try:
-    import clipy.request
-    clipy_request_download = clipy.request.download
-except ImportError:
-    from request import download as clipy_request_download
+import clipy.utils
+import clipy.request
+
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.8.4'
+VERSION = '0.9.15'
+
+# Borrowed from Pafy https://github.com/np1/pafy
+ITAGS = {
+    '5': ('320x240', 'flv', "normal", ''),
+    '17': ('176x144', '3gp', "normal", ''),
+    '18': ('640x360', 'mp4', "normal", ''),
+    '22': ('1280x720', 'mp4', "normal", ''),
+    '34': ('640x360', 'flv', "normal", ''),
+    '35': ('854x480', 'flv', "normal", ''),
+    '36': ('320x240', '3gp', "normal", ''),
+    '37': ('1920x1080', 'mp4', "normal", ''),
+    '38': ('4096x3072', 'mp4', "normal", '4:3 hi-res'),
+    '43': ('640x360', 'webm', "normal", ''),
+    '44': ('854x480', 'webm', "normal", ''),
+    '45': ('1280x720', 'webm', "normal", ''),
+    '46': ('1920x1080', 'webm', "normal", ''),
+
+    # '59': ('1x1', 'mp4', 'normal', ''),
+    # '78': ('1x1', 'mp4', 'normal', ''),
+
+    '82': ('640x360-3D', 'mp4', "normal", ''),
+    '83': ('640x480-3D', 'mp4', 'normal', ''),
+    '84': ('1280x720-3D', 'mp4', "normal", ''),
+    '100': ('640x360-3D', 'webm', "normal", ''),
+    '102': ('1280x720-3D', 'webm', "normal", ''),
+    '133': ('426x240', 'm4v', 'video', ''),
+    '134': ('640x360', 'm4v', 'video', ''),
+    '135': ('854x480', 'm4v', 'video', ''),
+    '136': ('1280x720', 'm4v', 'video', ''),
+    '137': ('1920x1080', 'm4v', 'video', ''),
+    '138': ('4096x3072', 'm4v', 'video', ''),
+    '139': ('48k', 'm4a', 'audio', ''),
+    '140': ('128k', 'm4a', 'audio', ''),
+    '141': ('256k', 'm4a', 'audio', ''),
+    '160': ('256x144', 'm4v', 'video', ''),
+    '167': ('640x480', 'webm', 'video', ''),
+    '168': ('854x480', 'webm', 'video', ''),
+    '169': ('1280x720', 'webm', 'video', ''),
+    '170': ('1920x1080', 'webm', 'video', ''),
+    '171': ('128k', 'ogg', 'audio', ''),
+    '172': ('192k', 'ogg', 'audio', ''),
+    '218': ('854x480', 'webm', 'video', 'VP8'),
+    '219': ('854x480', 'webm', 'video', 'VP8'),
+    '242': ('360x240', 'webm', 'video', 'VP9'),
+    '243': ('480x360', 'webm', 'video', 'VP9'),
+    '244': ('640x480', 'webm', 'video', 'VP9'),
+    '245': ('640x480', 'webm', 'video', 'VP9'),
+    '246': ('640x480', 'webm', 'video', 'VP9'),
+    '247': ('720x480', 'webm', 'video', 'VP9'),
+    '248': ('1920x1080', 'webm', 'video', 'VP9'),
+    '256': ('192k', 'm4a', 'audio', '6-channel'),
+    '258': ('320k', 'm4a', 'audio', '6-channel'),
+    '264': ('2560x1440', 'm4v', 'video', ''),
+    '271': ('1920x1280', 'webm', 'video', 'VP9'),
+    '272': ('3414x1080', 'webm', 'video', 'VP9')
+}
 
 
-class Video(object):
-    """Pafy video encapsulation"""
-    def __init__(self, video):
-        self.video = video
+class VideoDetail(object):
+    info = dict()
+    stream = None
+    streams =list()
+    info_map = dict(
+        videoid='video_id',
+        duration='length_seconds',
+    )
+
+    def __init__(self, data=None):
+        if data is not None:
+            # data is url querystring format, so we need to parse it
+            self.info = urllib.parse.parse_qs(data)
+
+            # first we split the mapping on the commas
+            stream_map = clipy.utils.take_first(
+                self.info.get('url_encoded_fmt_stream_map', ())).split(',')
+
+            # then we zip/map the values into our streams list
+            streams = [{k: clipy.utils.take_first(v)
+                for k, v in sdic.items()}
+                for sdic in [urllib.parse.parse_qs(mapp)
+                for mapp in stream_map]]
+
+            # now add in our new fields
+            self.streams = []
+            for stream in streams:
+
+                itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
+
+                stream.update(dict(
+                    resolution=itags[0]),
+                    extension=itags[1],
+                    title=self.info.get('title', '<NOTITLE>'),
+                )
+                self.streams.append(Stream(stream))
+
+                # from pprint import pformat
+                # # info = pformat(self.info)
+                # # strm = pformat(self.streams)
+                # strm = pformat([str(s) for s in self.streams])
+                # with open('INIT', 'a') as f:
+                #     # f.write('data: '); f.write(data); f.write('\n\n')
+                #     # f.write('info: '); f.write(info); f.write('\n\n')
+                #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
+                #     f.write('strm: '); f.write(strm); f.write('\n\n')
+                #     f.write('------------------------------------\n\n')
+
+    def __getattr__(self, name):
+        """
+        Check if our attribute exists for the object, otherwise return the
+        corresponding entry from our 'info'.
+        """
+        # from pprint import pformat
+        # print('!!!!!!!!!', name)
+        # # import pdb; pdb.set_trace()
+        # sdict = pformat(self.__dict__)
+        # dname = self.__dict__.get(name, '?.')
+        # mname = self.info_map.get(name, name)
+        # ninfo = self.info.get(mname)
+        # finfo = clipy.utils.take_first(ninfo)
+        # with open('getattr.{}'.format(name), 'w') as f:
+        #     f.write('name:  '); f.write(     name ); f.write('\n\n')
+        #     f.write('dict:  '); f.write(    sdict ); f.write('\n\n')
+        #     f.write('dname: '); f.write(    dname ); f.write('\n\n')
+        #     f.write('mname: '); f.write(    mname ); f.write('\n\n')
+        #     f.write('ninfo: '); f.write(str(ninfo)); f.write('\n\n')
+        #     f.write('finfo: '); f.write(    finfo ); f.write('\n\n')
+        return self.__dict__.get(name,
+            clipy.utils.take_first(
+               self.info.get(
+                    self.info_map.get(name, name))))
 
     def __str__(self):
-        return '{dur}  {title}'.format(
-            dur=self.video.duration, title=self.video.title)
+        return 'V> {duration}  {title}  {path}'.format(
+            duration=self.duration, title=self.title, path=self.path)
+
+    @property
+    def detail(self):
+        # import pprint
+        # p = pprint.pformat(self.info)
+        return '''
+Id:     {}
+Title:  {}
+Author: {}
+Length: {} seconds
+Views:  {}
+
+Streams: {}
+* {}
+        '''.format(
+            clipy.utils.take_first(self.info['video_id']),
+            clipy.utils.take_first(self.info['title']),
+            clipy.utils.take_first(self.info['author']),
+            clipy.utils.take_first(self.info['length_seconds']),
+            clipy.utils.take_first(self.info['view_count']),
+            len(self.streams),
+            '\n* '.join([stream.display for stream in self.streams]),
+        )
+        # with open('qs', 'w') as f:
+        #     f.write(output)
 
 
 class Stream(object):
-    """Pafy stream encapsulation"""
-    def __init__(self, stream, filename):
+    """Video stream """
+    name = None
+    path = None
+    itags = []
+    stream = None
+    status = ''
+
+    def __init__(self, stream):
         self.stream = stream
-        self.filename = filename
+        self.itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
+
+    def __getattr__(self, name):
+        """
+        Check if our attribute exists for the object, otherwise return the
+        corresponding entry from our 'stream'.
+        """
+        return self.__dict__.get(name, self.stream.get(name))
 
     def __str__(self):
-        return str(self.filename)
+        # from pprint import pformat
+        # # info = pformat(self.info)
+        # strm = pformat(self.stream)
+        # with open('Stream.__str__', 'a') as f:
+        #     # f.write('data: '); f.write(data); f.write('\n\n')
+        #     # f.write('info: '); f.write(info); f.write('\n\n')
+        #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
+        #     f.write('strm: '); f.write(strm); f.write('\n\n')
+        #     f.write('------------------------------------\n\n')
+
+        return 'S> {} {}'.format(self.status, self.display or self.name or self.title)
+
+    @property
+    def display(self):
+        return '{} ({}) {}'.format(', '.join(self.itags),
+                                   self.stream.get('quality', 'unknown'),
+                                   self.stream.get('type', ''))
 
 
 class File(object):
     """file encapsulation"""
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
 
     def __str__(self):
-        return str(self.filename)
+        return str(self.name)
 
 
 class Thread(object):
     """thread encapsulation"""
-    status = None
-
-    def __init__(self, thread, stream):
-        self.stream = stream
+    def __init__(self, thread):
         self.thread = thread
         self.name = thread.name
 
     def __str__(self):
-        return str('{} {}'.format(self.name, self.status))
+        return str('{}: ident {}, {}'.format(
+            self.name,
+            self.thread.ident,
+            'Alive' if self.thread.is_alive() else 'Dead',
+            'Daemon' if self.thread.daemon else '',
+        ))
 
 
 class Window(object):
@@ -126,32 +302,19 @@ class DetailWindow(Window):
     Window with video info
     """
     video = None
-    stream = None
-    streams = False
 
     def reset(self):
         self.video = None
-        self.stream = None
-        self.streams = False
 
     def display(self):
         super(DetailWindow, self).display()
 
-        # Display video detail
         if self.video:
-            self.printstr(self.video)
+            self.printstr(self.video.detail)
+            self.panel.cache.streams.clear()
+            for stream in self.video.streams:
+                self.panel.cache.streams[stream.url] = stream
 
-            # Display streams only if toggled
-            if self.streams:
-                self.printstr('')
-                self.printstr('Streams:')
-                for i, stream in enumerate(self.video.allstreams):
-                    self.printstr('{}: {} {} {} {} {}'.format(i,
-                                  stream.mediatype,
-                                  stream.quality,
-                                  stream.extension,
-                                  stream.notes,
-                                  stream.bitrate or ''))
         self.freshen()
 
 
@@ -159,35 +322,38 @@ class ListWindow(Window):
     """
     Window with cache storage and list capabilities
     """
-    class CacheList(OrderedDict):
+    class CacheList(collections.OrderedDict):
         """An ordered dictionary of videos"""
-        def __init__(self, name, title=None):
+        def __init__(self, name, title=''):
             super(self.__class__, self).__init__()
-            # OrderedDict.__init__(self)
             self.index = None
             self.name = name
-            self.title = title if title else name
+            self.title = title
 
-    class CacheItem():
-        pass
+        def __str__(self):
+            return '{}: {} {}'.format(self.name, len(self), self.title)
 
     index = 0
     caches = ()
-    lookups = downloads = files = threads = None
+    searches= lookups = streams = downloads = files = threads = actives = None
     videos = None   # mis-named as videos, s/b cache or something
 
     def reset(self):
         (self.searches,
          self.lookups,
+         self.streams,
          self.downloads,
          self.files,
          self.threads,
+         self.actives,
         ) = self.caches = (
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
+            self.CacheList('Streams'),
             self.CacheList('Downloaded'),
-            self.CacheList('Files', 'Files: {}'.format(self.panel.target)),
+            self.CacheList('Files', self.panel.target),
             self.CacheList('Threads'),
+            self.CacheList('Active'),
         )
         self.index = 0
         self.videos = self.caches[self.index]
@@ -201,12 +367,17 @@ class ListWindow(Window):
         # Files: manually build the files list here real-time
         if self.videos is self.files:
             self.files.clear()
-            # self.panel.console.printstr(self.videos)
             target_dir = os.path.expanduser(self.panel.target)
             for filename in sorted(os.listdir(target_dir)):
                 path = os.path.join(target_dir, filename)
                 if os.path.isfile(path) and not filename.startswith('.'):
-                    self.files[path] = File(path)
+                    self.files[path] = File(filename, path)
+
+        # Threads: manually build the threads list here real-time
+        if self.videos is self.threads:
+            self.threads.clear()
+            for thread in threading.enumerate():
+                self.threads[thread.name] = Thread(thread)
 
         # Header: Display list of caches
         for i, cache in enumerate(self.caches):
@@ -214,49 +385,21 @@ class ListWindow(Window):
             self.win.addstr(' {} '.format(cache.name.upper()), attr)
 
         # Rows: Display selected cache detail
-        title = self.videos.title
-        if self.videos is self.threads:
-            title = '{}: {}'.format(
-                self.videos.title, threading.active_count() - 1)
-        self.win.addstr(2, 2, title)
+        self.win.addstr(2, 2, str(self.videos))
         for i, key in enumerate(self.videos):
             video = self.videos[key]
             attr = curses.A_STANDOUT if i == self.videos.index else 0
             try:
                 self.win.addstr(3+i, 0, str(video), attr)
-            except Exception:
+            except Exception:  # Python 3 -> except:
                 break
 
         self.freshen()
 
+    @asyncio.coroutine
     def load_search(self, url):
-        # page = requests.get(resource)
-        # tree = html.fromstring(page.text)
-        # videos = tree.xpath('//div/@data-context-item-id')
-
-        # r = urllib2.Request(url='http://www.mysite.com')
-        # r.add_header('User-Agent', 'Clipy')
-        # # r.add_data(urllib.urlencode({'foo': 'bar'})
-        # response = urlopen(r)
-
-        try:
-            import urllib.request
-        except ImportError as ex:
-            self.panel.console.printstr('Cannot search: {}'.format(ex),
-                                        error=True)
-            return
-
         self.panel.console.printstr('Searching: {}'.format(url))
-
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) Python3 urllib / Clipy'
-        headers = {'User-Agent': user_agent}
-        request = urllib.request.Request(url, headers=headers)
-        # self.panel.console.printstr('Request: {}'.format(request))
-
-        response = urllib.request.urlopen(request)
-        html = str(response.read())
-        # self.panel.console.printstr('Response: {} {}'.format(len(html), response))
-
+        html = yield from clipy.request.get_text(url)
         videoids = re.findall('data-context-item-id="([^"]+)"', html)
         self.panel.console.printstr('Video Ids: {}'.format(videoids))
 
@@ -264,27 +407,38 @@ class ListWindow(Window):
             self.searches.clear()
             for videoid in videoids:
                 if videoid != '__video_id__':
-                    self.searches[videoid] = videoid
+                    video = yield from self.panel.get_video(videoid)
+                    if video:
+                        self.searches[videoid] = video
+                        self.display()
+                        self.panel.update()
 
     def load_lookups(self):
         """ Load file from disk into cache """
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
                 key, duration, title = line.split(None, 2)
-                video = self.CacheItem()
+
+                video = VideoDetail()
                 video.videoid = key
                 video.duration = duration
                 video.title = title.strip()
-                self.lookups[key] = Video(video)
+
+                self.lookups[key] = video
 
     def load_downloads(self):
         """ Load file from disk into cache """
         with open('clipy.downloads', 'r') as f:
             for line in f.readlines():
-                url, filename = line.split(None, 1)
-                stream = self.CacheItem()
+
+                url, path = line.split(None, 1)
+                path = path.strip()
+
+                stream = VideoDetail()
                 stream.url = url
-                self.downloads[url] = Stream(stream, filename.strip())
+                stream.path = path
+
+                self.downloads[url] = stream
 
 
 class Panel(object):
@@ -292,7 +446,8 @@ class Panel(object):
     testing = False
     target = '~'
 
-    def __init__(self, stdscr, detail, cache, console):
+    def __init__(self, loop, stdscr, detail, cache, console):
+        self.loop = loop
         self.stdscr = stdscr
         self.detail = detail
         self.cache = cache
@@ -334,7 +489,7 @@ class Panel(object):
         with open('clipy.lookups', 'w') as f:
             for key in self.cache.lookups:
                 cache = self.cache.lookups[key]
-                f.write('{} {}\n'.format(cache.video.videoid, cache))
+                f.write('{} {}\n'.format(cache.videoid, cache))
 
         with open('clipy.downloads', 'w') as f:
             for key in self.cache.downloads:
@@ -343,47 +498,46 @@ class Panel(object):
 
             self.console.printstr('Cache: saved')
 
+    @asyncio.coroutine
     def get_video(self, resource):
-        """ Create new Pafy video instance """
         try:
-            return pafy.new(resource)
-        except (OSError, ValueError) as ex:
+            data = yield from clipy.request.get_youtube_info(resource)
+        except ConnectionError as ex:
             self.console.printstr(ex, error=True)
+            return
+        if data is None:
+            self.console.printstr('No data returned', error=True)
+            return
 
-    def search(self):
-        searches = self.cache.searches
-        if searches:
-            self.console.printstr('Inquiring on all {} searches'.format(
-                len(searches)))
-            for videoid in searches:
-                video = self.get_video(videoid)
-                if video:
-                    searches[videoid] = Video(video)
-                    self.cache.display()
-                    self.panel.update()
-        else:
-            self.console.printstr('No recent searches found, paste search url')
+        return VideoDetail(data)
 
+    @asyncio.coroutine
     def inquire(self, resource=None):
-        # Check if we have a supplied resoure, else check the clipboard
+        video_id = None
+
         if resource is None:
             resource = pyperclip.paste().strip()
             self.console.printstr('Checking clipboard: {}'.format(resource))
 
-        # We may want to search
-        if 'youtube.com/results?search' in resource:
-            self.cache.load_search(resource)
-        # We can try to inquire at YouTube now
+        if len(resource) == 11:
+            video_id = resource
+        elif 'youtube.com/results?search' in resource:
+            yield from self.cache.load_search(resource)
+        elif 'youtube.com/watch' in resource:
+            video_id = re  # ToDo
         else:
-            self.console.printstr('Inquiring: {}'.format(resource))
-            video = self.get_video(resource)
-            if video:
-                self.detail.video = video
-                # If entry not in Lookups
-                if video.videoid not in self.cache.lookups:
-                    # Add entry to Lookups
-                    vid = video.videoid
-                    self.cache.lookups[vid] = Video(video)
+            self.console.printstr('Resource not valid: "{}"'.format(resource), error=True)
+
+        if video_id is None:
+            return
+
+        self.console.printstr('Inquiring: {}'.format(resource))
+        video = yield from self.get_video(resource)
+        if video:
+            self.detail.video = video
+            self.cache.lookups[video.videoid] = video
+
+        self.display()
 
     def wait_for_input(self):
         # self.cache.win.nodelay(False)
@@ -410,150 +564,144 @@ class Panel(object):
 
         # Intra-cache navigation
         else:
-            # Initialize cache
-            if self.cache.videos.index is None:
-                self.cache.videos.index = 0
             v_index = self.cache.videos.index
 
             # Move up the list
             if key == curses.KEY_UP:
-                if v_index > 0:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index > 0:
                     self.cache.videos.index -= 1
 
             # Move down the list
             elif key == curses.KEY_DOWN:
-                if v_index < len(self.cache.videos) - 1:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index < len(self.cache.videos) - 1:
                     self.cache.videos.index += 1
 
-            # Selected cache entry action
-            elif key == curses.KEY_ENTER or key == 10:
+    @asyncio.coroutine
+    def action(self):
+        v_index = self.cache.videos.index
+        # print(' View() v_index: {}'.format(v_index))
 
-                # Validate selected index
-                if v_index >= 0 and v_index < len(self.cache.videos):
+        if v_index is not None:
+            # Validate selected index
+            if v_index >= 0 and v_index < len(self.cache.videos):
 
-                    # Search / Lookups action
-                    if self.cache.videos is self.cache.searches or \
-                       self.cache.videos is self.cache.lookups:
-                        self.inquire(list(self.cache.videos)[v_index])
+                # Search / Lookups action
+                if self.cache.videos is self.cache.searches or \
+                   self.cache.videos is self.cache.lookups:
+                    # print(' View() list caches.videos: {}'.format(list(self.cache.videos)))
+                    # print(' View() index caches.videos: {}'.format(list(self.cache.videos)[v_index]))
+                    yield from self.inquire(list(self.cache.videos)[v_index])
 
-                    # Downloads action
-                    elif self.cache.videos is self.cache.downloads \
-                      or self.cache.videos is self.cache.files:
-                        key = list(self.cache.videos)[v_index]
-                        filename = self.cache.videos[key].filename
-                        self.console.printstr('Playing {}'.format(filename))
+                # Downloads action
+                elif self.cache.videos is self.cache.downloads \
+                  or self.cache.videos is self.cache.files:
+                    key = list(self.cache.videos)[v_index]
+                    path = self.cache.videos[key].path
+                    if not os.path.exists(path):
+                        self.console.printstr('File no longer exists {}'.format(
+                            path), error=True)
+                    else:
+                        self.console.printstr('Playing {}'.format(path))
                         try:
                             subprocess.call(
-                                ['mplayer', "{}".format(filename)],
+                                ['mplayer', "{}".format(path)],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
                         except AttributeError:
-                            self.console.printstr("Can't play, maybe Python2?")
-
-    def streams(self):
-        self.detail.streams = not self.detail.streams
-
-        if self.detail.video:
-            if self.detail.streams:
-                self.console.printstr(
-                    'Press one of the numbers above to download (0-{})'
-                    .format(len(self.detail.video.allstreams)-1))
-        else:
-            self.console.printstr('No video to show streams, Inquire first',
-                                  error=True)
+                            self.console.printstr("Can't play, Python2?")
 
     def cancel(self):
         """ Cancel last spawned thread """
         cprint = self.console.printstr
-
-        if self.cache.threads:
-            key = list(self.cache.threads).pop()
-            thread = self.cache.threads.pop(key)
-            stream = thread.stream
-            cprint('Canceling {} `{}`'.format(stream, stream.title))
-            if stream.cancel():
-                cprint('Canceled {} `{}`'.format(stream, stream.title))
-                self.detail.stream = None
+        if self.cache.actives:
+            last_key = list(self.cache.actives).pop()
+            cprint('Cancelling most recent active download: {}'.format(last_key))
+            del self.cache.actives[last_key]
         else:
             cprint('Nothing to cancel')
 
-    def progress(self, total, *progress_stats, **kw):
-        name = kw['name'] if 'name' in kw else None
-        # Build status string
-        status_string = ('{:,} Bytes [{:.2%}] received. Rate: [{:4.0f} '
-                         'KB/s].  ETA: [{:.0f} secs]  ')
-        status = status_string.format(*progress_stats)
-
-        # Update main screen status
-        self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
-        self.stdscr.noutrefresh()
-
-        # Update threads status
-        if name in self.cache.threads:  # may have been cancelled
-            self.cache.threads[name].status = status
-            self.cache.display()
-
-        # Commit screen changes
-        self.update()
-
-    def download(self, index=None):
+    @asyncio.coroutine
+    def download(self, video, index=None):
         cprint = self.console.printstr
-
-        def done_callback(stream, filename, success, name):
-            if success:
-                self.cache.downloads[stream.url] = Stream(stream, filename)
-            self.cache.display()
-            self.console.freshen()
-            self.update()
-            # Check if thread not already cancel'd
-            if name in self.cache.threads:
-                del self.cache.threads[name]
-
-        if self.detail.video is None:
+        target_dir = os.path.expanduser(self.target)
+        if video is None:
             cprint('No video to download, Inquire first', error=True)
             return
 
-        if index is None:
-            try:
-                self.detail.stream = self.detail.video.getbest(preftype="mp4")
-            except (OSError, ValueError) as e:
-                cprint(e, error=True)
-                return
-        else:
-            if index >= len(self.detail.video.allstreams):
-                cprint('Stream {} not available'.format(index), error=True)
-                return
-            self.detail.stream = self.detail.video.allstreams[index]
+        def progress_poll(url, total, *progress_stats):
+            """" The downloader will poll this after each chunk """
+            # Build status string
+            status_string = (
+                '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  ')
+            status = status_string.format(*progress_stats, total=total)
 
-        name = self.detail.video.videoid
+            # Update main screen status
+            self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
+            self.stdscr.noutrefresh()
 
-        t = threading.Thread(
-            name=name,
-            target=clipy_request_download,
-            args=(
-                self.detail.stream,
-                self.target,
-                self.console.printstr,
-                functools.partial(self.progress, name=name),
-                functools.partial(done_callback, name=name),
-            ))
-        self.cache.threads[name] = Thread(t, self.detail.stream)
-        t.daemon = True
-        t.start()
+            # Update actives status
+            if url in self.cache.actives:  # may have been cancelled
+                self.cache.actives[url].status = status
+                self.cache.display()
+
+            # Commit screen changes
+            self.update()
+
+        def active_poll(url):
+            """" The downloader will poll this after each chunk """
+            return url in self.cache.actives
+
+        # get the stream we want
+        stream = video.stream = video.streams[index or 0]
+
+        # think of a good name
+        stream.name = '{}-({}).{}'.format(
+            video.title, stream.resolution, stream.extension
+            ).replace('/', '|')
+        stream.path = os.path.join(target_dir, stream.name)
+
+        cprint('Downloading {}'.format(stream.path))
+
+        # add to actives list
+        self.cache.actives[stream.url] = stream
+
+        # here is the magic goodness
+        _success, _length = yield from clipy.request.download(
+            stream.url,
+            path=stream.path,
+            active_poll=functools.partial(active_poll, stream.url),
+            progress_callback=progress_poll,
+        )
+        # and here we start our inline that would "normally" be in a callback
+
+        # Add to downloaded list
+        if _success:
+            self.cache.downloads[stream.url] = stream
+
+        # Remove from actives list if not already cencelled
+        if stream.url in self.cache.actives:
+            del self.cache.actives[stream.url]
+
+        # Update screen to show the active download is no longer active
+        self.cache.display()
+        cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
 
 
-def loop(stdscr, panel):
+def key_loop(stdscr, panel):
     KEYS_NUMERIC  = range(48, 58)
-    KEYS_CANCEL   = (ord('x'), ord('X'))
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
-    KEYS_SEARCH   = (ord('s'), ord('S'))
     KEYS_HELP     = (ord('h'), ord('H'))
-    KEYS_STREAMS  = (ord('v'), ord('V'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
+    KEYS_CANCEL   = (ord('X'),)
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
-        curses.KEY_UP, curses.KEY_DOWN, curses.KEY_ENTER, 10)  # 10 is enter
+                     curses.KEY_UP, curses.KEY_DOWN)
+    KEYS_ACTION   = (curses.KEY_ENTER, 10)  # 10 is enter
 
     while True:
 
@@ -571,19 +719,19 @@ def loop(stdscr, panel):
             panel.reset()
 
         if c in KEYS_INQUIRE:
-            panel.inquire()
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire())
 
-        if c in KEYS_SEARCH:
-            panel.search()
+        # if c in KEYS_SEARCH:
+        #     panel.loop.call_soon_threadsafe(asyncio.async, panel.search())
 
-        if c in KEYS_STREAMS:
-            panel.streams()
+        if c in KEYS_DOWNLOAD:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(panel.detail.video))
+
+        if c in KEYS_ACTION:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
 
         if c in KEYS_CACHE:
             panel.view(c)
-
-        if c in KEYS_DOWNLOAD:
-            panel.download()
 
         if c in KEYS_NUMERIC:
             panel.download(c-48)
@@ -593,8 +741,12 @@ def loop(stdscr, panel):
 
         if c in KEYS_HELP:
             panel.console.printstr(
-                'HELP: Load cache (L), save cache (C) and reset (R) commands '
-                'are all upper case only.', wow=True)
+                'HELP: Load cache (L), save cache (C), reset (R) and cancel (X)'
+                ' commands are all upper case only.', wow=True)
+
+        # Debug
+        if c in (ord('Z'),):
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
 
         # Debug
         stdscr.addstr(
@@ -602,7 +754,7 @@ def loop(stdscr, panel):
             'c={}, t={}      '.format(c, threading.active_count()))
 
 
-def init(stdscr, video, stream, target):
+def init(stdscr, loop, video, stream, target):
 
     # Setup curses
     curses.curs_set(False)
@@ -620,8 +772,6 @@ def init(stdscr, video, stream, target):
     # Menu options at bottom
     menu_options = (
         ('I', 'inquire'),
-        ('S', 'search'),
-        ('V', 'streams'),
         ('arrows', 'cache'),
         ('L', 'load cache'),
         ('C', 'save cache'),
@@ -639,22 +789,31 @@ def init(stdscr, video, stream, target):
     detail  = DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
     cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
     console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
-    control_panel = Panel(stdscr, detail, cache, console)
+    control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
-    detail.video = video
-    detail.stream = stream
-    control_panel.target = target
+    # detail.video = video
+    # detail.stream = Stream(stream)
+    # control_panel.target = target
 
-    # Enter event loop
-    loop(stdscr, control_panel)
+    # Enter curses keyboard event loop
+    key_loop(stdscr, control_panel)
+    loop.call_soon_threadsafe(loop.stop)
 
 
 def main(video=None, stream=None, target=None):
     """
-    Single entry point
+    Single entry point to run two event loops:
+
+    1. Python `asyncio` event loop
+    2. Curses wrapper runs init in another thread which in-turn runs `key_loop`
     """
-    curses.wrapper(init, video, stream, target)
+    # Python event loop
+    loop = asyncio.get_event_loop()
+    loop.set_debug(True)
+    loop.run_in_executor(None, curses.wrapper, *(init, loop, video, stream, target))
+    loop.run_forever()
+    loop.close()
 
 if __name__ == '__main__':
     main()

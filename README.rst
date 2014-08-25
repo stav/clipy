@@ -3,14 +3,20 @@ clipy
 
 *Command Line Interface using Python for Youtube*
 
-Python command-line YouTube video downloader.
+Asynchronous Python command-line YouTube video downloader.
+
+This project was created so I could learn Python's `asyncio` library.
 
 Requirements
 ------------
 
+The following Python versions are supported:
+
+* Python 3.4
+
 The following third-party libraries are used:
 
-* Pafy (YouTube API)
+* aiohttp (asynchronous HTTP communication)
 * pyperclip (optional, uses Gtk to read the clipboard)
 
 Usage
@@ -29,9 +35,7 @@ User interface written with `curses` from the standard library:
 Notes
 -----
 
-Developed with Python 3 but should also work with Python 2.
-
 Only tested on Ubuntu Trusty and Mac Lion.
 
-Python for Windows does not contain the needed `curses` library, perhaps
-UniCurses can help.
+Python for Windows does not contain the needed `curses` library so the user
+interface will not work "out of the box", perhaps UniCurses can help.

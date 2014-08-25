@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='clipy',
-    version='0.8',
+    version='0.9',
     license='BSD',
     url='https://github.com/stav/clipy',
     download_url='https://github.com/stav/clipy/archive/master.zip',
@@ -16,12 +16,13 @@ setup(
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Topic :: Utilities',
     ],
     packages=['clipy'],
     package_data={"": ["CHANGELOG", "LICENSE", "README.rst"]},
-    install_requires=['Pafy', 'pyperclip'],
+    install_requires=['aiohttp', 'pyperclip'],
     #  dependency_links = [
     #     'http://github.com/gabrielgrant/django-ckeditor/tarball/master#egg=django-ckeditor-0.9.3',
     #     'git+https://github.com/np1/pafy.git@develop',
