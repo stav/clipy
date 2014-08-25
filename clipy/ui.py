@@ -20,7 +20,7 @@ import clipy.request
 
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.15'
+VERSION = '0.9.16'
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -37,10 +37,8 @@ ITAGS = {
     '44': ('854x480', 'webm', "normal", ''),
     '45': ('1280x720', 'webm', "normal", ''),
     '46': ('1920x1080', 'webm', "normal", ''),
-
-    # '59': ('1x1', 'mp4', 'normal', ''),
-    # '78': ('1x1', 'mp4', 'normal', ''),
-
+  # '59': ('1x1', 'mp4', 'normal', ''),
+  # '78': ('1x1', 'mp4', 'normal', ''),
     '82': ('640x360-3D', 'mp4', "normal", ''),
     '83': ('640x480-3D', 'mp4', 'normal', ''),
     '84': ('1280x720-3D', 'mp4', "normal", ''),
@@ -596,6 +594,10 @@ class Panel(object):
                     # print(' View() index caches.videos: {}'.format(list(self.cache.videos)[v_index]))
                     yield from self.inquire(list(self.cache.videos)[v_index])
 
+                # Streams action
+                elif self.cache.videos is self.cache.streams:
+                    yield from self.download(self.detail.video, v_index)
+
                 # Downloads action
                 elif self.cache.videos is self.cache.downloads \
                   or self.cache.videos is self.cache.files:
@@ -692,7 +694,6 @@ class Panel(object):
 
 
 def key_loop(stdscr, panel):
-    KEYS_NUMERIC  = range(48, 58)
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
     KEYS_INQUIRE  = (ord('i'), ord('I'))
     KEYS_HELP     = (ord('h'), ord('H'))
@@ -721,9 +722,6 @@ def key_loop(stdscr, panel):
         if c in KEYS_INQUIRE:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire())
 
-        # if c in KEYS_SEARCH:
-        #     panel.loop.call_soon_threadsafe(asyncio.async, panel.search())
-
         if c in KEYS_DOWNLOAD:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.download(panel.detail.video))
 
@@ -732,9 +730,6 @@ def key_loop(stdscr, panel):
 
         if c in KEYS_CACHE:
             panel.view(c)
-
-        if c in KEYS_NUMERIC:
-            panel.download(c-48)
 
         if c in KEYS_CANCEL:
             panel.cancel()
