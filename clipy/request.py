@@ -50,9 +50,6 @@ def download(url,
 def fetch(url, **kw):
     try:
         response = yield from aiohttp.request('GET', url, **kw)
-        # loop = asyncio.get_event_loop()
-        # loop.call_soon_threadsafe(asyncio.wait_for(aiohttp.request('GET', url, **kw), 5.0))
-        # response = yield from asyncio.wait_for(aiohttp.request('GET', url, **kw), 5.0)
 
     except aiohttp.errors.OsConnectionError as ex:
         raise ConnectionError from ex
@@ -105,4 +102,3 @@ def get_youtube_info(resource):
         return data
     else:
         raise ConnectionError('Invalid video Id "{}" {}'.format(resource, info))
-

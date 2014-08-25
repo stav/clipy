@@ -22,9 +22,13 @@ The following third-party libraries are used:
 Usage
 -----
 
-Command line::
+Download::
 
     clipy -d http://www.youtube.com/watch?v=fm78gjYkYKc
+
+User Interface::
+
+    clipy -u
 
 User interface written with `curses` from the standard library:
 

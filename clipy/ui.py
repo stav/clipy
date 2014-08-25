@@ -80,7 +80,7 @@ ITAGS = {
 class VideoDetail(object):
     info = dict()
     stream = None
-    streams =list()
+    streams = list()
     info_map = dict(
         videoid='video_id',
         duration='length_seconds',
@@ -97,9 +97,9 @@ class VideoDetail(object):
 
             # then we zip/map the values into our streams list
             streams = [{k: clipy.utils.take_first(v)
-                for k, v in sdic.items()}
-                for sdic in [urllib.parse.parse_qs(mapp)
-                for mapp in stream_map]]
+                       for k, v in sdic.items()}
+                       for sdic in [urllib.parse.parse_qs(mapp)
+                       for mapp in stream_map]]
 
             # now add in our new fields
             self.streams = []
@@ -145,9 +145,10 @@ class VideoDetail(object):
         #     f.write('mname: '); f.write(    mname ); f.write('\n\n')
         #     f.write('ninfo: '); f.write(str(ninfo)); f.write('\n\n')
         #     f.write('finfo: '); f.write(    finfo ); f.write('\n\n')
-        return self.__dict__.get(name,
+        return self.__dict__.get(
+            name,
             clipy.utils.take_first(
-               self.info.get(
+                self.info.get(
                     self.info_map.get(name, name))))
 
     def __str__(self):
@@ -333,18 +334,21 @@ class ListWindow(Window):
 
     index = 0
     caches = ()
-    searches= lookups = streams = downloads = files = threads = actives = None
+    searches = lookups = streams = downloads = files = threads = actives = None
     videos = None   # mis-named as videos, s/b cache or something
 
     def reset(self):
-        (self.searches,
-         self.lookups,
-         self.streams,
-         self.downloads,
-         self.files,
-         self.threads,
-         self.actives,
+        (
+            self.searches,
+            self.lookups,
+            self.streams,
+            self.downloads,
+            self.files,
+            self.threads,
+            self.actives,
+
         ) = self.caches = (
+
             self.CacheList('Search'),
             self.CacheList('Inquiries'),
             self.CacheList('Streams'),
@@ -590,8 +594,6 @@ class Panel(object):
                 # Search / Lookups action
                 if self.cache.videos is self.cache.searches or \
                    self.cache.videos is self.cache.lookups:
-                    # print(' View() list caches.videos: {}'.format(list(self.cache.videos)))
-                    # print(' View() index caches.videos: {}'.format(list(self.cache.videos)[v_index]))
                     yield from self.inquire(list(self.cache.videos)[v_index])
 
                 # Streams action
@@ -723,7 +725,8 @@ def key_loop(stdscr, panel):
             panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire())
 
         if c in KEYS_DOWNLOAD:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(panel.detail.video))
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
+                panel.detail.video))
 
         if c in KEYS_ACTION:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
