@@ -13,20 +13,19 @@ import asyncio
 
 
 @asyncio.coroutine
-def download(url,
-             port=80, path='~', active_poll=lambda: True,
-             progress_callback=lambda *a: None):
+def download(stream, port=80,
+             active_poll=lambda url: True, progress_poll=lambda *a: None):
 
     bytesdone = 0
     chunk_size = 16384
     t0 = time.time()
 
-    response = yield from aiohttp.request('GET', url)
+    response = yield from aiohttp.request('GET', stream.url)
     total = int(response.headers.get('Content-Length', 0).strip())
     complete = False
 
-    with open(path, 'wb') as fd:
-        while active_poll():
+    with open(stream.path, 'wb') as fd:
+        while active_poll(stream.url):
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
                 complete = True
@@ -38,7 +37,7 @@ def download(url,
             rate = (bytesdone / 1024) / elapsed
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
-            progress_callback(url, total, *progress_stats)
+            progress_poll(stream.url, total, *progress_stats)
 
     return complete, bytesdone
 

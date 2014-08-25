@@ -1,12 +1,14 @@
 """
 Clipy YouTube video downloader video module
 """
+import os
 import urllib
 
 import clipy.utils
 
 
 class VideoDetail(object):
+    """ Video information container """
     info = dict()
     stream = None
     streams = list()
@@ -15,7 +17,7 @@ class VideoDetail(object):
         duration='length_seconds',
     )
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, target=None):
         if data is not None:
             # data is url querystring format, so we need to parse it
             self.info = urllib.parse.parse_qs(data)
@@ -42,7 +44,9 @@ class VideoDetail(object):
                     extension=itags[1],
                     title=self.info.get('title', '<NOTITLE>'),
                 )
-                self.streams.append(Stream(stream))
+                self.streams.append(Stream(stream,
+                                           video=self,
+                                           target=target))
 
                 # from pprint import pformat
                 # # info = pformat(self.info)
@@ -55,31 +59,30 @@ class VideoDetail(object):
                 #     f.write('strm: '); f.write(strm); f.write('\n\n')
                 #     f.write('------------------------------------\n\n')
 
-    def __getattr__(self, name):
+    def __getattr__(self, field_name):
         """
         Check if our attribute exists for the object, otherwise return the
         corresponding entry from our 'info'.
         """
         # from pprint import pformat
-        # print('!!!!!!!!!', name)
         # # import pdb; pdb.set_trace()
         # sdict = pformat(self.__dict__)
-        # dname = self.__dict__.get(name, '?.')
-        # mname = self.info_map.get(name, name)
+        # dname = self.__dict__.get(field_name, '?.')
+        # mname = self.info_map.get(field_name, field_name)
         # ninfo = self.info.get(mname)
         # finfo = clipy.utils.take_first(ninfo)
-        # with open('getattr.{}'.format(name), 'w') as f:
-        #     f.write('name:  '); f.write(     name ); f.write('\n\n')
+        # with open('getattr.{}'.format(field_name), 'w') as f:
+        #     f.write('field_name:  '); f.write(     field_name ); f.write('\n\n')
         #     f.write('dict:  '); f.write(    sdict ); f.write('\n\n')
         #     f.write('dname: '); f.write(    dname ); f.write('\n\n')
         #     f.write('mname: '); f.write(    mname ); f.write('\n\n')
         #     f.write('ninfo: '); f.write(str(ninfo)); f.write('\n\n')
         #     f.write('finfo: '); f.write(    finfo ); f.write('\n\n')
         return self.__dict__.get(
-            name,
+            field_name,
             clipy.utils.take_first(
                 self.info.get(
-                    self.info_map.get(name, name))))
+                    self.info_map.get(field_name, field_name))))
 
     def __str__(self):
         return 'V> {duration}  {title}  {path}'.format(
@@ -112,26 +115,29 @@ Streams: {}
 
 
 class Stream(object):
-    """Video stream """
+    """ Video stream """
+    itags = []
+    itag = None
     name = None
     path = None
-    itags = []
-    stream = None
     status = ''
+    target = None
 
-    def __init__(self, stream):
-        self.stream = stream
-        self.itags = [t for t in clipy.youtube.ITAGS.get(
-            stream.get('itag', None)) if t]
+    def __init__(self, info, video=None, target=None):
+        """  """
+        for k, v in info.items():
+            setattr(self, k, v)
 
-    def __getattr__(self, name):
-        """
-        Check if our attribute exists for the object, otherwise return the
-        corresponding entry from our 'stream'.
-        """
-        return self.__dict__.get(name, self.stream.get(name))
+        self.name = video.name or '{}-({}).{}'.format(
+            video.title, self.resolution, self.extension
+            ).replace('/', '|')
+
+        self.path = os.path.join(target or '.', self.name)
+
+        self.itags = [t for t in clipy.youtube.ITAGS.get(self.itag) if t]
 
     def __str__(self):
+        return 'S> {} {}'.format(self.status, self.display)
         # from pprint import pformat
         # # info = pformat(self.info)
         # strm = pformat(self.stream)
@@ -142,10 +148,8 @@ class Stream(object):
         #     f.write('strm: '); f.write(strm); f.write('\n\n')
         #     f.write('------------------------------------\n\n')
 
-        return 'S> {} {}'.format(self.status, self.display or self.name or self.title)
-
     @property
     def display(self):
-        return '{} ({}) {}'.format(', '.join(self.itags),
-                                   self.stream.get('quality', 'unknown'),
-                                   self.stream.get('type', ''))
+        return 'Sd>  {} ({}) {}'.format(', '.join(self.itags),
+                                        getattr(self, 'quality', 'unknown'),
+                                        getattr(self, 'type', ''))

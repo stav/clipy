@@ -4,8 +4,6 @@ Clipy
 Command Line Interface using Python for Youtube
 
 Python commmand-line YouTube video downloader.
-
-mxvLMEyCXR0
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -19,7 +17,7 @@ import argparse
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 
 def _get_commandline_options():
@@ -62,10 +60,6 @@ def _get_commandline_options():
         nargs='?', default=lambda *a: None, const=print,
         help='Logging enabled, option must follow RESOURCE')
 
-    # command_line.add_argument('-i', dest='inputfile', nargs='?', metavar='INFL',
-    #                     type=argparse.FileType('rU'), default=sys.stdin,
-    #                     help='input filename, def=stdin')
-
     # command_line.add_argument('-o', dest='outputfile', metavar='OUFL', nargs='?',
     #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
     #                     help='output filename, def=stdout, const=/dev/null')
@@ -85,6 +79,7 @@ def init(options):
     video = None
     stream = None
     resource = None
+    target_dir = os.path.expanduser(options.target)
 
     log('Clipy started with {}'.format(options))
 
@@ -93,7 +88,9 @@ def init(options):
     if options.resource:
         log('Supplied resource: {}'.format(options.resource))
         try:
-            video = yield from clipy.youtube.get_video(options.resource)
+            video = yield from clipy.youtube.get_video(
+                options.resource, target=target_dir)
+
         except ConnectionError as ex:
             log('Error: Cannot connect {}'.format(ex))
 
@@ -101,10 +98,12 @@ def init(options):
         log('Checking clipboard for resource')
         import pyperclip
         resource = pyperclip.paste().strip()
-        video = yield from clipy.youtube.get_video(resource)
+
+        video = yield from clipy.youtube.get_video(
+            resource, target=target_dir)
 
     if video:
-        log('Video found on YouTube ')
+        log('Video found on YouTube')
         print(video.detail)
 
         if options.stream is not None:
@@ -129,11 +128,7 @@ def init(options):
         else:
             import clipy.request
             print('Downloading...')
-            _success, _length = yield from clipy.request.download(
-                stream.url,
-                path=os.path.join(os.path.expanduser(options.target), 'clipy.download'),
-                active_poll=lambda: True,
-            )
+            _success, _length = yield from clipy.request.download(stream)
 
     log('Clipy stopping')
 

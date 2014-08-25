@@ -8,21 +8,25 @@ Application
 
     remove external API usage
 
+    download option does not require stream option
+        -d -s1 -->> -d1
+
+    download needs progress meter
+
 UI
 
     downloads!
         use .temp for resuming
-
-    class VideoDetail (this is all we need?)
-    class Thread
-    class Stream
-    class File
 
     waiting spinner, for example when waiting for inquiry/searching
 
     move clipy.downloads, clipy.lookups to /data/
 
     duration (like pafy using length_seconds)
+
+    stream.title is still list:
+        'title': ['waste 2 seconds of your life']
+        {'fallback_host': 'tc.v14.cache1.googlevideo.com', 'extension': 'mp4', 'itag': '18', 'url': 'http://r4---sn-0opoxu-2cjs.googlevideo.com/videoplayback?initcwndbps=287000&ratebypass=yes&upn=81ya6Fvr6rs&signature=9053EDD2B6692631F9BB268027B012D2DA6C01C2.48B17B132BE0F251A8A0B386858EA884EAF3A608&expire=1409025697&itag=18&sver=3&key=yt5&ipbits=0&mt=1409004042&sparams=id%2Cinitcwndbps%2Cip%2Cipbits%2Citag%2Cmm%2Cms%2Cmv%2Cratebypass%2Csource%2Cupn%2Cexpire&id=o-AHkjykHFXNcDum9O-fV2dVC0CQuJX5x9gVRv-DGXsAiF&mm=31&ms=au&mv=m&source=youtube&fexp=902408%2C906335%2C908596%2C927622%2C929305%2C931983%2C934024%2C934030%2C934804%2C936215%2C945025%2C946013%2C948110&ip=189.132.144.35', 'resolution': '640x360', 'title': ['waste 2 seconds of your life'], 'quality': 'medium', 'type': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"'}
 
 Request
 

@@ -7,7 +7,6 @@ import urllib
 import clipy.request
 import clipy.video
 import clipy.utils
-# from . import utils
 
 # Borrowed from Pafy https://github.com/np1/pafy
 ITAGS = {
@@ -82,21 +81,19 @@ def get_youtube_info(resource):
 
 
 @asyncio.coroutine
-def get_video(resource):
+def get_video(resource, target=None):
+    # try:
+    #     data = yield from clipy.request.get_youtube_info(resource)
+    # except ConnectionError as ex:
+    #     self.console.printstr(ex, error=True)
+    #     return
+    # if data is None:
+    #     self.console.printstr('No data returned', error=True)
+    #     return
     if 'youtube.com/watch?v=' in resource:
-        resource = 'fm78gjYkYKc'
+        pos = resource.find('/watch?v=') + 9
+        resource = resource[pos: pos+11]
+
     data = yield from get_youtube_info(resource)
 
-    return clipy.video.VideoDetail(data)
-
-# @asyncio.coroutine
-# def get_video(resource):
-#     try:
-#         data = yield from clipy.request.get_youtube_info(resource)
-#     except ConnectionError as ex:
-#         self.console.printstr(ex, error=True)
-#         return
-#     if data is None:
-#         self.console.printstr('No data returned', error=True)
-#         return
-#     return clipy.video.VideoDetail(data)
+    return clipy.video.VideoDetail(data, target=target)

@@ -19,7 +19,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.17'
+VERSION = '0.9.18'
 
 
 class File(object):
@@ -155,7 +155,7 @@ class ListWindow(Window):
             self.CacheList('Inquiries'),
             self.CacheList('Streams'),
             self.CacheList('Downloaded'),
-            self.CacheList('Files', self.panel.target),
+            self.CacheList('Files', self.panel.target_dir),
             self.CacheList('Threads'),
             self.CacheList('Active'),
         )
@@ -171,9 +171,8 @@ class ListWindow(Window):
         # Files: manually build the files list here real-time
         if self.videos is self.files:
             self.files.clear()
-            target_dir = os.path.expanduser(self.panel.target)
-            for filename in sorted(os.listdir(target_dir)):
-                path = os.path.join(target_dir, filename)
+            for filename in sorted(os.listdir(self.panel.target_dir)):
+                path = os.path.join(self.panel.target_dir, filename)
                 if os.path.isfile(path) and not filename.startswith('.'):
                     self.files[path] = File(filename, path)
 
@@ -211,7 +210,8 @@ class ListWindow(Window):
             self.searches.clear()
             for videoid in videoids:
                 if videoid != '__video_id__':
-                    video = yield from clipy.youtube.get_video(videoid)
+                    video = yield from clipy.youtube.get_video(
+                        videoid, target=self.panel.target_dir)
                     if video:
                         self.searches[videoid] = video
                         self.display()
@@ -221,7 +221,7 @@ class ListWindow(Window):
         """ Load file from disk into cache """
         with open('clipy.lookups', 'r') as f:
             for line in f.readlines():
-                key, duration, title = line.split(None, 2)
+                key, duration, title = line.split(maxsplit=2)
 
                 video = clipy.video.VideoDetail()
                 video.videoid = key
@@ -234,21 +234,16 @@ class ListWindow(Window):
         """ Load file from disk into cache """
         with open('clipy.downloads', 'r') as f:
             for line in f.readlines():
-
-                url, path = line.split(None, 1)
-                path = path.strip()
-
                 stream = clipy.video.VideoDetail()
-                stream.url = url
-                stream.path = path
-
-                self.downloads[url] = stream
+                stream.url, stream.path = line.split(maxsplit=1)
+                stream.path = stream.path.strip()
+                self.downloads[stream.url] = stream
 
 
 class Panel(object):
     """docstring for Panel"""
     testing = False
-    target = '~'
+    target_dir = ''
 
     def __init__(self, loop, stdscr, detail, cache, console):
         self.loop = loop
@@ -323,7 +318,7 @@ class Panel(object):
             return
 
         self.console.printstr('Inquiring: {}'.format(resource))
-        video = yield from clipy.youtube.get_video(resource)
+        video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
         if video:
             self.detail.video = video
             self.cache.lookups[video.videoid] = video
@@ -412,7 +407,8 @@ class Panel(object):
         cprint = self.console.printstr
         if self.cache.actives:
             last_key = list(self.cache.actives).pop()
-            cprint('Cancelling most recent active download: {}'.format(last_key))
+            cprint('Cancelling most recent active download: {}'.format(
+                self.cache.actives[last_key]))
             del self.cache.actives[last_key]
         else:
             cprint('Nothing to cancel')
@@ -420,7 +416,7 @@ class Panel(object):
     @asyncio.coroutine
     def download(self, video, index=None):
         cprint = self.console.printstr
-        target_dir = os.path.expanduser(self.target)
+
         if video is None:
             cprint('No video to download, Inquire first', error=True)
             return
@@ -451,12 +447,6 @@ class Panel(object):
         # get the stream we want
         stream = video.stream = video.streams[index or 0]
 
-        # think of a good name
-        stream.name = '{}-({}).{}'.format(
-            video.title, stream.resolution, stream.extension
-            ).replace('/', '|')
-        stream.path = os.path.join(target_dir, stream.name)
-
         cprint('Downloading {}'.format(stream.path))
 
         # add to actives list
@@ -464,10 +454,9 @@ class Panel(object):
 
         # here is the magic goodness
         _success, _length = yield from clipy.request.download(
-            stream.url,
-            path=stream.path,
-            active_poll=functools.partial(active_poll, stream.url),
-            progress_callback=progress_poll,
+            stream,
+            active_poll=active_poll,
+            progress_poll=progress_poll,
         )
         # and here we start our inline that would "normally" be in a callback
 
@@ -579,7 +568,7 @@ def init(stdscr, loop, resource, target):
     control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
-    control_panel.target = target
+    control_panel.target_dir = os.path.expanduser(target)
     if resource:
         stdscr.noutrefresh()
         loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))
