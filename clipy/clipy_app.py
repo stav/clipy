@@ -17,7 +17,7 @@ import argparse
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 
 def _get_commandline_options():
@@ -61,8 +61,8 @@ def _get_commandline_options():
         help='Logging enabled, option must follow RESOURCE')
 
     # command_line.add_argument('-o', dest='outputfile', metavar='OUFL', nargs='?',
-    #                     type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
-    #                     help='output filename, def=stdout, const=/dev/null')
+    # type=argparse.FileType('w'), default=sys.stdout, const='/dev/null',
+    # help='output filename, def=stdout, const=/dev/null')
 
     command_line.add_argument(
         '-V', '--version', action='version',

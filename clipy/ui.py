@@ -7,7 +7,6 @@ import os
 import re
 import curses
 import asyncio
-import functools
 import threading
 import subprocess
 import collections
@@ -19,7 +18,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.18'
+VERSION = '0.9.19'
 
 
 class File(object):
