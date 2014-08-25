@@ -10,9 +10,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import time
 import aiohttp
 import asyncio
-import urllib
-
-from . import utils
 
 
 @asyncio.coroutine
@@ -85,20 +82,3 @@ def get_text(url):
 
     data = yield from response.text()
     return data
-
-
-@asyncio.coroutine
-def get_youtube_info(resource):
-    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
-    try:
-        data = yield from get_text(url)
-    except:
-        raise
-
-    info = urllib.parse.parse_qs(data)
-
-    status = utils.take_first(info.get('status', None))
-    if status == 'ok':
-        return data
-    else:
-        raise ConnectionError('Invalid video Id "{}" {}'.format(resource, info))

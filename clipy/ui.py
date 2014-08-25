@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import re
 import curses
-import urllib
 import asyncio
 import functools
 import threading
@@ -15,209 +14,12 @@ import collections
 
 import pyperclip
 
-import clipy.utils
+import clipy.video
 import clipy.request
-
+import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.16'
-
-# Borrowed from Pafy https://github.com/np1/pafy
-ITAGS = {
-    '5': ('320x240', 'flv', "normal", ''),
-    '17': ('176x144', '3gp', "normal", ''),
-    '18': ('640x360', 'mp4', "normal", ''),
-    '22': ('1280x720', 'mp4', "normal", ''),
-    '34': ('640x360', 'flv', "normal", ''),
-    '35': ('854x480', 'flv', "normal", ''),
-    '36': ('320x240', '3gp', "normal", ''),
-    '37': ('1920x1080', 'mp4', "normal", ''),
-    '38': ('4096x3072', 'mp4', "normal", '4:3 hi-res'),
-    '43': ('640x360', 'webm', "normal", ''),
-    '44': ('854x480', 'webm', "normal", ''),
-    '45': ('1280x720', 'webm', "normal", ''),
-    '46': ('1920x1080', 'webm', "normal", ''),
-  # '59': ('1x1', 'mp4', 'normal', ''),
-  # '78': ('1x1', 'mp4', 'normal', ''),
-    '82': ('640x360-3D', 'mp4', "normal", ''),
-    '83': ('640x480-3D', 'mp4', 'normal', ''),
-    '84': ('1280x720-3D', 'mp4', "normal", ''),
-    '100': ('640x360-3D', 'webm', "normal", ''),
-    '102': ('1280x720-3D', 'webm', "normal", ''),
-    '133': ('426x240', 'm4v', 'video', ''),
-    '134': ('640x360', 'm4v', 'video', ''),
-    '135': ('854x480', 'm4v', 'video', ''),
-    '136': ('1280x720', 'm4v', 'video', ''),
-    '137': ('1920x1080', 'm4v', 'video', ''),
-    '138': ('4096x3072', 'm4v', 'video', ''),
-    '139': ('48k', 'm4a', 'audio', ''),
-    '140': ('128k', 'm4a', 'audio', ''),
-    '141': ('256k', 'm4a', 'audio', ''),
-    '160': ('256x144', 'm4v', 'video', ''),
-    '167': ('640x480', 'webm', 'video', ''),
-    '168': ('854x480', 'webm', 'video', ''),
-    '169': ('1280x720', 'webm', 'video', ''),
-    '170': ('1920x1080', 'webm', 'video', ''),
-    '171': ('128k', 'ogg', 'audio', ''),
-    '172': ('192k', 'ogg', 'audio', ''),
-    '218': ('854x480', 'webm', 'video', 'VP8'),
-    '219': ('854x480', 'webm', 'video', 'VP8'),
-    '242': ('360x240', 'webm', 'video', 'VP9'),
-    '243': ('480x360', 'webm', 'video', 'VP9'),
-    '244': ('640x480', 'webm', 'video', 'VP9'),
-    '245': ('640x480', 'webm', 'video', 'VP9'),
-    '246': ('640x480', 'webm', 'video', 'VP9'),
-    '247': ('720x480', 'webm', 'video', 'VP9'),
-    '248': ('1920x1080', 'webm', 'video', 'VP9'),
-    '256': ('192k', 'm4a', 'audio', '6-channel'),
-    '258': ('320k', 'm4a', 'audio', '6-channel'),
-    '264': ('2560x1440', 'm4v', 'video', ''),
-    '271': ('1920x1280', 'webm', 'video', 'VP9'),
-    '272': ('3414x1080', 'webm', 'video', 'VP9')
-}
-
-
-class VideoDetail(object):
-    info = dict()
-    stream = None
-    streams = list()
-    info_map = dict(
-        videoid='video_id',
-        duration='length_seconds',
-    )
-
-    def __init__(self, data=None):
-        if data is not None:
-            # data is url querystring format, so we need to parse it
-            self.info = urllib.parse.parse_qs(data)
-
-            # first we split the mapping on the commas
-            stream_map = clipy.utils.take_first(
-                self.info.get('url_encoded_fmt_stream_map', ())).split(',')
-
-            # then we zip/map the values into our streams list
-            streams = [{k: clipy.utils.take_first(v)
-                       for k, v in sdic.items()}
-                       for sdic in [urllib.parse.parse_qs(mapp)
-                       for mapp in stream_map]]
-
-            # now add in our new fields
-            self.streams = []
-            for stream in streams:
-
-                itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
-
-                stream.update(dict(
-                    resolution=itags[0]),
-                    extension=itags[1],
-                    title=self.info.get('title', '<NOTITLE>'),
-                )
-                self.streams.append(Stream(stream))
-
-                # from pprint import pformat
-                # # info = pformat(self.info)
-                # # strm = pformat(self.streams)
-                # strm = pformat([str(s) for s in self.streams])
-                # with open('INIT', 'a') as f:
-                #     # f.write('data: '); f.write(data); f.write('\n\n')
-                #     # f.write('info: '); f.write(info); f.write('\n\n')
-                #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
-                #     f.write('strm: '); f.write(strm); f.write('\n\n')
-                #     f.write('------------------------------------\n\n')
-
-    def __getattr__(self, name):
-        """
-        Check if our attribute exists for the object, otherwise return the
-        corresponding entry from our 'info'.
-        """
-        # from pprint import pformat
-        # print('!!!!!!!!!', name)
-        # # import pdb; pdb.set_trace()
-        # sdict = pformat(self.__dict__)
-        # dname = self.__dict__.get(name, '?.')
-        # mname = self.info_map.get(name, name)
-        # ninfo = self.info.get(mname)
-        # finfo = clipy.utils.take_first(ninfo)
-        # with open('getattr.{}'.format(name), 'w') as f:
-        #     f.write('name:  '); f.write(     name ); f.write('\n\n')
-        #     f.write('dict:  '); f.write(    sdict ); f.write('\n\n')
-        #     f.write('dname: '); f.write(    dname ); f.write('\n\n')
-        #     f.write('mname: '); f.write(    mname ); f.write('\n\n')
-        #     f.write('ninfo: '); f.write(str(ninfo)); f.write('\n\n')
-        #     f.write('finfo: '); f.write(    finfo ); f.write('\n\n')
-        return self.__dict__.get(
-            name,
-            clipy.utils.take_first(
-                self.info.get(
-                    self.info_map.get(name, name))))
-
-    def __str__(self):
-        return 'V> {duration}  {title}  {path}'.format(
-            duration=self.duration, title=self.title, path=self.path)
-
-    @property
-    def detail(self):
-        # import pprint
-        # p = pprint.pformat(self.info)
-        return '''
-Id:     {}
-Title:  {}
-Author: {}
-Length: {} seconds
-Views:  {}
-
-Streams: {}
-* {}
-        '''.format(
-            clipy.utils.take_first(self.info['video_id']),
-            clipy.utils.take_first(self.info['title']),
-            clipy.utils.take_first(self.info['author']),
-            clipy.utils.take_first(self.info['length_seconds']),
-            clipy.utils.take_first(self.info['view_count']),
-            len(self.streams),
-            '\n* '.join([stream.display for stream in self.streams]),
-        )
-        # with open('qs', 'w') as f:
-        #     f.write(output)
-
-
-class Stream(object):
-    """Video stream """
-    name = None
-    path = None
-    itags = []
-    stream = None
-    status = ''
-
-    def __init__(self, stream):
-        self.stream = stream
-        self.itags = [t for t in ITAGS.get(stream.get('itag', None)) if t]
-
-    def __getattr__(self, name):
-        """
-        Check if our attribute exists for the object, otherwise return the
-        corresponding entry from our 'stream'.
-        """
-        return self.__dict__.get(name, self.stream.get(name))
-
-    def __str__(self):
-        # from pprint import pformat
-        # # info = pformat(self.info)
-        # strm = pformat(self.stream)
-        # with open('Stream.__str__', 'a') as f:
-        #     # f.write('data: '); f.write(data); f.write('\n\n')
-        #     # f.write('info: '); f.write(info); f.write('\n\n')
-        #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
-        #     f.write('strm: '); f.write(strm); f.write('\n\n')
-        #     f.write('------------------------------------\n\n')
-
-        return 'S> {} {}'.format(self.status, self.display or self.name or self.title)
-
-    @property
-    def display(self):
-        return '{} ({}) {}'.format(', '.join(self.itags),
-                                   self.stream.get('quality', 'unknown'),
-                                   self.stream.get('type', ''))
+VERSION = '0.9.17'
 
 
 class File(object):
@@ -409,7 +211,7 @@ class ListWindow(Window):
             self.searches.clear()
             for videoid in videoids:
                 if videoid != '__video_id__':
-                    video = yield from self.panel.get_video(videoid)
+                    video = yield from clipy.youtube.get_video(videoid)
                     if video:
                         self.searches[videoid] = video
                         self.display()
@@ -421,7 +223,7 @@ class ListWindow(Window):
             for line in f.readlines():
                 key, duration, title = line.split(None, 2)
 
-                video = VideoDetail()
+                video = clipy.video.VideoDetail()
                 video.videoid = key
                 video.duration = duration
                 video.title = title.strip()
@@ -436,7 +238,7 @@ class ListWindow(Window):
                 url, path = line.split(None, 1)
                 path = path.strip()
 
-                stream = VideoDetail()
+                stream = clipy.video.VideoDetail()
                 stream.url = url
                 stream.path = path
 
@@ -501,19 +303,6 @@ class Panel(object):
             self.console.printstr('Cache: saved')
 
     @asyncio.coroutine
-    def get_video(self, resource):
-        try:
-            data = yield from clipy.request.get_youtube_info(resource)
-        except ConnectionError as ex:
-            self.console.printstr(ex, error=True)
-            return
-        if data is None:
-            self.console.printstr('No data returned', error=True)
-            return
-
-        return VideoDetail(data)
-
-    @asyncio.coroutine
     def inquire(self, resource=None):
         video_id = None
 
@@ -534,7 +323,7 @@ class Panel(object):
             return
 
         self.console.printstr('Inquiring: {}'.format(resource))
-        video = yield from self.get_video(resource)
+        video = yield from clipy.youtube.get_video(resource)
         if video:
             self.detail.video = video
             self.cache.lookups[video.videoid] = video
@@ -752,7 +541,7 @@ def key_loop(stdscr, panel):
             'c={}, t={}      '.format(c, threading.active_count()))
 
 
-def init(stdscr, loop, video, stream, target):
+def init(stdscr, loop, resource, target):
 
     # Setup curses
     curses.curs_set(False)
@@ -790,16 +579,17 @@ def init(stdscr, loop, video, stream, target):
     control_panel = Panel(loop, stdscr, detail, cache, console)
 
     # Load command line options
-    # detail.video = video
-    # detail.stream = Stream(stream)
-    # control_panel.target = target
+    control_panel.target = target
+    if resource:
+        stdscr.noutrefresh()
+        loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))
 
     # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
     loop.call_soon_threadsafe(loop.stop)
 
 
-def main(video=None, stream=None, target=None):
+def main(resource=None, target=None):
     """
     Single entry point to run two event loops:
 
@@ -809,7 +599,7 @@ def main(video=None, stream=None, target=None):
     # Python event loop
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    loop.run_in_executor(None, curses.wrapper, *(init, loop, video, stream, target))
+    loop.run_in_executor(None, curses.wrapper, *(init, loop, resource, target))
     loop.run_forever()
     loop.close()
 

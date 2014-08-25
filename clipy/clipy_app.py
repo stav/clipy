@@ -9,15 +9,17 @@ mxvLMEyCXR0
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
 import sys
+import asyncio
 import argparse
 
-import pafy
 # import pyperclip - lazy import
 # import clipy.request - lazy import
 # import clipy.ui - lazy import
+# import clipy.youtube - lazy import
 
-VERSION = '0.9'
+VERSION = '0.9.1'
 
 
 def _get_commandline_options():
@@ -76,17 +78,9 @@ def _get_commandline_options():
     return command_line.parse_args(sys.argv[1:])
 
 
-def _get_video(resource):
-    """ Create new Pafy video instance """
-    try:
-        return pafy.new(resource)
-    except (OSError, ValueError) as ex:
-        print(ex)
-
-
-def main():
-    """ Script entry point """
-    options = _get_commandline_options()
+@asyncio.coroutine
+def init(options):
+    """ Non-user interface """
     log = options.logger
     video = None
     stream = None
@@ -94,62 +88,69 @@ def main():
 
     log('Clipy started with {}'.format(options))
 
+    import clipy.youtube
+
     if options.resource:
         log('Supplied resource: {}'.format(options.resource))
-        video = _get_video(options.resource)
+        try:
+            video = yield from clipy.youtube.get_video(options.resource)
+        except ConnectionError as ex:
+            log('Error: Cannot connect {}'.format(ex))
 
     if video is None and options.clipboard:
         log('Checking clipboard for resource')
         import pyperclip
         resource = pyperclip.paste().strip()
-        video = _get_video(resource)
+        video = yield from clipy.youtube.get_video(resource)
 
     if video:
         log('Video found on YouTube ')
-        print(video)
-        for i, stm in enumerate(video.allstreams):
-            print('{}: {} {} {} {} {}'.format(i,
-                  stm.mediatype,
-                  stm.quality,
-                  stm.extension,
-                  stm.notes,
-                  stm.bitrate or ''))
+        print(video.detail)
+
         if options.stream is not None:
             log('Stream selected: {}'.format(options.stream))
             try:
-                stream = video.allstreams[options.stream]
+                stream = video.streams[options.stream]
             except IndexError:
                 print('Stream {} not found in {}'.format(
-                    options.stream, video.allstreams))
+                    options.stream, video.streams))
             else:
                 for p in dir(stream):
                     attr = getattr(stream, p, None)
                     if not p.startswith('_') and not hasattr(attr, '__call__'):
                         print('{}: {}'.format(p, getattr(stream, p, '')))
 
-    if options.ui:
-        try:
-            import clipy.ui
-            clipy.ui.main(video, stream, options.target)
-        except ImportError:
-            from ui import main
-            main(video, stream, options.target)
-
-    elif options.download:
+    if options.download:
         if video is None:
             print('No valid resource provided {} {}'.format(
                 options.resource or '', resource or ''))
         elif stream is None:
             print('No stream selected for download')
         else:
-            try:
-                import clipy.request
-                clipy.request.download(stream, options.target)
-            except ImportError:
-                from request import download
-                download(stream, options.target)
+            import clipy.request
+            print('Downloading...')
+            _success, _length = yield from clipy.request.download(
+                stream.url,
+                path=os.path.join(os.path.expanduser(options.target), 'clipy.download'),
+                active_poll=lambda: True,
+            )
 
     log('Clipy stopping')
+
+
+def main():
+    """ Script entry point """
+    options = _get_commandline_options()
+
+    if options.ui:
+        import clipy.ui
+        clipy.ui.main(options.resource, options.target)
+
+    else:
+        loop = asyncio.get_event_loop()
+        loop.set_debug(True)
+        loop.run_until_complete(init(options))
+        loop.close()
 
 
 if __name__ == '__main__':
