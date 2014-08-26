@@ -5,8 +5,6 @@ g79HokJTfPU
 g79HokJTfP!
 g79HokJTfP
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import time
 import aiohttp
 import asyncio
