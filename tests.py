@@ -1,9 +1,14 @@
+"""
+Clipy YouTube video downloader test suite
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import curses
 import asyncio
 import unittest
+
 import pyperclip
+
 import clipy.ui
 
 
@@ -50,30 +55,34 @@ class ClipyAsyncTest(unittest.TestCase):
     def setUp(self):
         asyncio.get_event_loop().set_debug(True)
 
-    def test_primera(self):
+    def test_1_debug(self):
         self.assertIs(asyncio.get_event_loop().get_debug(), True)
 
-    def test_coroutine(self):
-        @asyncio.coroutine
-        def print_and_repeat():
-            return 'asdf'
+    def test_2_call_soon(self):
+        def normal_function():
+            pass
 
         loop = asyncio.get_event_loop()
-        result = yield from print_and_repeat()
-        # loop.call_soon(print_and_repeat)
-        asdf
+        loop.call_soon(normal_function())
 
-        # # future = asyncio.Future()
-        # # loop.create_task(print_and_repeat(future))
+    def test_3_coroutines(self):
+        @asyncio.coroutine
+        def coroutine_function_1():
+            result = yield from coroutine_function_2()
+            self.assertIs(result, True)
+            return result
 
-        # try:
-        #     loop.run_until_complete(print_and_repeat())
-        # finally:
-        #     loop.close()
+        @asyncio.coroutine
+        def coroutine_function_2():
+            return True
 
-        # self.assertEqual(result, 'qwer')
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(coroutine_function_1())
+
+        # future = asyncio.Future()
+        # loop.create_task(print_and_repeat(future))
 
 
 if __name__ == '__main__':
     # import pdb; pdb.set_trace()
-    unittest.main(verbosity=2)
+    unittest.main()
