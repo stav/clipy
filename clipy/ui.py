@@ -319,6 +319,7 @@ class Panel(object):
         if video:
             self.detail.video = video
             self.cache.lookups[video.videoid] = video
+            self.cache.streams.index = None
 
         self.display()
 
