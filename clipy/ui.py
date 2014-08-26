@@ -16,7 +16,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.19'
+VERSION = '0.9.20'
 
 
 class File(object):
@@ -520,8 +520,6 @@ def key_loop(stdscr, panel):
         # Debug
         if c in (ord('Z'),):
             panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
-
-        # Debug
         stdscr.addstr(
             curses.LINES-1, curses.COLS-20,
             'c={}, t={}      '.format(c, threading.active_count()))
@@ -572,6 +570,8 @@ def init(stdscr, loop, resource, target):
 
     # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
+
+    # After the curses loop has finished we then stop the Python loop
     loop.call_soon_threadsafe(loop.stop)
 
 

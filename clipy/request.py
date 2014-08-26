@@ -5,6 +5,7 @@ g79HokJTfPU
 g79HokJTfP!
 g79HokJTfP
 """
+import os
 import time
 import aiohttp
 import asyncio
@@ -13,16 +14,30 @@ import asyncio
 @asyncio.coroutine
 def download(stream, port=80,
              active_poll=lambda url: True, progress_poll=lambda *a: None):
+    """ Taken from from Pafy https://github.com/np1/pafy """
+    response = yield from aiohttp.request('GET', stream.url)
 
-    bytesdone = 0
+    total = int(response.headers.get('Content-Length', '0').strip())
     chunk_size = 16384
+    bytesdone = 0
+    offset = 0
+    mode = "wb"
     t0 = time.time()
 
-    response = yield from aiohttp.request('GET', stream.url)
-    total = int(response.headers.get('Content-Length', 0).strip())
+    temp_path = stream.path + ".clipy"
+
+    if os.path.exists(temp_path):
+        filesize = os.stat(temp_path).st_size
+
+        if filesize < total:
+            mode = "ab"
+            bytesdone = offset = filesize
+            headers = dict(Range='bytes={}-'.format(offset))
+            response = yield from aiohttp.request('GET', stream.url, headers=headers)
+
     complete = False
 
-    with open(stream.path, 'wb') as fd:
+    with open(temp_path, mode) as fd:
         while active_poll(stream.url):
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
@@ -32,10 +47,13 @@ def download(stream, port=80,
 
             elapsed = time.time() - t0
             bytesdone += len(chunk)
-            rate = (bytesdone / 1024) / elapsed
+            rate = ((bytesdone - offset) / 1024) / elapsed
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
             progress_poll(stream.url, total, *progress_stats)
+
+    if complete:
+        os.rename(temp_path, stream.path)
 
     return complete, bytesdone
 

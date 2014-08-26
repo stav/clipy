@@ -8,7 +8,7 @@ import clipy.request
 import clipy.video
 import clipy.utils
 
-# Borrowed from Pafy https://github.com/np1/pafy
+# Taken from from Pafy https://github.com/np1/pafy
 ITAGS = {
     '5': ('320x240', 'flv', "normal", ''),
     '17': ('176x144', '3gp', "normal", ''),
@@ -64,7 +64,7 @@ ITAGS = {
 
 
 @asyncio.coroutine
-def get_youtube_info(resource):
+def get_info(resource):
     url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
     try:
         data = yield from clipy.request.get_text(url)
@@ -90,10 +90,12 @@ def get_video(resource, target=None):
     # if data is None:
     #     self.console.printstr('No data returned', error=True)
     #     return
+
+    # Pull out just the 11-digit Id from the URL
     if 'youtube.com/watch?v=' in resource:
         pos = resource.find('/watch?v=') + 9
         resource = resource[pos: pos+11]
 
-    data = yield from get_youtube_info(resource)
+    data = yield from get_info(resource)
 
     return clipy.video.VideoDetail(data, target=target)
