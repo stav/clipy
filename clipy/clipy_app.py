@@ -15,7 +15,7 @@ import argparse
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.3'
+VERSION = '0.9.4'
 
 
 def _get_commandline_options():
@@ -25,7 +25,7 @@ def _get_commandline_options():
     # declare command-line argument parser
     command_line = argparse.ArgumentParser(
         description='YouTube video downloader',
-        epilog='E.g.: clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d -s1',
+        epilog='E.g.: clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d',
         )
 
     # define the command-line arguments
@@ -34,12 +34,8 @@ def _get_commandline_options():
         help='URL or video Id')
 
     command_line.add_argument(
-        '-d', '--download', action='store_true',
-        help='Downloaded a stream')
-
-    command_line.add_argument(
-        '-s', '--stream', metavar='S', type=int,
-        help='Select stream to download: 0, 1, 2, 3...')
+        '-d', '--download', type=int, nargs='?', default=None, const=0,
+        help='Downloaded a stream, default 0')
 
     command_line.add_argument(
         '-t', '--target', metavar='DIR', type=str,
@@ -90,7 +86,7 @@ def init(options):
                 options.resource, target=target_dir)
 
         except ConnectionError as ex:
-            log('Error: Cannot connect {}'.format(ex))
+            log('Error: Cannot connect, no Intenet? {}'.format(ex))
 
     if video is None and options.clipboard:
         log('Checking clipboard for resource')
@@ -104,26 +100,18 @@ def init(options):
         log('Video found on YouTube')
         print(video.detail)
 
-        if options.stream is not None:
-            log('Stream selected: {}'.format(options.stream))
+        if options.download is not None:
+            log('Stream selected: {}'.format(options.download))
             try:
-                stream = video.streams[options.stream]
+                stream = video.streams[options.download]
             except IndexError:
-                print('Stream {} not found in {}'.format(
-                    options.stream, video.streams))
+                print('Stream {} not found'.format(options.download))
             else:
                 for p in dir(stream):
                     attr = getattr(stream, p, None)
                     if not p.startswith('_') and not hasattr(attr, '__call__'):
                         print('{}: {}'.format(p, getattr(stream, p, '')))
 
-    if options.download:
-        if video is None:
-            print('No valid resource provided {} {}'.format(
-                options.resource or '', resource or ''))
-        elif stream is None:
-            print('No stream selected for download')
-        else:
             import clipy.request
             print('Downloading...')
             _success, _length = yield from clipy.request.download(stream)
