@@ -16,7 +16,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.21'
+VERSION = '0.9.22'
 
 
 class File(object):
@@ -421,11 +421,15 @@ class Panel(object):
 
         stream = video.stream = video.streams[index or 0]
 
+        if stream.url in self.cache.actives:
+            cprint('Stream already downloading: {}'.format(stream))
+            return
+
         cprint('Downloading {}'.format(stream.path))
 
         self.cache.actives[stream.url] = stream
 
-        _success, _length = yield from clipy.request.download(stream,
+        _success, _length = yield from clipy.request.governed_download(stream,
             self.cache.actives)
 
         # and here we start our inline that would "normally" be in a callback
@@ -534,6 +538,9 @@ def init(stdscr, loop, resource, target):
     cache   = ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
     console = Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
     control_panel = Panel(loop, stdscr, detail, cache, console)
+
+    # Setup download limits
+    # loop.call_soon_threadsafe(asyncio.async, control_panel.government())
 
     # Load command line options
     control_panel.target_dir = os.path.expanduser(target)

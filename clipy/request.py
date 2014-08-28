@@ -11,9 +11,24 @@ import aiohttp
 import asyncio
 
 
+# Limit number of downloads for calls to `governed_download`
+semaphore = asyncio.Semaphore(3)
+
+
+@asyncio.coroutine
+def governed_download(stream, actives=None):
+    """
+    Request stream's url and read from response and write to disk obeying the
+    law of Semaphores
+    """
+    with (yield from semaphore):
+        response = yield from download(stream, actives)
+        return response
+
+
 @asyncio.coroutine
 def download(stream, actives=None):
-    """ Taken from from Pafy https://github.com/np1/pafy """
+    """ Request stream's url and read from response and write to disk """
     response = yield from aiohttp.request('GET', stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
@@ -25,6 +40,7 @@ def download(stream, actives=None):
 
     temp_path = stream.path + ".clipy"
 
+    # Taken from from Pafy https://github.com/np1/pafy
     if os.path.exists(temp_path):
         filesize = os.stat(temp_path).st_size
 
