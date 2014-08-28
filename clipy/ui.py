@@ -269,17 +269,19 @@ class Panel(object):
             curses.doupdate()
 
     def load_cache(self):
+        cprint = self.console.printstr
+
         if os.path.exists('clipy.lookups'):
             self.cache.load_lookups()
-            self.console.printstr('Cache: lookups loaded')
+            cprint('Cache: lookups loaded')
         else:
-            self.console.printstr('Cache: no lookups found, not loaded')
+            cprint('Cache: no lookups found, not loaded')
 
         if os.path.exists('clipy.downloads'):
             self.cache.load_downloads()
-            self.console.printstr('Cache: downloads loaded')
+            cprint('Cache: downloads loaded')
         else:
-            self.console.printstr('Cache: no downloads found, not loaded')
+            cprint('Cache: no downloads found, not loaded')
 
     def save_cache(self):
         with open('clipy.lookups', 'w') as f:
@@ -296,20 +298,22 @@ class Panel(object):
 
     @asyncio.coroutine
     def inquire(self, resource=None):
+        cprint = self.console.printstr
+
         if resource is None:
             resource = pyperclip.paste().strip()
-            self.console.printstr('Checking clipboard: {}'.format(resource))
+            cprint('Checking clipboard: {}'.format(resource))
 
         if 'youtube.com/results?search' in resource:
             yield from self.cache.load_search(resource)
             return
 
-        self.console.printstr('Inquiring: {}'.format(resource))
+        cprint('Inquiring: {}'.format(resource))
         try:
             video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
 
         except ConnectionError as ex:
-            self.console.printstr('Error cannot connect, no network? {}'.format(ex))
+            cprint('Error cannot connect, no network? {}'.format(ex), error=True)
 
         else:
             if video:
@@ -361,8 +365,9 @@ class Panel(object):
 
     @asyncio.coroutine
     def action(self):
+        cprint = self.console.printstr
+
         v_index = self.cache.videos.index
-        # print(' View() v_index: {}'.format(v_index))
 
         if v_index is not None:
             # Validate selected index
@@ -383,21 +388,21 @@ class Panel(object):
                     key = list(self.cache.videos)[v_index]
                     path = self.cache.videos[key].path
                     if not os.path.exists(path):
-                        self.console.printstr('File no longer exists {}'.format(
-                            path), error=True)
+                        cprint('File no longer exists {}'.format(path), error=True)
                     else:
-                        self.console.printstr('Playing {}'.format(path))
+                        cprint('Playing {}'.format(path))
                         try:
                             subprocess.call(
                                 ['mplayer', "{}".format(path)],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
                         except AttributeError:
-                            self.console.printstr("Can't play, Python2?")
+                            cprint("Can't play, Python2?")
 
     def cancel(self):
         """ Cancel last spawned thread """
         cprint = self.console.printstr
+
         if self.cache.actives:
             last_key = list(self.cache.actives).pop()
             cprint('Cancelling most recent active download: {}'.format(
@@ -537,7 +542,7 @@ def init(stdscr, loop, resource, target):
         loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))
 
     def status_poll():
-        """ Refresh screen 10/s when downloads active """
+        """ Refresh screen 10x/s when downloads active """
         loop.call_later(0.1, status_poll)
 
         if control_panel.cache.actives:
