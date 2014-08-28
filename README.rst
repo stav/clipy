@@ -16,8 +16,8 @@ The following Python versions are supported:
 
 The following third-party libraries are used:
 
-* aiohttp (asynchronous HTTP communication)
-* pyperclip (optional, uses Gtk to read the clipboard)
+* ``aiohttp`` (asynchronous HTTP communication)
+* ``pyperclip`` (optional, uses Gtk to read the clipboard)
 
 Usage
 -----
@@ -30,9 +30,9 @@ User Interface::
 
     clipy --ui
 
-User interface written with `curses` from the standard library:
+User interface written with ``curses`` from the standard library:
 
-1. start script with `--ui` option
+1. start script with ``--ui`` option
 2. copy youtube url into clipboard
 3. follow menu: I to inquire, D to download
 
@@ -42,4 +42,4 @@ Notes
 Only tested on Ubuntu Trusty and Mac Lion.
 
 Python for Windows does not contain the needed `curses` library so the user
-interface will not work "out of the box", perhaps UniCurses can help.
+interface will not work "out of the box", perhaps ``UniCurses`` can help.
