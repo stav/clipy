@@ -414,25 +414,6 @@ class Panel(object):
             cprint('No video to download, Inquire first', error=True)
             return
 
-        def progress_poll(url, status):
-            """" The downloader will poll this after each chunk """
-            # # Update main screen status
-            # self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
-            # self.stdscr.noutrefresh()
-
-            # Update actives status
-            if is_active(url):  # may have been cancelled
-                self.cache.actives[url].status = status
-                self.cache.display()
-
-            # Commit screen changes
-            self.update()
-
-        def is_active(url):
-            """" The downloader will poll this after each chunk """
-            return url in self.cache.actives
-
-        # get the stream we want
         stream = video.stream = video.streams[index or 0]
 
         cprint('Downloading {}'.format(stream.path))
@@ -443,8 +424,7 @@ class Panel(object):
         # here is the magic goodness
         _success, _length = yield from clipy.request.download(
             stream,
-            active=is_active,
-            status=progress_poll,
+            self.cache.actives,
         )
         # and here we start our inline that would "normally" be in a callback
 

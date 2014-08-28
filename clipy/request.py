@@ -12,7 +12,7 @@ import asyncio
 
 
 @asyncio.coroutine
-def download(stream, active=lambda url: True, status=lambda *a: None):
+def download(stream, actives=()):
     """ Taken from from Pafy https://github.com/np1/pafy """
     response = yield from aiohttp.request('GET', stream.url)
 
@@ -38,7 +38,8 @@ def download(stream, active=lambda url: True, status=lambda *a: None):
     complete = False
 
     with open(temp_path, mode) as fd:
-        while active(stream.url):
+
+        while stream.url in actives:
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
                 complete = True
@@ -51,8 +52,7 @@ def download(stream, active=lambda url: True, status=lambda *a: None):
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
 
-            status(stream.url,
-                '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(*progress_stats, total=total))
+            stream.status = '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(*progress_stats, total=total)
 
     if complete:
         os.rename(temp_path, stream.path)
