@@ -32,17 +32,17 @@ def download(stream, actives=None):
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            response = yield from aiohttp.request('GET', stream.url,
-                headers=headers)
+            try:
+                response = yield from aiohttp.request('GET', stream.url,
+                                                      headers=headers)
+            except aiohttp.errors.OsConnectionError as ex:
+                raise ConnectionError from ex
 
     complete = False
 
     with open(temp_path, mode) as fd:
 
-        if actives is None:
-            actives = (stream.url,)
-
-        while stream.url in actives:
+        while actives is None or stream.url in actives:
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
                 complete = True
