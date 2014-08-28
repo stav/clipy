@@ -12,7 +12,7 @@ import asyncio
 
 
 @asyncio.coroutine
-def download(stream, actives=()):
+def download(stream, actives=None):
     """ Taken from from Pafy https://github.com/np1/pafy """
     response = yield from aiohttp.request('GET', stream.url)
 
@@ -38,6 +38,9 @@ def download(stream, actives=()):
     complete = False
 
     with open(temp_path, mode) as fd:
+
+        if actives is None:
+            actives = (stream.url,)
 
         while stream.url in actives:
             chunk = yield from response.content.read(chunk_size)
