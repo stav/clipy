@@ -418,14 +418,11 @@ class Panel(object):
 
         cprint('Downloading {}'.format(stream.path))
 
-        # add to actives list
         self.cache.actives[stream.url] = stream
 
-        # here is the magic goodness
-        _success, _length = yield from clipy.request.download(
-            stream,
-            self.cache.actives,
-        )
+        _success, _length = yield from clipy.request.download(stream,
+            self.cache.actives)
+
         # and here we start our inline that would "normally" be in a callback
 
         # Add to downloaded list
@@ -454,7 +451,7 @@ def key_loop(stdscr, panel):
 
     while True:
 
-        # Refresh screen
+        # Refresh screen with each keystroke for snappy display
         stdscr.noutrefresh()
         panel.display()
 
@@ -538,6 +535,16 @@ def init(stdscr, loop, resource, target):
     if resource:
         stdscr.noutrefresh()
         loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))
+
+    def status_poll():
+        """ Refresh screen 10/s when downloads active """
+        loop.call_later(0.1, status_poll)
+
+        if control_panel.cache.actives:
+            stdscr.noutrefresh()
+            control_panel.display()
+
+    loop.call_soon_threadsafe(status_poll)
 
     # Enter curses keyboard event loop
     key_loop(stdscr, control_panel)
