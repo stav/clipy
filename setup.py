@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='clipy',
-    version='0.9.3',
+    version='0.9.4',
     license='BSD',
     url='https://github.com/stav/clipy',
     download_url='https://github.com/stav/clipy/archive/master.zip',

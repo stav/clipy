@@ -24,11 +24,11 @@ Usage
 
 Download::
 
-    clipy -d http://www.youtube.com/watch?v=fm78gjYkYKc
+    clipy http://www.youtube.com/watch?v=fm78gjYkYKc -d
 
 User Interface::
 
-    clipy -u
+    clipy --ui
 
 User interface written with `curses` from the standard library:
 
