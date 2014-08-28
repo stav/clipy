@@ -16,7 +16,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.20'
+VERSION = '0.9.21'
 
 
 class File(object):
@@ -296,32 +296,27 @@ class Panel(object):
 
     @asyncio.coroutine
     def inquire(self, resource=None):
-        video_id = None
-
         if resource is None:
             resource = pyperclip.paste().strip()
             self.console.printstr('Checking clipboard: {}'.format(resource))
 
-        if len(resource) == 11:
-            video_id = resource
-        elif 'youtube.com/results?search' in resource:
+        if 'youtube.com/results?search' in resource:
             yield from self.cache.load_search(resource)
-        elif 'youtube.com/watch' in resource:
-            video_id = re  # ToDo
-        else:
-            self.console.printstr('Resource not valid: "{}"'.format(resource), error=True)
-
-        if video_id is None:
             return
 
         self.console.printstr('Inquiring: {}'.format(resource))
-        video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
-        if video:
-            self.detail.video = video
-            self.cache.lookups[video.videoid] = video
-            self.cache.streams.index = None
+        try:
+            video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
 
-        self.display()
+        except ConnectionError as ex:
+            self.console.printstr('Error cannot connect, no network? {}'.format(ex))
+
+        else:
+            if video:
+                self.detail.video = video
+                self.cache.lookups[video.videoid] = video
+                self.cache.streams.index = None
+                self.display()
 
     def wait_for_input(self):
         # self.cache.win.nodelay(False)
@@ -419,26 +414,21 @@ class Panel(object):
             cprint('No video to download, Inquire first', error=True)
             return
 
-        def progress_poll(url, total, *progress_stats):
+        def progress_poll(url, status):
             """" The downloader will poll this after each chunk """
-            # Build status string
-            status_string = (
-                '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  ')
-            status = status_string.format(*progress_stats, total=total)
-
-            # Update main screen status
-            self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
-            self.stdscr.noutrefresh()
+            # # Update main screen status
+            # self.stdscr.addstr(0, 15, status, curses.A_REVERSE)
+            # self.stdscr.noutrefresh()
 
             # Update actives status
-            if url in self.cache.actives:  # may have been cancelled
+            if is_active(url):  # may have been cancelled
                 self.cache.actives[url].status = status
                 self.cache.display()
 
             # Commit screen changes
             self.update()
 
-        def active_poll(url):
+        def is_active(url):
             """" The downloader will poll this after each chunk """
             return url in self.cache.actives
 
@@ -453,8 +443,8 @@ class Panel(object):
         # here is the magic goodness
         _success, _length = yield from clipy.request.download(
             stream,
-            active_poll=active_poll,
-            progress_poll=progress_poll,
+            active=is_active,
+            status=progress_poll,
         )
         # and here we start our inline that would "normally" be in a callback
 

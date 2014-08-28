@@ -12,8 +12,7 @@ import asyncio
 
 
 @asyncio.coroutine
-def download(stream, port=80,
-             active_poll=lambda url: True, progress_poll=lambda *a: None):
+def download(stream, active=lambda url: True, status=lambda *a: None):
     """ Taken from from Pafy https://github.com/np1/pafy """
     response = yield from aiohttp.request('GET', stream.url)
 
@@ -33,12 +32,13 @@ def download(stream, port=80,
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            response = yield from aiohttp.request('GET', stream.url, headers=headers)
+            response = yield from aiohttp.request('GET', stream.url,
+                headers=headers)
 
     complete = False
 
     with open(temp_path, mode) as fd:
-        while active_poll(stream.url):
+        while active(stream.url):
             chunk = yield from response.content.read(chunk_size)
             if not chunk:
                 complete = True
@@ -50,7 +50,9 @@ def download(stream, port=80,
             rate = ((bytesdone - offset) / 1024) / elapsed
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
-            progress_poll(stream.url, total, *progress_stats)
+
+            status(stream.url,
+                '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(*progress_stats, total=total))
 
     if complete:
         os.rename(temp_path, stream.path)
@@ -80,7 +82,11 @@ def fetch(url, **kw):
 
 @asyncio.coroutine
 def get(url):
-    response = yield from fetch(url)
+    try:
+        response = yield from fetch(url)
+
+    except ConnectionError as ex:
+        raise ConnectionError from ex
 
     if response.status < 200 or response.status > 299:
         raise ConnectionError('Bad response status: {}, {}'.format(response.status, url))
@@ -92,8 +98,9 @@ def get(url):
 def get_text(url):
     try:
         response = yield from get(url)
-    except:
-        raise
+
+    except ConnectionError as ex:
+        raise ConnectionError from ex
 
     data = yield from response.text()
     return data

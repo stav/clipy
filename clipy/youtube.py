@@ -68,8 +68,9 @@ def get_info(resource):
     url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
     try:
         data = yield from clipy.request.get_text(url)
-    except:
-        raise
+
+    except ConnectionError as ex:
+        raise ConnectionError from ex
 
     info = urllib.parse.parse_qs(data)
 
@@ -96,6 +97,10 @@ def get_video(resource, target=None):
         pos = resource.find('/watch?v=') + 9
         resource = resource[pos: pos+11]
 
-    data = yield from get_info(resource)
+    try:
+        data = yield from get_info(resource)
+
+    except ConnectionError as ex:
+        raise ConnectionError from ex
 
     return clipy.video.VideoDetail(data, target=target)
