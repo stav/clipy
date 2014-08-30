@@ -1,3 +1,4 @@
+
 """
 Clipy YouTube video downloader YouTube module
 """
@@ -70,7 +71,7 @@ def get_info(resource):
         data = yield from clipy.request.get_text(url)
 
     except ConnectionError as ex:
-        raise ConnectionError from ex
+        raise
 
     info = urllib.parse.parse_qs(data)
 
@@ -78,7 +79,7 @@ def get_info(resource):
     if status == 'ok':
         return data
     else:
-        raise ConnectionError('Invalid video Id "{}" {}'.format(resource, info))
+        raise ValueError('Invalid video Id "{}" {}'.format(resource, info))
 
 
 @asyncio.coroutine
@@ -101,6 +102,9 @@ def get_video(resource, target=None):
         data = yield from get_info(resource)
 
     except ConnectionError as ex:
-        raise ConnectionError from ex
+        raise
+
+    except ValueError as ex:
+        raise
 
     return clipy.video.VideoDetail(data, target=target)

@@ -312,8 +312,11 @@ class Panel(object):
         try:
             video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
 
+        except ValueError as ex:
+            cprint('Error: {}'.format(ex), error=True)
+
         except ConnectionError as ex:
-            cprint('Error cannot connect, no network? {}'.format(ex), error=True)
+            cprint('Error: {}'.format(ex), error=True)
 
         else:
             if video:

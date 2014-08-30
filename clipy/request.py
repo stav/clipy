@@ -29,6 +29,17 @@ def governed_download(stream, actives=None):
 @asyncio.coroutine
 def download(stream, actives=None):
     """ Request stream's url and read from response and write to disk """
+    try:
+        result = yield from _download(stream, actives)
+
+    except aiohttp.errors.OsConnectionError as ex:
+        raise ConnectionError from ex
+
+    return result
+
+@asyncio.coroutine
+def _download(stream, actives=None):
+    """ Request stream's url and read from response and write to disk """
     response = yield from aiohttp.request('GET', stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
@@ -48,11 +59,8 @@ def download(stream, actives=None):
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            try:
-                response = yield from aiohttp.request('GET', stream.url,
-                                                      headers=headers)
-            except aiohttp.errors.OsConnectionError as ex:
-                raise ConnectionError from ex
+            response = yield from aiohttp.request('GET', stream.url,
+                                                  headers=headers)
 
     complete = False
 
@@ -85,7 +93,7 @@ def fetch(url, **kw):
         response = yield from aiohttp.request('GET', url, **kw)
 
     except aiohttp.errors.OsConnectionError as ex:
-        raise ConnectionError from ex
+        raise ConnectionError('Cannot connect') from ex
 
     # Debug
     # data = yield from response.text()
@@ -105,7 +113,7 @@ def get(url):
         response = yield from fetch(url)
 
     except ConnectionError as ex:
-        raise ConnectionError from ex
+        raise
 
     if response.status < 200 or response.status > 299:
         raise ConnectionError('Bad response status: {}, {}'.format(response.status, url))
@@ -119,7 +127,7 @@ def get_text(url):
         response = yield from get(url)
 
     except ConnectionError as ex:
-        raise ConnectionError from ex
+        raise
 
     data = yield from response.text()
     return data

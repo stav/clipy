@@ -18,8 +18,6 @@ UI
 
     top clipy title-bar session stats
 
-    load-lookups should append (not overwrite) to current
-
 Request
 
     user agent
