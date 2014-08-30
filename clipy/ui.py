@@ -154,7 +154,7 @@ class ListWindow(Window):
             self.CacheList('Downloaded'),
             self.CacheList('Files', self.panel.target_dir),
             self.CacheList('Threads'),
-            self.CacheList('Active'),
+            self.actives or self.CacheList('Active'),
         )
         self.index = 0
         self.videos = self.caches[self.index]
@@ -403,19 +403,18 @@ class Panel(object):
                     if os.path.exists(path):
                         self.loop.run_in_executor(None, play)
                     else:
-                        cprint('File no longer exists {}'.format(path), error=True)
+                        cprint('File no longer exists {}'.format(path),
+                            error=True)
 
-    def cancel(self):
-        """ Cancel last spawned thread """
-        cprint = self.console.printstr
-
-        if self.cache.actives:
-            last_key = list(self.cache.actives).pop()
-            cprint('Cancelling most recent active download: {}'.format(
-                self.cache.actives[last_key]))
-            del self.cache.actives[last_key]
-        else:
-            cprint('Nothing to cancel')
+                # Actives action
+                elif self.cache.videos is self.cache.actives:
+                    try:
+                        key = list(self.cache.actives)[v_index]
+                        cprint('Cancelling download: {}'.format(
+                            self.cache.actives[key]))
+                        del self.cache.actives[key]
+                    except IndexError:
+                        cprint('Nothing to cancel')
 
     @asyncio.coroutine
     def download(self, video, index=None):
@@ -459,7 +458,6 @@ def key_loop(stdscr, panel):
     KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
-    KEYS_CANCEL   = (ord('X'),)
     KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
                      curses.KEY_UP, curses.KEY_DOWN)
     KEYS_ACTION   = (curses.KEY_ENTER, 10)  # 10 is enter
@@ -492,12 +490,9 @@ def key_loop(stdscr, panel):
         if c in KEYS_CACHE:
             panel.view(c)
 
-        if c in KEYS_CANCEL:
-            panel.cancel()
-
         if c in KEYS_HELP:
             panel.console.printstr(
-                'HELP: Load cache (L), save cache (C), reset (R) and cancel (X)'
+                'HELP: Load cache (L), save cache (C) and reset (R)'
                 ' commands are all upper case only.', wow=True)
 
         # Debug
@@ -530,7 +525,6 @@ def init(stdscr, loop, resource, target):
         ('L', 'load cache'),
         ('C', 'save cache'),
         ('D', 'download'),
-        ('X', 'cancel'),
         ('R', 'reset'),
         ('H', 'help'),
         ('Q', 'quit'),
