@@ -367,6 +367,16 @@ class Panel(object):
     def action(self):
         cprint = self.console.printstr
 
+        def play():
+            cprint('Playing {}'.format(path))
+            try:
+                subprocess.call(
+                    ['mplayer', "{}".format(path)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL)
+            except AttributeError:
+                cprint("Can't play, Python2?")
+
         v_index = self.cache.videos.index
 
         if v_index is not None:
@@ -387,17 +397,10 @@ class Panel(object):
                   or self.cache.videos is self.cache.files:
                     key = list(self.cache.videos)[v_index]
                     path = self.cache.videos[key].path
-                    if not os.path.exists(path):
-                        cprint('File no longer exists {}'.format(path), error=True)
+                    if os.path.exists(path):
+                        self.loop.run_in_executor(None, play)
                     else:
-                        cprint('Playing {}'.format(path))
-                        try:
-                            subprocess.call(
-                                ['mplayer', "{}".format(path)],
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-                        except AttributeError:
-                            cprint("Can't play, Python2?")
+                        cprint('File no longer exists {}'.format(path), error=True)
 
     def cancel(self):
         """ Cancel last spawned thread """
