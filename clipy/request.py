@@ -37,6 +37,7 @@ def download(stream, actives=None):
 
     return result
 
+
 @asyncio.coroutine
 def _download(stream, actives=None):
     """ Request stream's url and read from response and write to disk """
@@ -78,7 +79,9 @@ def _download(stream, actives=None):
             eta = (total - bytesdone) / (rate * 1024)
             progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
 
-            stream.status = '({total}) {:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(*progress_stats, total=total)
+            stream.status = '({total}) '\
+                '{:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(
+                    *progress_stats, total=total)
 
     if complete:
         os.rename(temp_path, stream.path)
@@ -111,7 +114,7 @@ def get(url):
     try:
         response = yield from fetch(url)
 
-    except ConnectionError as ex:
+    except ConnectionError:
         raise
 
     if response.status < 200 or response.status > 299:
@@ -125,7 +128,7 @@ def get_text(url):
     try:
         response = yield from get(url)
 
-    except ConnectionError as ex:
+    except ConnectionError:
         raise
 
     data = yield from response.text()
