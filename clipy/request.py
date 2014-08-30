@@ -40,7 +40,7 @@ def download(stream, actives=None):
 @asyncio.coroutine
 def _download(stream, actives=None):
     """ Request stream's url and read from response and write to disk """
-    response = yield from aiohttp.request('GET', stream.url)
+    response = yield from fetch(stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
     chunk_size = 16384
@@ -59,8 +59,7 @@ def _download(stream, actives=None):
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            response = yield from aiohttp.request('GET', stream.url,
-                                                  headers=headers)
+            response = yield from fetch(stream.url, headers=headers)
 
     complete = False
 
