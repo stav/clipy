@@ -126,7 +126,7 @@ class Stream(object):
     def __init__(self, info, video=None, target=None):
         """  """
         for k, v in info.items():
-            setattr(self, k, v)
+            setattr(self, k, clipy.utils.take_first(v))
 
         self.name = video.name or '{}-({}).{}'.format(
             video.title, self.resolution, self.extension
@@ -137,16 +137,12 @@ class Stream(object):
         self.itags = [t for t in clipy.youtube.ITAGS.get(self.itag) if t]
 
     def __str__(self):
-        return 'S> {} {}'.format(self.status, self.display)
         # from pprint import pformat
-        # # info = pformat(self.info)
-        # strm = pformat(self.stream)
+        # x = pformat(self.type)
         # with open('Stream.__str__', 'a') as f:
-        #     # f.write('data: '); f.write(data); f.write('\n\n')
-        #     # f.write('info: '); f.write(info); f.write('\n\n')
-        #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
-        #     f.write('strm: '); f.write(strm); f.write('\n\n')
+        #     f.write('x: '); f.write(x); f.write('\n\n')
         #     f.write('------------------------------------\n\n')
+        return 'S> {} {}'.format(self.status, self.display)
 
     @property
     def display(self):
