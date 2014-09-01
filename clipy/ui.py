@@ -16,7 +16,7 @@ import clipy.request
 import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.23'
+VERSION = '0.9.24'
 
 
 class File(object):
@@ -107,7 +107,11 @@ class DetailWindow(Window):
     def display(self):
         super(DetailWindow, self).display()
 
-        if self.video:
+        if self.panel.input_mode:
+            self.printstr('Input your YouTube search string, then press Enter')
+            self.printstr('> {}'.format(self.panel.input_text))
+
+        elif self.video:
             self.printstr(self.video.detail)
             self.panel.cache.streams.clear()
             for stream in self.video.streams:
@@ -241,6 +245,8 @@ class Panel(object):
     """docstring for Panel"""
     testing = False
     target_dir = ''
+    input_mode = False
+    input_text = ''
 
     def __init__(self, loop, stdscr, detail, cache, console):
         self.loop = loop
@@ -297,12 +303,23 @@ class Panel(object):
             self.console.printstr('Cache: saved')
 
     @asyncio.coroutine
-    def inquire(self, resource=None):
+    def clipboard(self):
         cprint = self.console.printstr
+        try:
+            contents = pyperclip.paste()
+        except:
+            contents = None
+            cprint('Cannot seem to read the clipboad, try (I) input')
+        if contents:
+            contents = str(contents).strip()
+            cprint('Checking clipboard: {}'.format(contents))
+            yield from self.inquire(contents)
+        else:
+            cprint('Found nothing in clipboard')
 
-        if resource is None:
-            resource = pyperclip.paste().strip()
-            cprint('Checking clipboard: {}'.format(resource))
+    @asyncio.coroutine
+    def inquire(self, resource):
+        cprint = self.console.printstr
 
         if 'youtube.com/results?search' in resource:
             yield from self.cache.load_search(resource)
@@ -310,7 +327,8 @@ class Panel(object):
 
         cprint('Inquiring: {}'.format(resource))
         try:
-            video = yield from clipy.youtube.get_video(resource, target=self.target_dir)
+            video = yield from clipy.youtube.get_video(
+                resource, target=self.target_dir)
 
         except ValueError as ex:
             cprint('Error: {}'.format(ex), error=True)
@@ -368,7 +386,14 @@ class Panel(object):
 
     @asyncio.coroutine
     def action(self):
+        """ The Enter key was pressed """
         cprint = self.console.printstr
+
+        # If we are in input mode then just inquire
+        if self.input_mode:
+            self.input_mode = False
+            yield from self.inquire(self.input_text)
+            return
 
         def play():
             cprint('Playing {}'.format(path))
@@ -454,11 +479,12 @@ class Panel(object):
 
 def key_loop(stdscr, panel):
     KEYS_DOWNLOAD = (ord('d'), ord('D'))
-    KEYS_INQUIRE  = (ord('i'), ord('I'))
+    KEYS_INPUT    = (ord('i'), ord('I'))
+    KEYS_CLIPBOARD= (ord('c'), ord('C'))
     KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
-    KEYS_CACHE    = (ord('L'), ord('C'), curses.KEY_LEFT, curses.KEY_RIGHT,
+    KEYS_CACHE    = (ord('L'), ord('S'), curses.KEY_LEFT, curses.KEY_RIGHT,
                      curses.KEY_UP, curses.KEY_DOWN)
     KEYS_ACTION   = (curses.KEY_ENTER, 10)  # 10 is enter
 
@@ -471,36 +497,56 @@ def key_loop(stdscr, panel):
         # Accept keyboard input
         c = panel.wait_for_input()
 
-        if c in KEYS_QUIT:
-            break
-
-        if c in KEYS_RESET:
-            panel.reset()
-
-        if c in KEYS_INQUIRE:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire())
-
-        if c in KEYS_DOWNLOAD:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
-                panel.detail.video))
-
-        if c in KEYS_ACTION:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
-
+        # Allow cache keys during input mode
         if c in KEYS_CACHE:
             panel.view(c)
 
-        if c in KEYS_HELP:
-            panel.console.printstr(
-                'HELP: Load cache (L), save cache (C) and reset (R)'
-                ' commands are all upper case only.', wow=True)
+        # Allow action keys during input mode
+        elif c in KEYS_ACTION:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
 
-        # Debug
-        if c in (ord('Z'),):
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
-        stdscr.addstr(
-            curses.LINES-1, curses.COLS-20,
-            'c={}, t={}      '.format(c, threading.active_count()))
+        # Check for input mode
+        elif panel.input_mode:
+            if c == 27:  # escape
+                panel.input_mode = False
+            else:
+                panel.input_text += chr(c)
+
+        # The following keys are not captured during input mode
+        else:
+
+            if c in KEYS_QUIT:
+                break
+
+            if c in KEYS_RESET:
+                panel.reset()
+
+            if c in KEYS_INPUT:
+                # panel.loop.call_soon_threadsafe(asyncio.async, panel.input())
+                panel.input_mode = True
+                panel.input_text = ''
+                # curses.nocbreak()
+                # self.stdscr.keypad(False)
+                # curses.echo()
+
+            if c in KEYS_CLIPBOARD:
+                panel.loop.call_soon_threadsafe(asyncio.async, panel.clipboard())
+
+            if c in KEYS_DOWNLOAD:
+                panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
+                    panel.detail.video))
+
+            if c in KEYS_HELP:
+                panel.console.printstr(
+                    'HELP: Load cache (L), save cache (C) and reset (R)'
+                    ' commands are all upper case only.', wow=True)
+
+            # Debug
+            if c in (ord('Z'),):
+                panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
+
+        # Show last key pressed
+        stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}'.format(c))
 
 
 def init(stdscr, loop, resource, target):
@@ -520,10 +566,11 @@ def init(stdscr, loop, resource, target):
 
     # Menu options at bottom
     menu_options = (
-        ('I', 'inquire'),
+        ('I', 'input'),
+        ('C', 'clipboard'),
         ('arrows', 'cache'),
         ('L', 'load cache'),
-        ('C', 'save cache'),
+        ('S', 'save cache'),
         ('D', 'download'),
         ('R', 'reset'),
         ('H', 'help'),
