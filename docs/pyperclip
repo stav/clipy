@@ -1,0 +1,24 @@
+OSX Lion
+
+https://www.youtube.com/watch?v=DRPfXHni1ok
+
+Future/Task exception was never retrieved
+
+future: Task(<inquire>)<exception=TypeError("descriptor 'decode' requires a 'bytes' object but received a 'NoneType'",)>
+
+
+Traceback (most recent call last):
+
+    File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/asyncio/tasks.py", line 321, in _step
+
+        result = next(coro)
+
+    File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/clipy-0.9.4-py3.4.egg/clipy/ui.py", line 304, in inquire
+
+        resource = pyperclip.paste().strip()
+
+    File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/pyperclip-1.5.1-py3.4.egg/pyperclip/__init__.py", line 111, in _pasteOSX
+
+        return bytes.decode(stdout)
+
+    TypeError: descriptor 'decode' requires a 'bytes' object but received a 'NoneType'
