@@ -6,11 +6,9 @@ import re
 import curses
 import asyncio
 import threading
-import subprocess
 import collections
 
-import pyperclip
-
+import clipy.panel
 import clipy.video
 import clipy.request
 import clipy.youtube

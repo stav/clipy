@@ -2,16 +2,12 @@
 Clipy YouTube video downloader user interface: Panel
 """
 import os
-import re
 import curses
 import asyncio
-import threading
 import subprocess
-import collections
 
 import pyperclip
 
-import clipy.video
 import clipy.request
 import clipy.youtube
 

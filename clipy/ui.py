@@ -2,20 +2,11 @@
 Clipy YouTube video downloader user interface
 """
 import os
-import re
 import curses
 import asyncio
-import threading
-import subprocess
-import collections
-
-import pyperclip
 
 import clipy.panel
-import clipy.request
-import clipy.video
 import clipy.window
-import clipy.youtube
 
 TITLE = '.:. Clipy .:.'
 VERSION = '0.9.25'
@@ -87,7 +78,8 @@ def key_loop(stdscr, panel):
 
             # Debug
             if c in (ord('Z'),):
-                panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire('g79HokJTfPU'))
+                panel.loop.call_soon_threadsafe(
+                    asyncio.async, panel.inquire('g79HokJTfPU'))
 
         # Show last key pressed
         stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}'.format(c))
