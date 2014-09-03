@@ -101,10 +101,7 @@ def get_video(resource, target=None):
     try:
         data = yield from get_info(resource)
 
-    except ConnectionError:
-        raise
-
-    except ValueError:
+    except (ConnectionError, ValueError):
         raise
 
     return clipy.video.VideoDetail(data, target=target)
