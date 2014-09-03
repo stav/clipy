@@ -15,7 +15,7 @@ import argparse
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 
 
 def _get_commandline_options():
@@ -72,29 +72,29 @@ def init(options):
     log = options.logger
     video = None
     stream = None
-    resource = None
+    resource = options.resource
     target_dir = os.path.expanduser(options.target)
 
     log('Clipy started with {}'.format(options))
 
     import clipy.youtube
 
-    if options.resource:
-        log('Supplied resource: {}'.format(options.resource))
-        try:
-            video = yield from clipy.youtube.get_video(
-                options.resource, target=target_dir)
-
-        except ConnectionError as ex:
-            log('Error: Cannot connect, no Intenet? {}'.format(ex))
-
-    if video is None and options.clipboard:
+    if options.clipboard:
+        if options.resource:
+            log('WARNING: attempting to override supplied resource "{}" with clipboard contents'.format(options.resource))
         log('Checking clipboard for resource')
         import pyperclip
         resource = pyperclip.paste().strip()
 
-        video = yield from clipy.youtube.get_video(
-            resource, target=target_dir)
+    if not resource:
+        print('No resource supplied')
+        return
+
+    log('Using resource: {}'.format(resource))
+    try:
+        video = yield from clipy.youtube.get_video(resource, target=target_dir)
+    except (ConnectionError, ValueError) as ex:
+        print(ex)
 
     if video:
         log('Video found on YouTube')

@@ -2,8 +2,6 @@
 Clipy YouTube video downloader network communications
 
 g79HokJTfPU
-g79HokJTfP!
-g79HokJTfP
 """
 import os
 import time
@@ -66,6 +64,7 @@ def _download(stream, actives=None):
 
     with open(temp_path, mode) as fd:
 
+        # While non-ui use or the stream is still active (not cancelled)
         while actives is None or stream.url in actives:
             chunk = yield from response.content.read(chunk_size)
             if not chunk:

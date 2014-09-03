@@ -90,8 +90,11 @@ class VideoDetail(object):
 
     @property
     def detail(self):
-        # import pprint
-        # p = pprint.pformat(self.info)
+        streams = ''
+
+        for i, stream in enumerate(self.streams):
+            streams += '{}: {}\n'.format(i, stream.display)
+
         return '''
 Id:     {}
 Title:  {}
@@ -100,15 +103,14 @@ Length: {} seconds
 Views:  {}
 
 Streams: {}
-* {}
-        '''.format(
+{}'''.format(
             clipy.utils.take_first(self.info['video_id']),
             clipy.utils.take_first(self.info['title']),
             clipy.utils.take_first(self.info['author']),
             clipy.utils.take_first(self.info['length_seconds']),
             clipy.utils.take_first(self.info['view_count']),
             len(self.streams),
-            '\n* '.join([stream.display for stream in self.streams]),
+            streams,
         )
         # with open('qs', 'w') as f:
         #     f.write(output)
