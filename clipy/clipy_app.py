@@ -81,7 +81,8 @@ def init(options):
 
     if options.clipboard:
         if options.resource:
-            log('WARNING: attempting to override supplied resource "{}" with clipboard contents'.format(options.resource))
+            log('WARNING: attempting to override supplied resource "{}" with'
+                ' clipboard contents'.format(options.resource))
         log('Checking clipboard for resource')
         import pyperclip
         resource = pyperclip.paste().strip()

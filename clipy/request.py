@@ -8,6 +8,7 @@ import time
 import aiohttp
 import asyncio
 
+import clipy.utils
 
 # Limit number of downloads for calls to `governed_download`
 semaphore = asyncio.Semaphore(3)
@@ -38,7 +39,11 @@ def download(stream, actives=None):
 
 @asyncio.coroutine
 def _download(stream, actives=None):
-    """ Request stream's url and read from response and write to disk """
+    """
+    Request stream's url and read from response and write to disk
+
+    After every chunk is processed the stream's status is updated.
+    """
     response = yield from fetch(stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
@@ -76,11 +81,15 @@ def _download(stream, actives=None):
             bytesdone += len(chunk)
             rate = ((bytesdone - offset) / 1024) / elapsed
             eta = (total - bytesdone) / (rate * 1024)
-            progress_stats = (bytesdone, bytesdone * 1.0 / total, rate, eta)
 
-            stream.status = '({total}) '\
-                '{:,} Bytes ({:.0%}) @ {:.0f} KB/s, ETA: {:.0f} secs  '.format(
-                    *progress_stats, total=total)
+            stream.status = '|{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
+                m=clipy.utils.progress_bar(bytesdone, total),
+                d=bytesdone,
+                t=clipy.utils.size(total),
+                p=bytesdone * 1.0 / total,
+                r=rate,
+                e=eta,
+            )
 
     if complete:
         os.rename(temp_path, stream.path)
