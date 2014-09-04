@@ -15,21 +15,21 @@ semaphore = asyncio.Semaphore(3)
 
 
 @asyncio.coroutine
-def governed_download(stream, actives=None):
+def governed_download(stream, actives=None, log=None):
     """
     Request stream's url and read from response and write to disk obeying the
     law of Semaphores
     """
     with (yield from semaphore):
-        response = yield from download(stream, actives)
+        response = yield from download(stream, actives, log)
         return response
 
 
 @asyncio.coroutine
-def download(stream, actives=None):
+def download(stream, actives=None, log=None):
     """ Request stream's url and read from response and write to disk """
     try:
-        result = yield from _download(stream, actives)
+        result = yield from _download(stream, actives, log)
 
     except aiohttp.errors.OsConnectionError as ex:
         raise ConnectionError from ex
@@ -38,7 +38,7 @@ def download(stream, actives=None):
 
 
 @asyncio.coroutine
-def _download(stream, actives=None):
+def _download(stream, actives, log):
     """
     Request stream's url and read from response and write to disk
 
@@ -90,6 +90,9 @@ def _download(stream, actives=None):
                 r=rate,
                 e=eta,
             )
+            if log:
+                log.write("\r{}    ".format(stream.status))
+                # log.flush()
 
     if complete:
         os.rename(temp_path, stream.path)

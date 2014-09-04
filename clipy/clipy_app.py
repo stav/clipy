@@ -15,7 +15,7 @@ import argparse
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.5'
+VERSION = '0.9.6'
 
 
 def _get_commandline_options():
@@ -115,8 +115,14 @@ def init(options):
                         print('{}: {}'.format(p, getattr(stream, p, '')))
             if stream:
                 import clipy.request
+
                 print('Downloading...')
-                _success, _length = yield from clipy.request.download(stream)
+
+                _success, _length = yield from clipy.request.download(
+                    stream, log=sys.stdout)
+
+                print('\nDownload of {} bytes {}'.format(_length,
+                      'completed normally' if _success else 'did not complete'))
 
     log('Clipy stopping')
 

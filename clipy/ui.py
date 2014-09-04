@@ -9,7 +9,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.25'
+VERSION = '0.9.26'
 
 
 def key_loop(stdscr, panel):
