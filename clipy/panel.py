@@ -37,8 +37,8 @@ class Thread(object):
         ))
 
 
-class Panel(object):
-    """docstring for Panel"""
+class BasePanel(object):
+    """ Synchronous panel code """
     testing = False
     target_dir = ''
     input_mode = False
@@ -70,6 +70,10 @@ class Panel(object):
         if not self.testing:
             curses.doupdate()
 
+    def wait_for_input(self):
+        # self.cache.win.nodelay(False)
+        return self.cache.win.getch()
+
     def load_cache(self):
         cprint = self.console.printstr
 
@@ -97,6 +101,47 @@ class Panel(object):
                 f.write('{} {}\n'.format(cache.stream.url, cache))
 
             self.console.printstr('Cache: saved')
+
+    def view(self, key):
+        # Load cache from disk
+        if key == ord('L'):
+            self.load_cache()
+
+        # Save cache to disk
+        elif key == ord('C'):
+            self.save_cache()
+
+        # Change cache view
+        elif key == curses.KEY_LEFT:
+            if self.cache.index > 0:
+                self.cache.index -= 1
+
+        # Change cache view
+        elif key == curses.KEY_RIGHT:
+            if self.cache.index < len(self.cache.caches) - 1:
+                self.cache.index += 1
+
+        # Intra-cache navigation
+        else:
+            v_index = self.cache.videos.index
+
+            # Move up the list
+            if key == curses.KEY_UP:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index > 0:
+                    self.cache.videos.index -= 1
+
+            # Move down the list
+            elif key == curses.KEY_DOWN:
+                if v_index is None:
+                    self.cache.videos.index = 0
+                elif v_index < len(self.cache.videos) - 1:
+                    self.cache.videos.index += 1
+
+
+class Panel(BasePanel):
+    """ Asynchronous panel code """
 
     @asyncio.coroutine
     def clipboard(self):
@@ -138,47 +183,6 @@ class Panel(object):
                 self.cache.lookups[video.videoid] = video
                 self.cache.streams.index = None
                 self.display()
-
-    def wait_for_input(self):
-        # self.cache.win.nodelay(False)
-        return self.cache.win.getch()
-
-    def view(self, key):
-        # Load cache from disk
-        if key == ord('L'):
-            self.load_cache()
-
-        # Save cache to disk
-        elif key == ord('C'):
-            self.save_cache()
-
-        # Change cache view
-        elif key == curses.KEY_LEFT:
-            if self.cache.index > 0:
-                self.cache.index -= 1
-
-        # Change cache view
-        elif key == curses.KEY_RIGHT:
-            if self.cache.index < len(self.cache.caches) - 1:
-                self.cache.index += 1
-
-        # Intra-cache navigation
-        else:
-            v_index = self.cache.videos.index
-
-            # Move up the list
-            if key == curses.KEY_UP:
-                if v_index is None:
-                    self.cache.videos.index = 0
-                elif v_index > 0:
-                    self.cache.videos.index -= 1
-
-            # Move down the list
-            elif key == curses.KEY_DOWN:
-                if v_index is None:
-                    self.cache.videos.index = 0
-                elif v_index < len(self.cache.videos) - 1:
-                    self.cache.videos.index += 1
 
     @asyncio.coroutine
     def action(self):
