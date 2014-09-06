@@ -198,8 +198,8 @@ class Panel(object):
                     ['mplayer', "{}".format(path)],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
-            except AttributeError:
-                cprint("Can't play, Python2?")
+            except FileNotFoundError as ex:
+                cprint("Can't play: {}".format(ex))
 
         v_index = self.cache.videos.index
 
