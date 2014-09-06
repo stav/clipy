@@ -102,22 +102,18 @@ def init(options):
         print(video.detail)
 
         if options.download is not None:
-            log('Stream selected: {}'.format(options.download))
+            print('Stream selected: {}'.format(options.download))
             try:
                 stream = video.streams[options.download]
             except IndexError:
                 print('Stream {} not found, available streams are {}'.format(
                     options.download, [i for i in range(len(video.streams))]))
-            else:
-                for p in dir(stream):
-                    attr = getattr(stream, p, None)
-                    if not p.startswith('_') and not hasattr(attr, '__call__'):
-                        print('{}: {}'.format(p, getattr(stream, p, '')))
+
             if stream:
+                print(stream.detail())
+                print('Downloading to {}'.format(stream.path))
+
                 import clipy.request
-
-                print('Downloading...')
-
                 _success, _length = yield from clipy.request.download(
                     stream, log=sys.stdout)
 

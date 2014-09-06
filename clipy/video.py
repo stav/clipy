@@ -123,7 +123,6 @@ class Stream(object):
     name = None
     path = None
     status = ''
-    target = None
 
     def __init__(self, info, video=None, target=None):
         """  """
@@ -151,3 +150,6 @@ class Stream(object):
         return 'Sd>  {} ({}) {}'.format(', '.join(self.itags),
                                         getattr(self, 'quality', 'unknown'),
                                         getattr(self, 'type', ''))
+
+    def detail(self):
+        return '\n'.join(clipy.utils.list_properties(self))

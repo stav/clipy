@@ -24,7 +24,7 @@ _traditional = [
 
 
 def size(bytes, system=_traditional):
-    """Human-readable file size.
+    """Human-readable file size
 
     Using the traditional system, where a factor of 1024 is used::
 
@@ -71,7 +71,7 @@ def size(bytes, system=_traditional):
 def progress_bar(done, total, length=10, bar='#', sep='-'):
     """
     Return a string indicating graphically the percentage of the first argument
-    to the second.
+    to the second
 
     >>> progress_bar(3, 6)
     "#####-----"
@@ -82,3 +82,19 @@ def progress_bar(done, total, length=10, bar='#', sep='-'):
     return '{}{}'.format(
         str(bar) * bars,
         str(sep) * (length - bars))
+
+
+def list_properties(obj):
+    """
+    Return a list of all the object's properties
+
+    Does not include callable attributes or attributes that begin with "_".
+    """
+    return [
+        '{}: {}'.format(p, getattr(obj, p, ''))
+            for p in dir(obj)
+                if not p.startswith('_')
+                and not hasattr(
+                    getattr(obj, p, None),
+                    '__call__')
+    ]
