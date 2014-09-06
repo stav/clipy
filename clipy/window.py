@@ -181,8 +181,13 @@ class ListWindow(Window):
             self.searches.clear()
             for videoid in videoids:
                 if videoid != '__video_id__':
-                    video = yield from clipy.youtube.get_video(
-                        videoid, target=self.panel.target_dir)
+                    try:
+                        video = yield from clipy.youtube.get_video(
+                            videoid, target=self.panel.target_dir)
+
+                    except (ConnectionError, ValueError) as ex:
+                        self.panel.console.printstr(ex)
+
                     if video:
                         self.searches[videoid] = video
                         self.display()

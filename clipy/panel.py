@@ -171,10 +171,7 @@ class Panel(BasePanel):
             video = yield from clipy.youtube.get_video(
                 resource, target=self.target_dir)
 
-        except ValueError as ex:
-            cprint('Error: {}'.format(ex), error=True)
-
-        except ConnectionError as ex:
+        except (ConnectionError, ValueError) as ex:
             cprint('Error: {}'.format(ex), error=True)
 
         else:
