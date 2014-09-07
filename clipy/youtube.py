@@ -1,4 +1,3 @@
-
 """
 Clipy YouTube video downloader YouTube module
 """
@@ -84,15 +83,6 @@ def get_info(resource):
 
 @asyncio.coroutine
 def get_video(resource, target=None):
-    # try:
-    #     data = yield from clipy.request.get_youtube_info(resource)
-    # except ConnectionError as ex:
-    #     self.console.printstr(ex, error=True)
-    #     return
-    # if data is None:
-    #     self.console.printstr('No data returned', error=True)
-    #     return
-
     # Pull out just the 11-digit Id from the URL
     if 'youtube.com/watch?v=' in resource:
         pos = resource.find('/watch?v=') + 9
@@ -103,5 +93,9 @@ def get_video(resource, target=None):
 
     except (ConnectionError, ValueError):
         raise
+
+    # Debug
+    # with open('get_video', 'w') as f:
+    #     f.write('Data: '); f.write(data); f.write('\n\n')
 
     return clipy.video.VideoDetail(data, target=target)

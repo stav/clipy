@@ -252,23 +252,28 @@ class Panel(BasePanel):
             cprint('Stream already downloading: {}'.format(stream))
             return
 
-        cprint('Downloading {}'.format(stream.path))
+        cprint('Preparing to download {}'.format(stream.path))
 
         self.cache.actives[stream.url] = stream
 
-        _success, _length = yield from clipy.request.governed_download(
-            stream, self.cache.actives)
+        try:
+            _success, _length = yield from clipy.request.governed_download(
+                stream, self.cache.actives)
+
+        except ConnectionError as ex:
+            cprint('Error: {}'.format(ex), error=True)
 
         # and here we start our inline that would "normally" be in a callback
 
-        # Add to downloaded list
-        if _success:
-            self.cache.downloads[stream.url] = stream
+        else:
+            # Add to downloaded list
+            if _success:
+                self.cache.downloads[stream.url] = stream
 
-        # Remove from actives list if not already cencelled
-        if stream.url in self.cache.actives:
-            del self.cache.actives[stream.url]
+            # Remove from actives list if not already cencelled
+            if stream.url in self.cache.actives:
+                del self.cache.actives[stream.url]
 
-        # Update screen to show the active download is no longer active
-        self.cache.display()
-        cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
+            # Update screen to show the active download is no longer active
+            self.cache.display()
+            cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
