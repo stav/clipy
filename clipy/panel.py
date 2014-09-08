@@ -8,8 +8,8 @@ import subprocess
 
 import pyperclip
 
-import clipy.request
 import clipy.youtube
+import clipy.download
 
 
 class File(object):
@@ -257,7 +257,7 @@ class Panel(BasePanel):
         self.cache.actives[stream.url] = stream
 
         try:
-            _success, _length = yield from clipy.request.governed_download(
+            _success, _length = yield from clipy.download.get(
                 stream, self.cache.actives)
 
         except ConnectionError as ex:

@@ -11,11 +11,11 @@ import asyncio
 import argparse
 
 # import pyperclip - lazy import
-# import clipy.request - lazy import
+# import clipy.download - lazy import
 # import clipy.ui - lazy import
 # import clipy.youtube - lazy import
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 
 def _get_commandline_options():
@@ -113,8 +113,8 @@ def init(options):
                 print(stream.detail())
                 print('Downloading to {}'.format(stream.path))
 
-                import clipy.request
-                _success, _length = yield from clipy.request.download(
+                import clipy.download
+                _success, _length = yield from clipy.download.get(
                     stream, log=sys.stdout)
 
                 print('\nDownload of {} bytes {}'.format(_length,
