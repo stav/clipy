@@ -11,7 +11,7 @@ import asyncio
 import clipy.utils
 import clipy.request
 
-# Limit number of downloads for calls to `governed_download`
+# Limit number of downloads for calls to `get`
 semaphore = asyncio.Semaphore(3)
 
 
@@ -28,17 +28,6 @@ def get(stream, actives=None, log=None):
 
     except ConnectionError:
         raise
-
-
-# @asyncio.coroutine
-# def download(stream, actives=None, log=None):
-#     """ Request stream's url and read from response and write to disk """
-#     try:
-#         result = yield from _download(stream, actives, log)
-#         return result
-
-#     except ConnectionError:
-#         raise
 
 
 @asyncio.coroutine
