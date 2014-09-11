@@ -9,7 +9,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.28'
+VERSION = '0.9.29'
 
 
 def key_loop(stdscr, panel):
@@ -32,54 +32,50 @@ def key_loop(stdscr, panel):
         # Accept keyboard input
         c = panel.wait_for_input()
 
-        # Allow cache keys during input mode
+        if c in KEYS_INPUT:
+            # self.panel.stdscr.keypad(False)
+            # curses.nocbreak()
+            # curses.echo()
+            curses.curs_set(True)
+
+            panel.input_text = ''
+            panel.popup.freshen()
+            panel.popup.display()
+
+            # stdscr.keypad(True)
+            # curses.cbreak()
+            # curses.noecho()
+            curses.curs_set(False)
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire(panel.input_text))
+
         if c in KEYS_CACHE:
             panel.view(c)
 
-        # Allow action keys during input mode
-        elif c in KEYS_ACTION:
+        if c in KEYS_ACTION:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
 
-        # Check for input mode
-        elif panel.input_mode:
-            if c == 27:  # escape
-                panel.input_mode = False
-            else:
-                panel.input_text += chr(c)
+        if c in KEYS_QUIT:
+            break
 
-        # The following keys are not captured during input mode
-        else:
+        if c in KEYS_RESET:
+            panel.reset()
 
-            if c in KEYS_QUIT:
-                break
+        if c in KEYS_CLIPBOARD:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.clipboard())
 
-            if c in KEYS_RESET:
-                panel.reset()
+        if c in KEYS_DOWNLOAD:
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
+                panel.detail.video))
 
-            if c in KEYS_INPUT:
-                # panel.loop.call_soon_threadsafe(asyncio.async, panel.input())
-                panel.input_mode = True
-                panel.input_text = ''
-                # curses.nocbreak()
-                # self.stdscr.keypad(False)
-                # curses.echo()
+        if c in KEYS_HELP:
+            panel.console.printstr(
+                'HELP: Load cache (L), save cache (C) and reset (R)'
+                ' commands are all upper case only.', wow=True)
 
-            if c in KEYS_CLIPBOARD:
-                panel.loop.call_soon_threadsafe(asyncio.async, panel.clipboard())
-
-            if c in KEYS_DOWNLOAD:
-                panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
-                    panel.detail.video))
-
-            if c in KEYS_HELP:
-                panel.console.printstr(
-                    'HELP: Load cache (L), save cache (C) and reset (R)'
-                    ' commands are all upper case only.', wow=True)
-
-            # Debug
-            if c in (ord('Z'),):
-                panel.loop.call_soon_threadsafe(
-                    asyncio.async, panel.inquire('g79HokJTfPU'))
+        # Debug
+        if c in (ord('Z'),):
+            panel.loop.call_soon_threadsafe(
+                asyncio.async, panel.inquire('g79HokJTfPU'))
 
         # Show last key pressed
         stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}'.format(c))
@@ -117,13 +113,15 @@ def init(stdscr, loop, resource, target):
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
     # Create the middle three windows
-    detail  = clipy.window.DetailWindow(curses.LINES-9, curses.COLS//2,              1, 0                           )
-    cache   = clipy.window.ListWindow  (curses.LINES-9, curses.COLS//2,              1, curses.COLS - curses.COLS//2)
-    console = clipy.window.Window      (7             , curses.COLS   , curses.LINES-8, 0                           )
-    control_panel = clipy.panel.Panel(loop, stdscr, detail, cache, console)
+    detail  = clipy.window.DetailWindow(curses.LINES-9, curses.COLS//2,              1 , 0                           )
+    cache   = clipy.window.ListWindow  (curses.LINES-9, curses.COLS//2,              1 , curses.COLS - curses.COLS//2)
+    console = clipy.window.Window      (7             , curses.COLS   , curses.LINES-8 , 0                           )
+    popup   = clipy.window.PopupWindow (3             , curses.COLS//2, curses.LINES//4, curses.COLS//4              )
+    control_panel = clipy.panel.Panel(loop, stdscr, detail, cache, console, popup)
 
     # Load command line options
     control_panel.target_dir = os.path.expanduser(target)
+    control_panel.reset()  # lame binding for target_dir
     if resource:
         stdscr.noutrefresh()
         loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))

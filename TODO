@@ -14,6 +14,12 @@ UI
 
     top clipy title-bar session stats
 
+    audio streams: VideoDetail.__init__() move to utils? and also capture `adaptive_fmts`
+
+Download
+
+    elapsed time in stream stats
+
 Request
 
     user agent

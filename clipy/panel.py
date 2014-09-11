@@ -41,17 +41,18 @@ class BasePanel(object):
     """ Synchronous panel code """
     testing = False
     target_dir = ''
-    input_mode = False
     input_text = ''
 
-    def __init__(self, loop, stdscr, detail, cache, console):
+    def __init__(self, loop, stdscr, detail, cache, console, popup):
         self.loop = loop
         self.stdscr = stdscr
         self.detail = detail
         self.cache = cache
         self.console = console
+        self.popup = popup
+
         # Should be in respective inits
-        detail.panel = cache.panel = console.panel = self
+        detail.panel = cache.panel = console.panel = popup.panel = self  # recursive
         cache.win.scrollok(False)
         cache.reset()
 

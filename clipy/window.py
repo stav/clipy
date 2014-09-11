@@ -21,6 +21,7 @@ class Window(object):
     """
     win = box = None
     panel = None
+    title = None
 
     def __init__(self, lines, cols, y, x):
         # Border
@@ -46,6 +47,8 @@ class Window(object):
         self.win.erase()
         self.box.erase()
         self.box.box()
+        if self.title:
+            self.box.addstr(0, 1, self.title)
 
     def freshen(self):
         self.box.noutrefresh()
@@ -66,6 +69,32 @@ class Window(object):
         self.panel.update()
 
 
+class PopupWindow(Window):
+    """
+    Window overlay for data input
+    """
+    title = ' Input your search string, then press Enter '
+    # def __init__(self, *a, **kw):
+    #     super(PopupWindow, self).__init__(*a, **kw)
+    #     self.box.addstr(0, 1, ' Input your search string, then press Enter ')
+
+    def display(self):
+        super(PopupWindow, self).display()
+
+        # self.box.addstr(self.title)
+        # self.freshen()
+        # self.panel.update()
+        # self.box.move(1, 1)
+        # curses.doupdate()
+
+        textbox = curses.textpad.Textbox(self.win)
+        textbox.stripspaces = True
+        textbox.edit()  # Let the user edit until Ctrl-G is struck.
+        # textbox.do_command(chr(7))  # Control-G
+
+        self.panel.input_text = textbox.gather() # Get resulting contents
+
+
 class DetailWindow(Window):
     """
     Window with video info
@@ -78,11 +107,7 @@ class DetailWindow(Window):
     def display(self):
         super(DetailWindow, self).display()
 
-        if False and self.panel.input_mode:
-            self.printstr('Input your YouTube search string, then press Enter')
-            self.printstr('> {}'.format(self.panel.input_text))
-
-        elif self.video:
+        if self.video:
             self.printstr(self.video.detail)
 
         self.freshen()
