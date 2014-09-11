@@ -4,9 +4,10 @@ Clipy YouTube video downloader user interface: Window
 import os
 import re
 import curses
-import asyncio
-import threading
+import curses.textpad
 import collections
+import threading
+import asyncio
 
 import clipy.panel
 import clipy.video
@@ -77,15 +78,12 @@ class DetailWindow(Window):
     def display(self):
         super(DetailWindow, self).display()
 
-        if self.panel.input_mode:
+        if False and self.panel.input_mode:
             self.printstr('Input your YouTube search string, then press Enter')
             self.printstr('> {}'.format(self.panel.input_text))
 
         elif self.video:
             self.printstr(self.video.detail)
-            self.panel.cache.streams.clear()
-            for stream in self.video.streams:
-                self.panel.cache.streams[stream.url] = stream
 
         self.freshen()
 
@@ -128,30 +126,32 @@ class ListWindow(Window):
             self.CacheList('Downloaded'),
             self.CacheList('Files', self.panel.target_dir),
             self.CacheList('Threads'),
-            self.actives or self.CacheList('Active'),
+            self.actives or self.CacheList('Active'),  # not reset if active dl
         )
-        self.index = 0
+        # self.index = 0
         self.videos = self.caches[self.index]
 
     def display(self):
         super(ListWindow, self).display()
 
-        # Setup our videos pointer
+        def manuals_setup():
+            # Files: manually build the files list here real-time
+            if self.videos is self.files:
+                self.files.clear()
+                for filename in sorted(os.listdir(self.panel.target_dir)):
+                    path = os.path.join(self.panel.target_dir, filename)
+                    if os.path.isfile(path) and not filename.startswith('.'):
+                        self.files[path] = clipy.panel.File(filename, path)
+
+            # Threads: manually build the threads list here real-time
+            if self.videos is self.threads:
+                self.threads.clear()
+                for thread in threading.enumerate():
+                    self.threads[thread.name] = clipy.panel.Thread(thread)
+
+        # Setup
         self.videos = self.caches[self.index]
-
-        # Files: manually build the files list here real-time
-        if self.videos is self.files:
-            self.files.clear()
-            for filename in sorted(os.listdir(self.panel.target_dir)):
-                path = os.path.join(self.panel.target_dir, filename)
-                if os.path.isfile(path) and not filename.startswith('.'):
-                    self.files[path] = clipy.panel.File(filename, path)
-
-        # Threads: manually build the threads list here real-time
-        if self.videos is self.threads:
-            self.threads.clear()
-            for thread in threading.enumerate():
-                self.threads[thread.name] = clipy.panel.Thread(thread)
+        manuals_setup()
 
         # Header: Display list of caches
         for i, cache in enumerate(self.caches):
@@ -162,6 +162,7 @@ class ListWindow(Window):
         self.win.addstr(2, 2, str(self.videos))
         for i, key in enumerate(self.videos):
             video = self.videos[key]
+            # Inverse video attribute if this entry is the indexed
             attr = curses.A_STANDOUT if i == self.videos.index else 0
             try:
                 self.win.addstr(3+i, 0, str(video), attr)
