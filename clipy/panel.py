@@ -166,31 +166,41 @@ class Panel(BasePanel):
             yield from self.cache.load_search(resource)
             return
 
-        cprint('Inquiring: {}'.format(resource))
-        try:
-            video = yield from clipy.youtube.get_video(
-                resource, target=self.target_dir)
+        if resource:
+            cprint('Inquiring: {}'.format(resource))
+            try:
+                video = yield from clipy.youtube.get_video(
+                    resource, target=self.target_dir)
 
-        except (ConnectionError, ValueError) as ex:
-            cprint('Error: {}'.format(ex), error=True)
+            except (ConnectionError, ValueError) as ex:
+                cprint('Error: {}'.format(ex), error=True)
 
-        else:
-            if video:
-                self.detail.video = video
-                self.cache.lookups[video.videoid] = video
-                self.cache.streams.index = None
-                self.display()
+            else:
+                if video:
+                    self.detail.video = video
+                    self.cache.lookups[video.videoid] = video
+                    self.cache.streams.index = None
+                    self.cache.streams.clear()
+
+                    for stream in video.streams:
+                        self.cache.streams[stream.url] = stream
+
+                    self.display()
+
 
     @asyncio.coroutine
     def action(self):
-        """ The Enter key was pressed """
-        cprint = self.console.printstr
+        """
+        The Enter key was pressed
 
-        # If we are in input mode then just inquire
-        if self.input_mode:
-            self.input_mode = False
-            yield from self.inquire(self.input_text)
-            return
+        * Search  action: Inquire
+        * Lookups action: Inquire
+        * Streams action: Download
+        * Files   action: Play
+        * Threads action: Print
+        * actives action: Cancel
+        """
+        cprint = self.console.printstr
 
         def play():
             cprint('Playing {}'.format(path))
@@ -208,16 +218,16 @@ class Panel(BasePanel):
             # Validate selected index
             if v_index >= 0 and v_index < len(self.cache.videos):
 
-                # Search / Lookups action
+                # Search / Lookups action: inquire
                 if self.cache.videos is self.cache.searches or \
                    self.cache.videos is self.cache.lookups:
                     yield from self.inquire(list(self.cache.videos)[v_index])
 
-                # Streams action
+                # Streams action: download
                 elif self.cache.videos is self.cache.streams:
                     yield from self.download(self.detail.video, v_index)
 
-                # Downloads action
+                # Files action: play
                 elif self.cache.videos is self.cache.downloads \
                   or self.cache.videos is self.cache.files:
                     key = list(self.cache.videos)[v_index]
@@ -228,7 +238,13 @@ class Panel(BasePanel):
                         cprint('File no longer exists {}'.format(path),
                                error=True)
 
-                # Actives action
+                # Threads action: console print
+                elif self.cache.videos is self.cache.threads:
+                    key = list(self.cache.videos)[v_index]
+                    thread = self.cache.videos[key]
+                    cprint(thread)
+
+                # Actives action: cancel
                 elif self.cache.videos is self.cache.actives:
                     try:
                         key = list(self.cache.actives)[v_index]
