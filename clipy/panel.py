@@ -41,7 +41,6 @@ class BasePanel(object):
     """ Synchronous panel code """
     testing = False
     target_dir = ''
-    input_text = ''
 
     def __init__(self, loop, stdscr, detail, cache, console, popup):
         self.loop = loop

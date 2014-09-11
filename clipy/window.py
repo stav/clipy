@@ -74,25 +74,25 @@ class PopupWindow(Window):
     Window overlay for data input
     """
     title = ' Input your search string, then press Enter '
+
     # def __init__(self, *a, **kw):
     #     super(PopupWindow, self).__init__(*a, **kw)
     #     self.box.addstr(0, 1, ' Input your search string, then press Enter ')
 
-    def display(self):
-        super(PopupWindow, self).display()
+    def get_input(self):
+        self.freshen()
+        self.display()
 
-        # self.box.addstr(self.title)
-        # self.freshen()
-        # self.panel.update()
-        # self.box.move(1, 1)
-        # curses.doupdate()
+        curses.curs_set(True)
 
         textbox = curses.textpad.Textbox(self.win)
         textbox.stripspaces = True
-        textbox.edit()  # Let the user edit until Ctrl-G is struck.
+        textbox.edit()  # Let the user edit (until Ctrl-G is struck?)
         # textbox.do_command(chr(7))  # Control-G
 
-        self.panel.input_text = textbox.gather() # Get resulting contents
+        curses.curs_set(False)
+
+        return textbox.gather()  # Get resulting contents of textbox
 
 
 class DetailWindow(Window):

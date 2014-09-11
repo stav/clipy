@@ -33,20 +33,8 @@ def key_loop(stdscr, panel):
         c = panel.wait_for_input()
 
         if c in KEYS_INPUT:
-            # self.panel.stdscr.keypad(False)
-            # curses.nocbreak()
-            # curses.echo()
-            curses.curs_set(True)
-
-            panel.input_text = ''
-            panel.popup.freshen()
-            panel.popup.display()
-
-            # stdscr.keypad(True)
-            # curses.cbreak()
-            # curses.noecho()
-            curses.curs_set(False)
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire(panel.input_text))
+            string = panel.popup.get_input()
+            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire(string))
 
         if c in KEYS_CACHE:
             panel.view(c)
