@@ -9,7 +9,13 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.30'
+VERSION = '0.9.31'
+
+loop = None
+
+
+def async(task):
+    loop.call_soon_threadsafe(asyncio.async, task)
 
 
 def key_loop(stdscr, panel):
@@ -32,44 +38,25 @@ def key_loop(stdscr, panel):
         # Accept keyboard input
         c = panel.wait_for_input()
 
-        if c in KEYS_QUIT:
-            break
-
-        if c in KEYS_INPUT:
-            string = panel.popup.get_input()
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire(string))
-
-        if c in KEYS_CACHE:
-            panel.view(c)
-
-        if c in KEYS_ACTION:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
-
-        if c in KEYS_RESET:
-            panel.reset()
-
-        if c in KEYS_CLIPBOARD:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.clipboard())
-
-        if c in KEYS_DOWNLOAD:
-            panel.loop.call_soon_threadsafe(asyncio.async, panel.download(
-                panel.detail.video))
+        if c in KEYS_QUIT:      break
+        if c in KEYS_INPUT:     async(panel.inquire(panel.popup.get_input()))
+        if c in KEYS_ACTION:    async(panel.action())
+        if c in KEYS_CLIPBOARD: async(panel.clipboard())
+        if c in KEYS_DOWNLOAD:  async(panel.download(panel.detail.video))
+        if c in KEYS_CACHE:           panel.view(c)
+        if c in KEYS_RESET:           panel.reset()
+        if c in (ord('Z'),):    async(panel.inquire('g79HokJTfPU'))  # Debug
 
         if c in KEYS_HELP:
             panel.console.printstr(
-                'HELP: Load cache (L), save cache (C) and reset (R)'
+                'HELP: Load cache (L), save cache (S) and reset (R)'
                 ' commands are all upper case only.', wow=True)
-
-        # Debug
-        if c in (ord('Z'),):
-            panel.loop.call_soon_threadsafe(
-                asyncio.async, panel.inquire('g79HokJTfPU'))
 
         # Show last key pressed
         stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}'.format(c))
 
 
-def init(stdscr, loop, resource, target):
+def init(stdscr, resource, target):
 
     # Setup curses
     curses.curs_set(False)
@@ -116,7 +103,7 @@ def init(stdscr, loop, resource, target):
     control_panel.reset()  # lame binding for target_dir
     if resource:
         stdscr.noutrefresh()
-        loop.call_soon_threadsafe(asyncio.async, control_panel.inquire(resource))
+        async(control_panel.inquire(resource))
 
     def status_poll():
         """ Refresh screen 10x/s when downloads active """
@@ -142,10 +129,11 @@ def main(resource=None, target=None):
     1. Python `asyncio` event loop
     2. Curses wrapper runs init in another thread which in-turn runs `key_loop`
     """
+    global loop
     # Python event loop
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    loop.run_in_executor(None, curses.wrapper, *(init, loop, resource, target))
+    loop.run_in_executor(None, curses.wrapper, *(init, resource, target))
     loop.run_forever()
     loop.close()
 
