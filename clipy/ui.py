@@ -9,7 +9,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.31'
+VERSION = '0.9.32'
 
 loop = None
 
