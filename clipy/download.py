@@ -18,8 +18,7 @@ semaphore = asyncio.Semaphore(3)
 @asyncio.coroutine
 def get(stream, actives=None, log=None):
     """
-    Request stream's url and read from response and write to disk obeying the
-    law of Semaphores
+    Govern downloading with a Semaphore
     """
     try:
         with (yield from semaphore):

@@ -47,6 +47,7 @@ class Window(object):
         self.win.erase()
         self.box.erase()
         self.box.box()
+        # TODO: the title doesn't show up the first time
         if self.title:
             self.box.addstr(0, 1, self.title)
 
@@ -73,7 +74,7 @@ class PopupWindow(Window):
     """
     Window overlay for data input
     """
-    title = ' Input your search string, then press Enter '
+    title = ' - Input YouTube watch URL or video Id, then press Enter or Ctrl-G '
 
     # def __init__(self, *a, **kw):
     #     super(PopupWindow, self).__init__(*a, **kw)

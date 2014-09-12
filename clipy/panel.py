@@ -50,8 +50,10 @@ class BasePanel(object):
         self.console = console
         self.popup = popup
 
-        # Should be in respective inits
-        detail.panel = cache.panel = console.panel = popup.panel = self  # recursive
+        # Recursive attributes
+        detail.panel = cache.panel = console.panel = popup.panel = self
+
+        # Should be in window.ListWindow.__init__
         cache.win.scrollok(False)
         cache.reset()
 
@@ -162,7 +164,7 @@ class Panel(BasePanel):
     def inquire(self, resource):
         cprint = self.console.printstr
 
-        if 'youtube.com/results?search' in resource:
+        if 'youtube.com/results?' in resource:
             yield from self.cache.load_search(resource)
             return
 

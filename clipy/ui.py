@@ -100,11 +100,15 @@ def init(stdscr, loop, resource, target):
         ['{}: {}'.format(k, v) for k, v in menu_options])
     stdscr.addstr(curses.LINES-1, 0, menu_string)
 
-    # Create the middle three windows
-    detail  = clipy.window.DetailWindow(curses.LINES-9, curses.COLS//2,              1 , 0                           )
-    cache   = clipy.window.ListWindow  (curses.LINES-9, curses.COLS//2,              1 , curses.COLS - curses.COLS//2)
-    console = clipy.window.Window      (7             , curses.COLS   , curses.LINES-8 , 0                           )
-    popup   = clipy.window.PopupWindow (3             , curses.COLS//2, curses.LINES//4, curses.COLS//4              )
+    # Create the middle three windows and the popoup
+    L = curses.LINES
+    C = curses.COLS
+    detail  = clipy.window.DetailWindow(  L-9,   C//2,    1  ,    0        )
+    cache   = clipy.window.ListWindow  (  L-9,   C//2,    1  ,   C - C//2  )
+    console = clipy.window.Window      (   7 ,   C   ,   L-8 ,    0        )
+    popup   = clipy.window.PopupWindow (   3 ,   C//2,   L//4,   C//4      )
+
+    # Create control panel
     control_panel = clipy.panel.Panel(loop, stdscr, detail, cache, console, popup)
 
     # Load command line options

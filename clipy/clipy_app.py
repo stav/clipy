@@ -20,7 +20,7 @@ VERSION = '0.9.7'
 
 def _get_commandline_options():
     """
-    Parse command line.
+    Parse command line
     """
     # declare command-line argument parser
     command_line = argparse.ArgumentParser(
@@ -68,7 +68,7 @@ def _get_commandline_options():
 
 @asyncio.coroutine
 def init(options):
-    """ Non-user interface """
+    """ Command line interface """
     log = options.logger
     video = None
     stream = None
@@ -76,8 +76,6 @@ def init(options):
     target_dir = os.path.expanduser(options.target)
 
     log('Clipy started with {}'.format(options))
-
-    import clipy.youtube
 
     if options.clipboard:
         if options.resource:
@@ -91,6 +89,7 @@ def init(options):
         print('No resource supplied')
         return
 
+    import clipy.youtube
     log('Using resource: {}'.format(resource))
     try:
         video = yield from clipy.youtube.get_video(resource, target=target_dir)
