@@ -24,8 +24,7 @@ class VideoDetail(object):
             self.info = urllib.parse.parse_qs(data)
 
             # first we split the mapping on the commas
-            stream_map = clipy.utils.take_first(
-                self.info.get('url_encoded_fmt_stream_map', ())).split(',')
+            stream_map = clipy.youtube.get_stream_map(self.info)
 
             # then we zip/map the values into our streams list
             streams = [{k: clipy.utils.take_first(v)
@@ -44,9 +43,7 @@ class VideoDetail(object):
                     extension=itags[1],
                     title=self.info.get('title', '<NOTITLE>'),
                 )
-                self.streams.append(Stream(stream,
-                                           video=self,
-                                           target=target))
+                self.streams.append(Stream(stream, video=self, target=target))
 
                 # from pprint import pformat
                 # # info = pformat(self.info)
@@ -151,9 +148,9 @@ class Stream(object):
 
     @property
     def display(self):
-        return 'Sd>  {} ({}) {}'.format(', '.join(self.itags),
-                                        getattr(self, 'quality', 'unknown'),
-                                        getattr(self, 'type', ''))
+        return 'Sd>  {}; {} {}'.format(', '.join(self.itags),
+                                       getattr(self, 'quality', ''),
+                                       getattr(self, 'type', ''))
 
     def detail(self):
         return '\n'.join(clipy.utils.list_properties(self))

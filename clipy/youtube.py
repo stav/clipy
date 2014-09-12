@@ -67,6 +67,11 @@ def get_itags(itag):
     return [t for t in ITAGS.get(itag, ()) if t]
 
 
+def get_stream_map(info):
+    return clipy.utils.take_first(info.get('url_encoded_fmt_stream_map', '')).split(',') +\
+           clipy.utils.take_first(info.get('adaptive_fmts', '')).split(',')
+
+
 @asyncio.coroutine
 def get_info(resource):
     url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
