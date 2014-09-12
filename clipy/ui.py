@@ -9,7 +9,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.29'
+VERSION = '0.9.30'
 
 
 def key_loop(stdscr, panel):
@@ -32,6 +32,9 @@ def key_loop(stdscr, panel):
         # Accept keyboard input
         c = panel.wait_for_input()
 
+        if c in KEYS_QUIT:
+            break
+
         if c in KEYS_INPUT:
             string = panel.popup.get_input()
             panel.loop.call_soon_threadsafe(asyncio.async, panel.inquire(string))
@@ -41,9 +44,6 @@ def key_loop(stdscr, panel):
 
         if c in KEYS_ACTION:
             panel.loop.call_soon_threadsafe(asyncio.async, panel.action())
-
-        if c in KEYS_QUIT:
-            break
 
         if c in KEYS_RESET:
             panel.reset()

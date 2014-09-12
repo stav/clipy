@@ -189,7 +189,6 @@ class Panel(BasePanel):
 
                     self.display()
 
-
     @asyncio.coroutine
     def action(self):
         """

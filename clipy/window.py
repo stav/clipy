@@ -198,27 +198,32 @@ class ListWindow(Window):
         self.freshen()
 
     @asyncio.coroutine
+    def _load_video(self, videoid):
+        cprint = self.panel.console.printstr
+        try:
+            video = yield from clipy.youtube.get_video(
+                videoid, target=self.panel.target_dir)
+
+        except (ConnectionError, ValueError) as ex:
+            cprint(str(ex), error=True)
+
+        else:
+            if video:
+                self.searches[videoid] = video
+                self.display()
+                self.panel.update()
+
+    @asyncio.coroutine
     def load_search(self, url):
         self.panel.console.printstr('Searching: {}'.format(url))
         html = yield from clipy.request.get_text(url)
         videoids = re.findall('data-context-item-id="([^"]+)"', html)
-        self.panel.console.printstr('Video Ids: {}'.format(videoids))
 
         if videoids:
+            videoids = [v for v in videoids if v != '__video_id__']
+            self.panel.console.printstr('Video Ids: {}'.format(videoids))
             self.searches.clear()
-            for videoid in videoids:
-                if videoid != '__video_id__':
-                    try:
-                        video = yield from clipy.youtube.get_video(
-                            videoid, target=self.panel.target_dir)
-
-                    except (ConnectionError, ValueError) as ex:
-                        self.panel.console.printstr(ex)
-
-                    if video:
-                        self.searches[videoid] = video
-                        self.display()
-                        self.panel.update()
+            yield from asyncio.wait([self._load_video(v) for v in videoids])
 
     def load_lookups(self):
         """ Load file from disk into cache """
