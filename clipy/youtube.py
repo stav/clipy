@@ -63,6 +63,10 @@ ITAGS = {
 }
 
 
+def get_itags(itag):
+    return [t for t in ITAGS.get(itag, ()) if t]
+
+
 @asyncio.coroutine
 def get_info(resource):
     url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)

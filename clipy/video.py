@@ -5,6 +5,7 @@ import os
 import urllib
 
 import clipy.utils
+import clipy.youtube
 
 
 class VideoDetail(object):
@@ -36,8 +37,7 @@ class VideoDetail(object):
             self.streams = []
             for stream in streams:
 
-                itags = [t for t in clipy.youtube.ITAGS.get(
-                    stream.get('itag', None)) if t]
+                itags = clipy.youtube.get_itags(stream.get('itag', None))
 
                 stream.update(dict(
                     resolution=itags[0]),
@@ -126,16 +126,20 @@ class Stream(object):
 
     def __init__(self, info, video=None, target=None):
         """  """
+        # First load all info items into the object namespace
         for k, v in info.items():
             setattr(self, k, clipy.utils.take_first(v))
 
+        # Declare the stream/file name using the title et.al.
         self.name = video.name or '{}-({}).{}'.format(
             video.title, self.resolution, self.extension
             ).replace('/', '|')
 
+        # Declare the path using the name
         self.path = os.path.join(target or '.', self.name)
 
-        self.itags = [t for t in clipy.youtube.ITAGS.get(self.itag) if t]
+        # Declare the tags
+        self.itags = clipy.youtube.get_itags(info.get('itag', None))
 
     def __str__(self):
         # from pprint import pformat
