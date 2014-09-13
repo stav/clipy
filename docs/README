@@ -1,0 +1,20 @@
+clipy
+=====
+
+*Command Line Interface using Python for Youtube*
+
+Asynchronous Python command-line YouTube video downloader.
+
+PyPI
+----
+
+I had to rename the package from `clipy` to `clipy-dl` to get it on PyPI.
+
+https://pypi.python.org/pypi/clipy-dl
+
+https://docs.python.org/3.4/distutils/packageindex.html#package-index
+
+GitHub
+------
+
+https://github.com/stav/clipy
