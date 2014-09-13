@@ -1,15 +1,14 @@
 """
 Clipy YouTube video downloader test suite
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 import curses
 import asyncio
 import unittest
 
 import pyperclip
 
-import clipy.ui
+import clipy.panel
+import clipy.window
 
 
 class ClipyUITest(unittest.TestCase):
@@ -17,17 +16,18 @@ class ClipyUITest(unittest.TestCase):
     def setUp(self):
         def main(stdscr):
             self.stdscr = stdscr
-            win1 = clipy.ui.DetailWindow(6, 10, 0, 0)
-            win2 = clipy.ui.ListWindow(6, 10, 10, 0)
-            win3 = clipy.ui.Window(6, 50, 20, 0)
-            panl = clipy.ui.Panel(None, self.stdscr, win1, win2, win3)
+            win1 = clipy.window.DetailWindow(6, 10, 0, 0)
+            win2 = clipy.window.ListWindow(6, 10, 10, 0)
+            win3 = clipy.window.Window(6, 50, 20, 0)
+            win4 = clipy.window.PopupWindow(3, 10, 10, 10)
+            panl = clipy.panel.Panel(None, self.stdscr, win1, win2, win3, win4)
             panl.testing = True
             self.panel = panl
         curses.wrapper(main)
 
     def test_1_windows_created(self):
         """ Test that we can create the window abstration object correctly """
-        win = clipy.ui.Window(10, curses.COLS, 12, 0)
+        win = clipy.window.Window(10, curses.COLS, 12, 0)
         self.assertIsInstance(win.box, type(curses.newwin(0, 0)))
         self.assertIsInstance(win.win, type(curses.newwin(0, 0)))
 
@@ -70,7 +70,6 @@ class ClipyAsyncTest(unittest.TestCase):
         def coroutine_function_1():
             result = yield from coroutine_function_2()
             self.assertIs(result, True)
-            return result
 
         @asyncio.coroutine
         def coroutine_function_2():
