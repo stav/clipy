@@ -55,12 +55,14 @@ class Window(object):
         self.box.noutrefresh()
         self.win.noutrefresh()
 
-    def printstr(self, text='', success=False, error=False, wow=False):
+    def printstr(self, text='', success=False, wow=False, warn=False, error=False):
         string = '\n{}'.format(text)
         if error:
             self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
         elif success:
             self.win.addstr(string, curses.color_pair(2))
+        elif warn:
+            self.win.addstr(string, curses.color_pair(3))
         elif wow:
             self.win.addstr(string, curses.A_STANDOUT)
         else:

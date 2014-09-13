@@ -67,6 +67,14 @@ def get_itags(itag):
     return [t for t in ITAGS.get(itag, ()) if t]
 
 
+def get_resolution(itag):
+    return ITAGS.get(itag, ('', ''))[0]
+
+
+def get_extension(itag):
+    return ITAGS.get(itag, ('', ''))[1]
+
+
 def get_stream_map(info):
     return clipy.utils.take_first(info.get('url_encoded_fmt_stream_map', '')).split(',') +\
            clipy.utils.take_first(info.get('adaptive_fmts', '')).split(',')

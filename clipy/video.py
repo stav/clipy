@@ -36,11 +36,11 @@ class VideoDetail(object):
             self.streams = []
             for stream in streams:
 
-                itags = clipy.youtube.get_itags(stream.get('itag', None))
+                itag = stream.get('itag', None)
 
-                stream.update(dict(
-                    resolution=itags[0]),
-                    extension=itags[1],
+                stream.update(
+                    resolution=clipy.youtube.get_resolution(itag),
+                    extension=clipy.youtube.get_extension(itag),
                     title=self.info.get('title', '<NOTITLE>'),
                 )
                 self.streams.append(Stream(stream, video=self, target=target))
@@ -90,7 +90,8 @@ class VideoDetail(object):
         streams = ''
 
         for i, stream in enumerate(self.streams):
-            streams += '{}: {}\n'.format(i, stream.display)
+            if hasattr(stream, 'url'):
+                streams += '{}: {}\n'.format(i, stream.display)
 
         return '''
 Id:     {}
@@ -129,7 +130,7 @@ class Stream(object):
 
         # Declare the stream/file name using the title et.al.
         self.name = video.name or '{}-({}).{}'.format(
-            video.title, self.resolution, self.extension
+            video.title, info.get('resolution', ''), info.get('extension', '')
             ).replace('/', '|')
 
         # Declare the path using the name

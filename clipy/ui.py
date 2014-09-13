@@ -62,6 +62,7 @@ def init(stdscr, resource, target):
     curses.curs_set(False)
     curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_RED)
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN)
+    curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     if curses.has_colors():
         curses.start_color()
 

@@ -184,8 +184,12 @@ class Panel(BasePanel):
                     self.cache.streams.index = None
                     self.cache.streams.clear()
 
+                    # Add our video streams to the cache
                     for stream in video.streams:
-                        self.cache.streams[stream.url] = stream
+                        if hasattr(stream, 'url'):
+                            self.cache.streams[stream.url] = stream
+                        else:
+                            cprint('Stream does not have a url: {}'.format(stream), warn=True)
 
                     self.display()
 
