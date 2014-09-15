@@ -92,9 +92,9 @@ def list_properties(obj):
     """
     return [
         '{}: {}'.format(p, getattr(obj, p, ''))
-            for p in dir(obj)
-                if not p.startswith('_')
-                and not hasattr(
-                    getattr(obj, p, None),
-                    '__call__')
+        for p in dir(obj)
+        if not p.startswith('_')
+        and not hasattr(
+            getattr(obj, p, None),
+            '__call__')
     ]

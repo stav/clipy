@@ -164,7 +164,8 @@ class Panel(BasePanel):
                         if hasattr(stream, 'url'):
                             self.cache.streams[stream.url] = stream
                         else:
-                            cprint('Stream does not have a url: {}'.format(stream), warn=True)
+                            cprint('Stream does not have a url: {}'.format(stream),
+                                   warn=True)
 
                     self.display()
 

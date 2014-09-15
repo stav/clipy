@@ -218,7 +218,7 @@ class ListWindow(Window):
             attr = curses.A_STANDOUT if i == self.videos.index else 0
             try:
                 self.win.addstr(3+i, 0, str(video), attr)
-            except Exception:  # Python 3 -> except:
+            except:
                 break
 
         self.freshen()
