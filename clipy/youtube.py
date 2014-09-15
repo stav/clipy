@@ -1,6 +1,7 @@
 """
 Clipy YouTube video downloader YouTube module
 """
+import re
 import asyncio
 import urllib
 
@@ -75,6 +76,15 @@ def get_extension(itag):
     return ITAGS.get(itag, ('', ''))[1]
 
 
+@asyncio.coroutine
+def get_video_id(url):
+    url = url.strip()
+    match = re.match('https://www\.youtube\.com/get_video_info\?video_id=(.+)$', url)
+
+    if match:
+        return match.group(1)
+
+
 def get_stream_map(info):
     return clipy.utils.take_first(info.get('url_encoded_fmt_stream_map', '')).split(',') +\
            clipy.utils.take_first(info.get('adaptive_fmts', '')).split(',')
@@ -104,6 +114,9 @@ def get_video(resource, target=None):
     if 'youtube.com/watch?v=' in resource:
         pos = resource.find('/watch?v=') + 9
         resource = resource[pos: pos+11]
+
+    if len(resource) != 11:
+        raise ValueError('Video Id must be 11 chars, got "{}"'.format(resource))
 
     try:
         data = yield from get_info(resource)
