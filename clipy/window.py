@@ -9,10 +9,34 @@ import collections
 import threading
 import asyncio
 
-import clipy.panel
 import clipy.video
 import clipy.request
 import clipy.youtube
+
+
+class File(object):
+    """file encapsulation"""
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Thread(object):
+    """thread encapsulation"""
+    def __init__(self, thread):
+        self.thread = thread
+        self.name = thread.name
+
+    def __str__(self):
+        return str('{}: ident {}, {}'.format(
+            self.name,
+            self.thread.ident,
+            'Alive' if self.thread.is_alive() else 'Dead',
+            'Daemon' if self.thread.daemon else '',
+        ))
 
 
 class Window(object):
@@ -169,13 +193,13 @@ class ListWindow(Window):
                 for filename in sorted(os.listdir(self.panel.target_dir)):
                     path = os.path.join(self.panel.target_dir, filename)
                     if os.path.isfile(path) and not filename.startswith('.'):
-                        self.files[path] = clipy.panel.File(filename, path)
+                        self.files[path] = File(filename, path)
 
             # Threads: manually build the threads list here real-time
             if self.videos is self.threads:
                 self.threads.clear()
                 for thread in threading.enumerate():
-                    self.threads[thread.name] = clipy.panel.Thread(thread)
+                    self.threads[thread.name] = Thread(thread)
 
         # Setup
         self.videos = self.caches[self.index]

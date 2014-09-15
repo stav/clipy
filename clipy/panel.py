@@ -12,31 +12,6 @@ import clipy.youtube
 import clipy.download
 
 
-class File(object):
-    """file encapsulation"""
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
-
-    def __str__(self):
-        return str(self.name)
-
-
-class Thread(object):
-    """thread encapsulation"""
-    def __init__(self, thread):
-        self.thread = thread
-        self.name = thread.name
-
-    def __str__(self):
-        return str('{}: ident {}, {}'.format(
-            self.name,
-            self.thread.ident,
-            'Alive' if self.thread.is_alive() else 'Dead',
-            'Daemon' if self.thread.daemon else '',
-        ))
-
-
 class BasePanel(object):
     """ Synchronous panel code """
     testing = False
