@@ -40,6 +40,11 @@ class YoutubeServer:
             if not data: # an empty string means the client disconnected
                 break
 
+            if '.googlevideo.com/' in data:
+                client_writer.write(
+                    'FAIL: Cannot download videos from local server yet\n'
+                    .encode("utf-8"))
+
             print('Got data: {}'.format(data.strip()))
             video_id = yield from clipy.youtube.get_video_id(data)
             print('Got video_id: {}'.format(video_id))
@@ -50,9 +55,13 @@ class YoutubeServer:
                     with open(os.path.join(DATA_DIR, video_id)) as fd:
                         response = fd.read()
                         client_writer.write(response.encode("utf-8"))
+                else:
+                    client_writer.write(
+                        'FAIL: Video does not exist "{}"\n'.format(video_id)
+                        .encode("utf-8"))
 
-                    # This enables us to have flow control in our connection.
-                    yield from client_writer.drain()
+            # This enables us to have flow control in our connection.
+            yield from client_writer.drain()
 
     def start(self, loop):
         self.server = loop.run_until_complete(

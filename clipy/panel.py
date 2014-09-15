@@ -291,10 +291,11 @@ class Panel(BasePanel):
             if _success:
                 self.cache.downloads[stream.url] = stream
 
-            # Remove from actives list if not already cencelled
-            if stream.url in self.cache.actives:
-                del self.cache.actives[stream.url]
-
             # Update screen to show the active download is no longer active
             self.cache.display()
             cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
+
+        finally:
+            # Remove from actives list if not already cencelled
+            if stream.url in self.cache.actives:
+                del self.cache.actives[stream.url]

@@ -36,6 +36,9 @@ def _fetch_local(url, **kw):
     msgback = (yield from reader.readline()).decode("utf-8").rstrip()
     writer.close()
 
+    if msgback.startswith('FAIL'):
+        raise ConnectionError(msgback)
+
     # Build the client response
     response = Response(200)
     response.body = msgback
