@@ -235,14 +235,10 @@ class Panel(BasePanel):
                         cprint('Nothing to cancel')
 
     @asyncio.coroutine
-    def download(self, video, index=None):
+    def _download(self, video, index):
         cprint = self.console.printstr
 
-        if video is None:
-            cprint('No video to download, Inquire first', error=True)
-            return
-
-        stream = video.stream = video.streams[index or 0]
+        stream = video.stream = video.streams[index]
 
         if stream.url in self.cache.actives:
             cprint('Stream already downloading: {}'.format(stream))
@@ -273,3 +269,23 @@ class Panel(BasePanel):
             # Update screen to show the active download is no longer active
             self.cache.display()
             cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
+
+    @asyncio.coroutine
+    def download(self, video, index=None):
+        """
+        Request download of specified video
+
+        If no stream index provided then download all streams.
+        """
+        cprint = self.console.printstr
+
+        if video is None:
+            cprint('No video to download, Inquire first', error=True)
+            return
+
+        if index is None:
+            cprint('Downloading all streams for video', wow=True)
+            yield from asyncio.wait(
+                [self._download(video, i) for i in range(len(video.streams))])
+        else:
+            yield from self._download(video, index)

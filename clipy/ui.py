@@ -9,7 +9,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.32'
+VERSION = '0.9.33'
 
 loop = None
 
@@ -19,7 +19,8 @@ def async(task):
 
 
 def key_loop(stdscr, panel):
-    KEYS_DOWNLOAD = (ord('d'), ord('D'))
+    KEYS_DOWNLOAD = (ord('d'),)
+    KEYS_DOWNLALL = (ord('D'),)
     KEYS_INPUT    = (ord('i'), ord('I'))
     KEYS_CLIPBOARD= (ord('c'), ord('C'))
     KEYS_HELP     = (ord('h'), ord('H'))
@@ -42,14 +43,15 @@ def key_loop(stdscr, panel):
         if c in KEYS_INPUT:     async(panel.inquire(panel.popup.get_input()))
         if c in KEYS_ACTION:    async(panel.action())
         if c in KEYS_CLIPBOARD: async(panel.clipboard())
-        if c in KEYS_DOWNLOAD:  async(panel.download(panel.detail.video))
+        if c in KEYS_DOWNLOAD:  async(panel.download(panel.detail.video, 0))
+        if c in KEYS_DOWNLALL:  async(panel.download(panel.detail.video))
         if c in KEYS_CACHE:           panel.view(c)
         if c in KEYS_RESET:           panel.reset()
         if c in (ord('Z'),):    async(panel.inquire('g79HokJTfPU'))  # Debug
 
         if c in KEYS_HELP:
             panel.console.printstr(
-                'HELP: Load cache (L), save cache (S) and reset (R)'
+                'HELP: Load cache (L), save cache (S), reset (R) and download all (D)'
                 ' commands are all upper case only.', wow=True)
 
         # Show last key pressed
@@ -79,7 +81,8 @@ def init(stdscr, resource, target):
         ('arrows', 'cache'),
         ('L', 'load cache'),
         ('S', 'save cache'),
-        ('D', 'download'),
+        ('d', 'download one'),
+        ('D', 'download all'),
         ('R', 'reset'),
         ('H', 'help'),
         ('Q', 'quit'),
