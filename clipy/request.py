@@ -8,8 +8,7 @@ mxvLMEyCXR0
 import aiohttp
 import asyncio
 
-LOCAL = False
-LOCAL = True
+import clipy.config
 
 
 class Response(aiohttp.Response):
@@ -69,7 +68,7 @@ def _fetch_network(url, **kw):
 @asyncio.coroutine
 def get(url, **kw):
     try:
-        if LOCAL:
+        if clipy.config.LOCAL_NETWORK:
             response = yield from _fetch_local(url, **kw)
         else:
             response = yield from _fetch_network(url, **kw)
