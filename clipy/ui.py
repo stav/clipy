@@ -10,7 +10,7 @@ import clipy.panel
 import clipy.window
 
 TITLE = '.:. Clipy .:.'
-VERSION = '0.9.33'
+VERSION = '0.9.34'
 
 loop = None
 logger = None
@@ -105,6 +105,8 @@ def init(stdscr, resource, target):
     console_log_handler = logging.StreamHandler(console)
     console_log_handler.setLevel(logging.DEBUG)
     console_log_handler.terminator = ''
+    console_log_formatter = logging.Formatter('%(levelname)s: %(message)s')
+    console_log_handler.setFormatter(console_log_formatter)
     logger.addHandler(console_log_handler)
 
     # Create control panel

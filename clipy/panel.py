@@ -4,12 +4,15 @@ Clipy YouTube video downloader user interface: Panel
 import os
 import curses
 import asyncio
+import logging
 import subprocess
 
 import pyperclip
 
 import clipy.youtube
 import clipy.download
+
+logger = logging.getLogger('clipy')
 
 
 class BasePanel(object):
@@ -122,18 +125,18 @@ class Panel(BasePanel):
 
     @asyncio.coroutine
     def clipboard(self):
-        cprint = self.console.printstr
         try:
             contents = pyperclip.paste()
         except:
             contents = None
-            cprint('Cannot seem to read the clipboad, try (I) input')
+            logger.warn('Cannot seem to read the clipboad, try input (I)')
+
         if contents:
             contents = str(contents).strip()
-            cprint('Checking clipboard: {}'.format(contents))
+            logger.info('Checking clipboard: {}'.format(contents))
             yield from self.inquire(contents)
         else:
-            cprint('Found nothing in clipboard')
+            logger.info('Found nothing in clipboard')
 
     @asyncio.coroutine
     def inquire(self, resource):

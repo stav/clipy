@@ -91,18 +91,19 @@ class Window(object):
             self.win.addstr(string, curses.A_STANDOUT)
         else:
             self.win.addstr(string)
+
         # Display immediately
         self.freshen()
         self.panel.update()
 
     def write(self, message):
-        # self.printstr('>>>[{}]'.format(repr(message)))
-        # self._printstr('+++[{}]'.format(message))
-        message = message.strip()
+        """ Logging calls this method """
+        # message = message.strip()
         if message:
-            self.printstr('>>>[{}]'.format(message))
+            self.printstr(message)
 
     def flush(self):
+        """ Logging calls this method but we don't need to add newline """
         pass
 
 class PopupWindow(Window):
