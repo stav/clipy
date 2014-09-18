@@ -140,20 +140,18 @@ class Panel(BasePanel):
 
     @asyncio.coroutine
     def inquire(self, resource):
-        cprint = self.console.printstr
-
         if 'youtube.com/results?' in resource:
             yield from self.cache.load_search(resource)
             return
 
         if resource:
-            cprint('Inquiring: {}'.format(resource))
+            logger.info('Inquiring: {}'.format(resource))
             try:
                 video = yield from clipy.youtube.get_video(
                     resource, target=self.target_dir)
 
             except (ConnectionError, ValueError) as ex:
-                cprint('Error: {}'.format(ex), error=True)
+                logger.error(ex)
 
             else:
                 if video:
@@ -167,8 +165,7 @@ class Panel(BasePanel):
                         if hasattr(stream, 'url'):
                             self.cache.streams[stream.url] = stream
                         else:
-                            cprint('Stream does not have a url: {}'.format(stream),
-                                   warn=True)
+                            logger.warn('Stream does not have a url: {}'.format(stream))
 
                     self.display()
 
