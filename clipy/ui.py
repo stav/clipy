@@ -147,7 +147,7 @@ def main(resource=None, target=None):
 
     # Logging
     logger = logging.getLogger('clipy')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Python event loop
     loop = asyncio.get_event_loop()

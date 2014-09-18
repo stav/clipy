@@ -55,19 +55,17 @@ class BasePanel(object):
         return self.cache.win.getch()
 
     def load_cache(self):
-        cprint = self.console.printstr
-
         if os.path.exists('clipy.lookups'):
             self.cache.load_lookups()
-            cprint('Cache: lookups loaded')
+            logger.info('Cache: lookups loaded')
         else:
-            cprint('Cache: no lookups found, not loaded')
+            logger.warn('Cache: no lookups found, not loaded')
 
         if os.path.exists('clipy.downloads'):
             self.cache.load_downloads()
-            cprint('Cache: downloads loaded')
+            logger.info('Cache: downloads loaded')
         else:
-            cprint('Cache: no downloads found, not loaded')
+            logger.warn('Cache: no downloads found, not loaded')
 
     def save_cache(self):
         with open('clipy.lookups', 'w') as f:
@@ -181,17 +179,16 @@ class Panel(BasePanel):
         * Threads action: Print
         * actives action: Cancel
         """
-        cprint = self.console.printstr
-
         def play():
-            cprint('Playing {}'.format(path))
+            logger.info('Playing {}'.format(path))
             try:
                 subprocess.call(
                     ['mplayer', "{}".format(path)],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
+
             except FileNotFoundError as ex:
-                cprint("Can't play: {}".format(ex))
+                logger.error("Can't play: {}".format(ex))
 
         v_index = self.cache.videos.index
 
@@ -216,36 +213,33 @@ class Panel(BasePanel):
                     if os.path.exists(path):
                         self.loop.run_in_executor(None, play)
                     else:
-                        cprint('File no longer exists {}'.format(path),
-                               error=True)
+                        logger.error('File no longer exists {}'.format(path))
 
                 # Threads action: console print
                 elif self.cache.videos is self.cache.threads:
                     key = list(self.cache.videos)[v_index]
                     thread = self.cache.videos[key]
-                    cprint(thread)
+                    logger.info(thread)
 
                 # Actives action: cancel
                 elif self.cache.videos is self.cache.actives:
                     try:
                         key = list(self.cache.actives)[v_index]
-                        cprint('Cancelling download: {}'.format(
+                        logger.info('Cancelling download: {}'.format(
                             self.cache.actives[key]))
                         del self.cache.actives[key]
                     except IndexError:
-                        cprint('Nothing to cancel')
+                        logger.warn('Nothing to cancel')
 
     @asyncio.coroutine
     def _download(self, video, index):
-        cprint = self.console.printstr
-
         stream = video.stream = video.streams[index]
 
         if stream.url in self.cache.actives:
-            cprint('Stream already downloading: {}'.format(stream))
+            logger.warn('Stream already downloading: {}'.format(stream))
             return
 
-        cprint('Preparing to download {}'.format(stream.path))
+        logger.debug('Preparing to download {}'.format(stream.path))
 
         self.cache.actives[stream.url] = stream
 
@@ -254,7 +248,7 @@ class Panel(BasePanel):
                 stream, self.cache.actives)
 
         except ConnectionError as ex:
-            cprint('Error: {}'.format(ex), error=True)
+            logger.error(ex)
 
         # and here we start our inline that would "normally" be in a callback
 
@@ -269,7 +263,7 @@ class Panel(BasePanel):
 
             # Update screen to show the active download is no longer active
             self.cache.display()
-            cprint('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
+            logger.info('Perhaps {} bytes were saved to {}'.format(_length, stream.path))
 
     @asyncio.coroutine
     def download(self, video, index=None):
@@ -278,14 +272,12 @@ class Panel(BasePanel):
 
         If no stream index provided then download all streams.
         """
-        cprint = self.console.printstr
-
         if video is None:
-            cprint('No video to download, Inquire first', error=True)
+            logger.warn('No video to download, Inquire first')
             return
 
         if index is None:
-            cprint('Downloading all streams for video', wow=True)
+            logger.info('Downloading all streams for video', wow=True)
             yield from asyncio.wait(
                 [self._download(video, i) for i in range(len(video.streams))])
         else:
