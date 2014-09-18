@@ -6,10 +6,14 @@ gZAf4nJBpa0
 """
 import aiohttp
 import asyncio
+import logging
+
+logger = logging.getLogger('clipy')
 
 
 @asyncio.coroutine
 def fetch(url, **kw):
+    logger.debug('request fetch: {} {}'.format(url, kw if kw else ''))
     try:
         response = yield from aiohttp.request('GET', url, **kw)
 

@@ -95,6 +95,15 @@ class Window(object):
         self.freshen()
         self.panel.update()
 
+    def write(self, message):
+        # self.printstr('>>>[{}]'.format(repr(message)))
+        # self._printstr('+++[{}]'.format(message))
+        message = message.strip()
+        if message:
+            self.printstr('>>>[{}]'.format(message))
+
+    def flush(self):
+        pass
 
 class PopupWindow(Window):
     """

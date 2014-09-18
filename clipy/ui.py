@@ -4,6 +4,7 @@ Clipy YouTube video downloader user interface
 import os
 import curses
 import asyncio
+import logging
 
 import clipy.panel
 import clipy.window
@@ -12,6 +13,7 @@ TITLE = '.:. Clipy .:.'
 VERSION = '0.9.33'
 
 loop = None
+logger = None
 
 
 def async(task):
@@ -99,6 +101,12 @@ def init(stdscr, resource, target):
     console = clipy.window.Window      (   7 ,   C   ,   L-8 ,    0        )
     popup   = clipy.window.PopupWindow (   3 ,   C//2,   L//4,   C//4      )
 
+    # Logging
+    console_log_handler = logging.StreamHandler(console)
+    console_log_handler.setLevel(logging.DEBUG)
+    console_log_handler.terminator = ''
+    logger.addHandler(console_log_handler)
+
     # Create control panel
     control_panel = clipy.panel.Panel(loop, stdscr, detail, cache, console, popup)
 
@@ -133,7 +141,12 @@ def main(resource=None, target=None):
     1. Python `asyncio` event loop
     2. Curses wrapper runs init in another thread which in-turn runs `key_loop`
     """
-    global loop
+    global loop, logger
+
+    # Logging
+    logger = logging.getLogger('clipy')
+    logger.setLevel(logging.DEBUG)
+
     # Python event loop
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
