@@ -1,8 +1,5 @@
 """
 Clipy YouTube video downloader disk storage
-
-g79HokJTfPU
-gZAf4nJBpa0
 """
 import os
 import time
@@ -36,7 +33,7 @@ def _download(stream, actives, log):
 
     After every chunk is processed the stream's status is updated.
     """
-    response = yield from clipy.request.fetch(stream.url)
+    response = yield from clipy.request.get(stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
     chunk_size = 16384
@@ -55,7 +52,7 @@ def _download(stream, actives, log):
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            response = yield from clipy.request.fetch(stream.url, headers=headers)
+            response = yield from clipy.request.get(stream.url, headers=headers)
 
     complete = False
 

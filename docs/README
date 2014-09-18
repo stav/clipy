@@ -18,3 +18,11 @@ GitHub
 ------
 
 https://github.com/stav/clipy
+
+Server
+------
+
+file:///home/stav/Documents/doc/Python/python-3.4.1-docs.html/library/asyncio-eventloop.html#asyncio.BaseEventLoop.create_server
+https://code.google.com/p/tulip/source/browse/examples/simple_tcp_server.py
+http://davebehnke.com/python-asyncio-streams-client-server.html
+http://stackoverflow.com/questions/21295068/how-can-i-create-a-relay-server-using-tulip-asyncio-in-python
