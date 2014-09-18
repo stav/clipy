@@ -7,11 +7,14 @@ import curses
 import curses.textpad
 import collections
 import threading
+import logging
 import asyncio
 
 import clipy.video
 import clipy.request
 import clipy.youtube
+
+logger = logging.getLogger('clipy')
 
 
 class File(object):
@@ -235,13 +238,12 @@ class ListWindow(Window):
 
     @asyncio.coroutine
     def _load_video(self, videoid):
-        cprint = self.panel.console.printstr
         try:
             video = yield from clipy.youtube.get_video(
                 videoid, target=self.panel.target_dir)
 
         except (ConnectionError, ValueError) as ex:
-            cprint(str(ex), error=True)
+            logger.error(ex)
 
         else:
             if video:
