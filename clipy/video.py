@@ -149,9 +149,9 @@ class Stream(object):
 
     @property
     def display(self):
-        return 'Sd>  {}; {} {}'.format(', '.join(self.itags),
-                                       getattr(self, 'quality', ''),
-                                       getattr(self, 'type', ''))
+        return 'Sd> {}; {} {}'.format(', '.join(self.itags),
+                                      getattr(self, 'quality', ''),
+                                      getattr(self, 'type', ''))
 
     def detail(self):
         return '\n'.join(clipy.utils.list_properties(self))
