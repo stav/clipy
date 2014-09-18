@@ -52,9 +52,8 @@ def key_loop(stdscr, panel):
         if c in (ord('Z'),):    async(panel.inquire('g79HokJTfPU'))  # Debug
 
         if c in KEYS_HELP:
-            panel.console.printstr(
-                'HELP: Load cache (L), save cache (S), reset (R) and download all (D)'
-                ' commands are all upper case only.', wow=True)
+            logger.info('HELP: Load cache (L), save cache (S), reset (R) and '
+                        'download all (D) commands are all upper case only.')
 
         # Show last key pressed
         stdscr.addstr(curses.LINES-1, curses.COLS-20, 'c={}'.format(c))

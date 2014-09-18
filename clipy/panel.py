@@ -278,7 +278,7 @@ class Panel(BasePanel):
             return
 
         if index is None:
-            logger.info('Downloading all streams for video', wow=True)
+            logger.info('Downloading all streams for video')
             yield from asyncio.wait(
                 [self._download(video, i) for i in range(len(video.streams))])
         else:
