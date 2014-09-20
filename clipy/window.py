@@ -71,6 +71,38 @@ class Window(object):
     def _coord(self, y, x):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
 
+    def _format_message(self, text):
+        """ Peel off the first word as the log level and return a tuple """
+        level, _, _text = text.partition(':')
+        colors = dict(
+            CRITICAL=curses.A_BOLD | curses.color_pair(1),
+            ERROR=curses.color_pair(1),
+            SUCCESS=curses.color_pair(2),
+            WARNING=curses.color_pair(3),
+            DEBUG=curses.A_STANDOUT,
+        )
+        return '\n{}'.format(_text.strip()), colors.get(level, 0)
+
+    def write(self, message):
+        """ Logging calls this method """
+        if message:
+            string, color = self._format_message(message)
+
+            # Draw on inner window
+            self.win.addstr(string, color)
+
+            # Display immediately
+            self.freshen()
+            self.panel.update()
+
+    def flush(self):
+        """ Logging calls this method but we don't need to add newline """
+        pass
+
+    def freshen(self):
+        self.box.noutrefresh()
+        self.win.noutrefresh()
+
     def display(self):
         self.win.erase()
         self.box.erase()
@@ -78,37 +110,6 @@ class Window(object):
         # TODO: the title doesn't show up the first time
         if self.title:
             self.box.addstr(0, 1, self.title)
-
-    def freshen(self):
-        self.box.noutrefresh()
-        self.win.noutrefresh()
-
-    def printstr(self, text='', success=False, wow=False, warn=False, error=False):
-        string = '\n{}'.format(text)
-        if error:
-            self.win.addstr(string, curses.A_BOLD | curses.color_pair(1))
-        elif success:
-            self.win.addstr(string, curses.color_pair(2))
-        elif warn:
-            self.win.addstr(string, curses.color_pair(3))
-        elif wow:
-            self.win.addstr(string, curses.A_STANDOUT)
-        else:
-            self.win.addstr(string)
-
-        # Display immediately
-        self.freshen()
-        self.panel.update()
-
-    def write(self, message):
-        """ Logging calls this method """
-        # message = message.strip()
-        if message:
-            self.printstr(message)
-
-    def flush(self):
-        """ Logging calls this method but we don't need to add newline """
-        pass
 
 class PopupWindow(Window):
     """
@@ -149,7 +150,7 @@ class DetailWindow(Window):
         super(DetailWindow, self).display()
 
         if self.video:
-            self.printstr(self.video.detail)
+            self.write(self.video.detail)
 
         self.freshen()
 

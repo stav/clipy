@@ -70,7 +70,7 @@ def _fetch_network(url, **kw):
 
 @asyncio.coroutine
 def get(url, **kw):
-    logger.debug('request get: {} {}'.format(url, kw if kw else ''))
+    logger.debug('request get: {}... {}'.format(url[:100], kw if kw else ''))
     try:
         if clipy.config.LOCAL_NETWORK:
             response = yield from _fetch_local(url, **kw)
