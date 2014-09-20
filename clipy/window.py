@@ -253,13 +253,13 @@ class ListWindow(Window):
 
     @asyncio.coroutine
     def load_search(self, url):
-        self.panel.console.printstr('Searching: {}'.format(url))
+        logger.info('Searching: {}'.format(url))
         html = yield from clipy.request.get_text(url)
         videoids = re.findall('data-context-item-id="([^"]+)"', html)
 
         if videoids:
             videoids = [v for v in videoids if v != '__video_id__']
-            self.panel.console.printstr('Video Ids: {}'.format(videoids))
+            logger.debug('Video Ids: {}'.format(videoids))
             self.searches.clear()
             yield from asyncio.wait([self._load_video(v) for v in videoids])
 
