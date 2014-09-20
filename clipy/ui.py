@@ -28,8 +28,12 @@ def key_loop(stdscr, panel):
     KEYS_HELP     = (ord('h'), ord('H'))
     KEYS_QUIT     = (ord('q'), ord('Q'))
     KEYS_RESET    = (ord('R'),)
-    KEYS_CACHE    = (ord('L'), ord('S'), curses.KEY_LEFT, curses.KEY_RIGHT,
-                     curses.KEY_UP, curses.KEY_DOWN)
+    KEYS_CACHE_LD = (ord('L'),)
+    KEYS_CACHE_SV = (ord('S'),)
+    KEYS_CACHE_ML = (curses.KEY_LEFT,)
+    KEYS_CACHE_MR = (curses.KEY_RIGHT,)
+    KEYS_CACHE_MU = (curses.KEY_UP,)
+    KEYS_CACHE_MD = (curses.KEY_DOWN,)
     KEYS_ACTION   = (curses.KEY_ENTER, 10)  # 10 is enter
 
     while True:
@@ -47,7 +51,12 @@ def key_loop(stdscr, panel):
         if c in KEYS_CLIPBOARD: async(panel.clipboard())
         if c in KEYS_DOWNLOAD:  async(panel.download(panel.detail.video, 0))
         if c in KEYS_DOWNLALL:  async(panel.download(panel.detail.video))
-        if c in KEYS_CACHE:           panel.view(c)
+        if c in KEYS_CACHE_LD:        panel.load_cache()
+        if c in KEYS_CACHE_SV:        panel.save_cache()
+        if c in KEYS_CACHE_ML:        panel.view_left()
+        if c in KEYS_CACHE_MR:        panel.view_right()
+        if c in KEYS_CACHE_MU:        panel.view_up()
+        if c in KEYS_CACHE_MD:        panel.view_down()
         if c in KEYS_RESET:           panel.reset()
         if c in (ord('Z'),):    async(panel.inquire('g79HokJTfPU'))  # Debug
 

@@ -78,44 +78,33 @@ class BasePanel(object):
                 cache = self.cache.downloads[key]
                 f.write('{} {}\n'.format(cache.stream.url, cache))
 
-            self.console.printstr('Cache: saved')
+        logger.info('Cache: saved')
 
-    def view(self, key):
-        # Load cache from disk
-        if key == ord('L'):
-            self.load_cache()
+    def view_left(self):
+        # Change cache view one tab to the left
+        if self.cache.index > 0:
+            self.cache.index -= 1
 
-        # Save cache to disk
-        elif key == ord('C'):
-            self.save_cache()
+    def view_right(self):
+        # Change cache view one tab to the right
+        if self.cache.index < len(self.cache.caches) - 1:
+            self.cache.index += 1
 
-        # Change cache view
-        elif key == curses.KEY_LEFT:
-            if self.cache.index > 0:
-                self.cache.index -= 1
+    def view_up(self):
+        v_index = self.cache.videos.index
+        # Move up the list
+        if v_index is None:
+            self.cache.videos.index = 0
+        elif v_index > 0:
+            self.cache.videos.index -= 1
 
-        # Change cache view
-        elif key == curses.KEY_RIGHT:
-            if self.cache.index < len(self.cache.caches) - 1:
-                self.cache.index += 1
-
-        # Intra-cache navigation
-        else:
-            v_index = self.cache.videos.index
-
-            # Move up the list
-            if key == curses.KEY_UP:
-                if v_index is None:
-                    self.cache.videos.index = 0
-                elif v_index > 0:
-                    self.cache.videos.index -= 1
-
-            # Move down the list
-            elif key == curses.KEY_DOWN:
-                if v_index is None:
-                    self.cache.videos.index = 0
-                elif v_index < len(self.cache.videos) - 1:
-                    self.cache.videos.index += 1
+    def view_down(self):
+        v_index = self.cache.videos.index
+        # Move down the list
+        if v_index is None:
+            self.cache.videos.index = 0
+        elif v_index < len(self.cache.videos) - 1:
+            self.cache.videos.index += 1
 
 
 class Panel(BasePanel):
