@@ -44,11 +44,12 @@ class Thread(object):
 
 class Window(object):
     """
-    Window absraction with border
+    Basic frame with border
     """
     win = box = None
     panel = None
     title = None
+    debug = False
 
     def __init__(self, lines, cols, y, x):
         # Border
@@ -62,10 +63,10 @@ class Window(object):
         self.win.scrollok(True)
         self.win.keypad(True)
 
-        # Debug
-        # self._coord(Y-4, X-5)
-        # for i in range(Y-2):
-        #     self._coord(i, i)
+        if self.debug:
+            self._coord(Y-4, X-5)
+            for i in range(Y-2):
+                self._coord(i, i)
 
     def _coord(self, y, x):
         self.win.addstr(y, x, '+ {} {}'.format(y, x))
