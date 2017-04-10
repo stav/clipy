@@ -1,0 +1,29 @@
+  <footer>
+
+    <script src="/static/vendor/q.js"></script>
+
+    <script src="/static/lib/es.js"></script>
+    <script src="/static/lib/u.js"></script>
+
+    <script src="/static/fire/http.js"></script>
+    <script src="/static/fire/json.js"></script>
+    <script src="/static/fire/clui.js"></script>
+
+    <script>
+      "use strict";
+
+      function inquire() {
+        let
+          video = document.getElementById('input-video').value,
+          url = '/api/test?video=' + video,
+          _;
+
+        http.get( url )
+        .then( json.parse   )
+        .then( clui.premier )
+        .fail( console.log  )
+      }
+
+    </script>
+
+  </footer>

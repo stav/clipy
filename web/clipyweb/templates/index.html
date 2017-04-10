@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="twelve columns">
+        <h4 class="page-header">
+          <img src="/static/c-logo.png">
+          Clipy
+        </h4>
+        <p> This is a Clipy interface. </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column">
+
+        <label for="input-video">
+          Video
+          <div class="tooltip" title="This is not Python, just a URL string, no quotes., For now only one URL supported.">
+            <div class="info" title=""></div>
+          </div>
+        </label>
+        <input
+          type="text"
+          name="video"
+          class="u-full-width"
+          placeholder="http://youtube.com/watch?v=12345678901"
+          id="input-video"
+          value="https://www.youtube.com/watch?v=-gZOxddqjjw"
+        >
+
+        <button class="button-primary" onclick="inquire()"> Inquire </button>
+        <button class="button" onclick="download()"> Download </button>
+
+        <div id="panels"></div>
+
+      </div>
+    </div>
+  </div>
+
+{% include 'footer.html' %}
+
+</body>
+</html>
