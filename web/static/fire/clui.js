@@ -6,9 +6,13 @@ clui
  */
 =(function(){"use strict";
 
+  /**
+   * Display the response in a new panel
+   */
   function premier( response ) {
     if ( 'error' in response ) {
       console.log(response.error)
+      console.log(response)
       return
     }
     let
@@ -22,18 +26,22 @@ clui
         term = document.createElement('dt'),
         item = document.createElement('dd');
       term.appendChild( document.createTextNode( key ))
-      item.appendChild( _get_value( value ))
+      item.appendChild( _markup_value( value ))
       // console.log(`${key}: ${value}`);
       list.appendChild( term )
       list.appendChild( item )
     }
 
-    panel.appendChild(list)
-    panels.appendChild(panel)
+    panel.setAttribute( 'class', 'panel' );
+    panel.appendChild( list )
+    panels.appendChild( panel )
     // document.body.insertBefore(panel, currentDiv);
   }
 
-  function _get_value( o ) {
+  /**
+   * Surround the given value with corresponding html
+   */
+  function _markup_value( o ) {
     if ( u.isArray( o )) {
       let
         list = document.createElement('ul'),
@@ -50,12 +58,26 @@ clui
     return document.createTextNode( o )
   }
 
+  /**
+   * Remove all panels
+   */
+  function clear() {
+    let
+      panels = document.getElementsByClassName('panel'),
+      _;
+
+    for (let panel of panels) {
+      panel.remove()
+    }
+  }
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Declare Public interface
 
   return {
     premier: premier,
+    clear:   clear,
   }
 
 }())

@@ -1,6 +1,12 @@
-# clipy
+# Clipy
 
 YouTube video downloader GUI
+
+## Requirements
+
+* Python 3.6
+
+See also requirement.txt
 
 ## Install
 
