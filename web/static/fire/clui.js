@@ -6,37 +6,49 @@ clui
  */
 =(function(){"use strict";
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Public Functions
+
   /**
-   * Display the response in a new panel
+   * Request a video inquiry for the particulars like title, duration and description
    */
-  function premier( response ) {
-    if ( 'error' in response ) {
-      console.log(response.error)
-      console.log(response)
-      return
-    }
+  function inquire() {
     let
-      list = document.createElement('dl'),
-      panel = document.createElement('div'),
-      panels = document.getElementById('panels'),
+      video = document.getElementById('input-video').value,
+      url = '/api/test?video=' + video,
       _;
 
-    for (const [key,value] of es.objectEntries( response )) {
-      const
-        term = document.createElement('dt'),
-        item = document.createElement('dd');
-      term.appendChild( document.createTextNode( key ))
-      item.appendChild( _markup_value( value ))
-      // console.log(`${key}: ${value}`);
-      list.appendChild( term )
-      list.appendChild( item )
-    }
-
-    panel.setAttribute( 'class', 'panel' );
-    panel.appendChild( list )
-    panels.appendChild( panel )
-    // document.body.insertBefore(panel, currentDiv);
+    http.get( url )
+    .then( json.parse  )
+    .then( _insert     )
+    .fail( console.log )
   }
+
+  /**
+   * Get the goods
+   */
+  function download() {
+    console.log('NotImplemented Error')
+  }
+
+  /**
+   * Remove all panels
+   */
+  function clear() {
+    let
+      // panels = document.getElementsByClassName('panel'),
+      panels = document.getElementById('panels'),
+      contaniner = document.getElementById('panels-container'),
+      _;
+
+    panels.remove()
+    panels = document.createElement('div')
+    panels.setAttribute('id', 'panels')
+    contaniner.appendChild( panels )
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Private Functions
 
   /**
    * Surround the given value with corresponding html
@@ -59,25 +71,44 @@ clui
   }
 
   /**
-   * Remove all panels
+   * Display the response in a new panel
    */
-  function clear() {
+  function _insert( response ) {
+    if ( 'error' in response ) {
+      console.log(response.error)
+      console.log(response)
+      return
+    }
     let
-      panels = document.getElementsByClassName('panel'),
+      list = document.createElement('dl'),
+      panel = document.createElement('div'),
+      panels = document.getElementById('panels'),
       _;
 
-    for (let panel of panels) {
-      panel.remove()
+    for (const [key,value] of es.objectEntries( response )) {
+      const
+        term = document.createElement('dt'),
+        item = document.createElement('dd');
+      term.appendChild( document.createTextNode( key ))
+      item.appendChild( _markup_value( value ))
+      // console.log(`${key}: ${value}`);
+      list.appendChild( term )
+      list.appendChild( item )
     }
-  }
 
+    panel.setAttribute('class', 'panel')
+    panel.appendChild( list )
+    panels.appendChild( panel )
+    // document.body.insertBefore(panel, currentDiv);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Declare Public interface
 
   return {
-    premier: premier,
-    clear:   clear,
+    download: download,
+    inquire: inquire,
+    clear: clear,
   }
 
 }())
