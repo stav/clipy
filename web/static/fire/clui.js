@@ -11,6 +11,9 @@ clui
 
   /**
    * Request a video inquiry for the particulars like title, duration and description
+   *
+   * We get back JSON in the response and convert it to an object then load it into the the cache
+   * and then insert a display panel for it.
    */
   function inquire() {
     let
@@ -20,6 +23,7 @@ clui
 
     http.get( url )
     .then( json.parse  )
+    .then( _inload     )
     .then( _insert     )
     .fail( console.log )
   }
@@ -36,15 +40,14 @@ clui
    */
   function clear() {
     let
-      // panels = document.getElementsByClassName('panel'),
-      panels = document.getElementById('panels'),
+      old_panels = document.getElementById('panels'),
+      new_panels = document.createElement('ol'),
       contaniner = document.getElementById('panels-container'),
       _;
 
-    panels.remove()
-    panels = document.createElement('div')
-    panels.setAttribute('id', 'panels')
-    contaniner.appendChild( panels )
+    old_panels.remove()
+    new_panels.setAttribute('id', 'panels')
+    contaniner.appendChild( new_panels )
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -71,21 +74,52 @@ clui
   }
 
   /**
-   * Display the response in a new panel
+   * Load the data into the cache
    */
-  function _insert( response ) {
-    if ( 'error' in response ) {
-      console.log(response.error)
-      console.log(response)
+  function _inload( data ) {
+    if ( 'error' in data ) {
+      console.log(data.error)
+      console.log(data)
       return
     }
+
+    console.log('clipy_cache:')
+    console.log(clipy_cache)
+    console.log('loding:')
+    console.log(data)
+    clipy_cache[ clipy_index++ ] = data;
+
+    return data; // chaining
+  }
+
+  /**
+   * Display the data summary in a new panel
+   */
+  function _insert( data ) {
+    let
+      text = document.createTextNode( data.title ),
+      panel = document.createElement('li'),
+      panels = document.getElementById('panels'),
+      _;
+
+    panel.setAttribute('class', 'panel')
+    panel.appendChild( text )
+    panels.appendChild( panel )
+
+    return data; // chaining
+  }
+
+  /**
+   * Display the data detail in a new panel
+   */
+  function _detail( data ) {
     let
       list = document.createElement('dl'),
       panel = document.createElement('div'),
       panels = document.getElementById('panels'),
       _;
 
-    for (const [key,value] of es.objectEntries( response )) {
+    for (const [key,value] of es.objectEntries( data )) {
       const
         term = document.createElement('dt'),
         item = document.createElement('dd');
@@ -100,6 +134,8 @@ clui
     panel.appendChild( list )
     panels.appendChild( panel )
     // document.body.insertBefore(panel, currentDiv);
+
+    return data; // chaining
   }
 
   /////////////////////////////////////////////////////////////////////////////

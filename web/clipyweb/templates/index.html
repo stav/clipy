@@ -3,6 +3,8 @@
 {% include 'head.html' %}
 <body>
   <div class="container">
+
+    <!--                                                                               HEROUNIT -->
     <div class="row">
       <div class="twelve columns">
         <h4 class="page-header">
@@ -13,6 +15,7 @@
       </div>
     </div>
 
+    <!--                                                                                TEXTBOX -->
     <div class="row">
       <div class="twelve columns">
         <label for="input-video">
@@ -32,6 +35,7 @@
       </div>
     </div>
 
+    <!--                                                                                BUTTONS -->
     <div class="row">
       <div class="ten columns">
         <button class="button-primary" onclick="clui.inquire()"> Inquire </button>
@@ -42,9 +46,12 @@
       </div>
     </div>
 
+    <!--                                                                                 PANELS -->
     <div class="row">
-      <div id="panels-container" class="twelve columns">
-        <div id="panels"></div>
+      <div class="twelve columns">
+        <div id="panels-container">
+          <ol id="panels"></ol>
+        </div>
       </div>
     </div>
 
