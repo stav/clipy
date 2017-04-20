@@ -8,18 +8,18 @@ from clipyweb.utils import take_first as tf
 
 class VideoDetail(object):
     """ Video information container """
-    info = dict()
-    stream = None
-    streams = list()
-    info_map = dict(
-        videoid='video_id',
-        duration='length_seconds',
-    )
-
     def __init__(self, data=None, target=None):
+        self.info = dict()
+        self.stream = None
+        self.streams = list()
+        self.info_map = dict(
+            videoid='video_id',
+            duration='length_seconds',
+        )
         if data is not None:
             # data is url querystring format, so we need to parse it
-            self.info = urllib.parse.parse_qs(data)
+            # self.info = urllib.parse.parse_qs(data)
+            self.info = data
 
             # first we split the mapping on the commas
             stream_map = clipyweb.youtube.get_stream_map(self.info)
@@ -114,15 +114,15 @@ Streams: {}
 
 class Stream(object):
     """ Video stream """
-    itags = []
-    itag = None
-    name = None
-    path = None
-    status = ''
-
     def __init__(self, info, video=None, target=None):
         """  """
         # First load all info items into the object namespace
+        self.itags = []
+        self.itag = None
+        self.name = None
+        self.path = None
+        self.status = ''
+
         for k, v in info.items():
             setattr(self, k, tf(v))
 

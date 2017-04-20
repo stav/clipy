@@ -5,8 +5,8 @@ import os
 import time
 import asyncio
 
-import clipy.utils
-import clipy.request
+import clipyweb
+import clipyweb.utils
 
 # Limit number of downloads for calls to `get`
 semaphore = asyncio.Semaphore(3)
@@ -33,7 +33,7 @@ def _download(stream, actives, log):
 
     After every chunk is processed the stream's status is updated.
     """
-    response = yield from clipy.request.get(stream.url)
+    response = yield from clipyweb.get(stream.url)
 
     total = int(response.headers.get('Content-Length', '0').strip())
     chunk_size = 16384
@@ -42,7 +42,7 @@ def _download(stream, actives, log):
     mode = "wb"
     t0 = time.time()
 
-    temp_path = stream.path + ".clipy"
+    temp_path = stream.path + ".clipyweb"
 
     # Taken from from Pafy https://github.com/np1/pafy
     if os.path.exists(temp_path):
@@ -52,7 +52,7 @@ def _download(stream, actives, log):
             mode = "ab"
             bytesdone = offset = filesize
             headers = dict(Range='bytes={}-'.format(offset))
-            response = yield from clipy.request.get(stream.url, headers=headers)
+            response = yield from clipyweb.get(stream.url, headers=headers)
 
     complete = False
 
@@ -72,9 +72,9 @@ def _download(stream, actives, log):
             eta = (total - bytesdone) / (rate * 1024)
 
             stream.status = '|{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
-                m=clipy.utils.progress_bar(bytesdone, total),
+                m=clipyweb.utils.progress_bar(bytesdone, total),
                 d=bytesdone,
-                t=clipy.utils.size(total),
+                t=clipyweb.utils.size(total),
                 p=bytesdone * 1.0 / total,
                 r=rate,
                 e=eta,

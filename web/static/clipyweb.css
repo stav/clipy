@@ -77,3 +77,8 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
 .winctl>button {
     font-size: x-large;
 }
+
+.panel:hover {
+    background-color: aliceblue;
+    cursor: pointer;
+}

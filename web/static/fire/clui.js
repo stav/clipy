@@ -18,7 +18,7 @@ clui
   function inquire() {
     let
       video = document.getElementById('input-video').value,
-      url = '/api/test?video=' + video,
+      url = '/api/inquire?video=' + video,
       _;
 
     http.get( url )
@@ -26,13 +26,6 @@ clui
     .then( _inload     )
     .then( _insert     )
     .fail( console.log )
-  }
-
-  /**
-   * Get the goods
-   */
-  function download() {
-    console.log('NotImplemented Error')
   }
 
   /**
@@ -83,11 +76,16 @@ clui
       return
     }
 
+    let index = clipy_index++;
+
     console.log('clipy_cache:')
     console.log(clipy_cache)
     console.log('loding:')
     console.log(data)
-    clipy_cache[ clipy_index++ ] = data;
+    console.log('index:')
+    console.log(index)
+    clipy_cache[ index ] = data;
+    data['index'] = index;
 
     return data; // chaining
   }
@@ -102,7 +100,11 @@ clui
       panels = document.getElementById('panels'),
       _;
 
+    panel.setAttribute('title', data.vid)
     panel.setAttribute('class', 'panel')
+    panel.setAttribute('index', data.index )
+    panel.setAttribute('vid', data.vid )
+    panel.addEventListener('click', _download, false);
     panel.appendChild( text )
     panels.appendChild( panel )
 
@@ -138,11 +140,27 @@ clui
     return data; // chaining
   }
 
+  /**
+   * Get the goods
+   */
+  function _download( e ) {
+    let
+      vid = e.target.attributes.vid.value,
+      index = e.target.attributes.index.value,
+      url = '/api/download?vid=' + vid + '&index=' + index,
+      _;
+    console.log( index )
+
+    http.get( url )
+    .then( json.parse  )
+    .then( console.log )
+    .fail( console.log )
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Declare Public interface
 
   return {
-    download: download,
     inquire: inquire,
     clear: clear,
   }

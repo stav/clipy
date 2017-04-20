@@ -14,20 +14,24 @@ async def get(url):
 
 
 async def get_info(resource):
-    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
+    url = f'https://www.youtube.com/get_video_info?video_id={resource}'
     data = await get(url)
     # print(f'get_info: data "{data}"')
     info = urllib.parse.parse_qs(data)
     status = take_first(info.get('status', None))
     if status == 'ok':
-        return data
+        return info
     else:
         raise ValueError('Invalid video Id "{}" {}'.format(resource, info))
 
 
-async def info(url):
+async def get_video(url):
     vid = get_video_id(url)
     print(f'info: url "{url}", vid "{vid}"')
     data = await get_info(vid)
-    print(f'info: data "{data}"')
-    return VideoDetail(data)
+    # print(f'info: data "{data}"')
+
+    video = VideoDetail(data)
+    video.vid = vid
+
+    return video
