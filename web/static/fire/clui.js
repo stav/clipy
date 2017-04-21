@@ -54,6 +54,7 @@ clui
       let
         list = document.createElement('ul'),
         _;
+
       for ( let i = 0; i < o.length; i++ ) {
         const
           item = document.createElement('li'),
@@ -64,6 +65,30 @@ clui
       return list
     }
     return document.createTextNode( o )
+  }
+
+  /**
+   * Surround the given streams list with corresponding html
+   */
+  function _markup_streams( streams, vid ) {
+    let
+      list = document.createElement('ol'),
+      _;
+
+    for ( let i = 0; i < streams.length; i++ ) {
+      const
+        item = document.createElement('li'),
+        text = document.createTextNode( streams[i] );
+
+      item.setAttribute('class', 'stream')
+      item.setAttribute('index', i + 1 )
+      item.setAttribute('vid', vid )
+      item.appendChild( text )
+      item.addEventListener('click', _download, false)
+
+      list.appendChild( item )
+    }
+    return list
   }
 
   /**
@@ -95,49 +120,62 @@ clui
    */
   function _insert( data ) {
     let
-      text = document.createTextNode( data.title ),
+      text = document.createElement('span'),
       panel = document.createElement('li'),
       panels = document.getElementById('panels'),
+      details = _get_details( data ),
       _;
 
-    panel.setAttribute('title', data.vid)
+    text.innerText = data.title;
+    text.setAttribute('class', 'toggle')
+    text.addEventListener('click', _toggle, false)
+
     panel.setAttribute('class', 'panel')
     panel.setAttribute('index', data.index )
+    panel.setAttribute('title', data.vid )
     panel.setAttribute('vid', data.vid )
-    panel.addEventListener('click', _download, false);
     panel.appendChild( text )
+    panel.appendChild( details )
     panels.appendChild( panel )
 
     return data; // chaining
   }
 
   /**
-   * Display the data detail in a new panel
+   * Construct the video data details
    */
-  function _detail( data ) {
+  function _get_details( data ) {
     let
       list = document.createElement('dl'),
-      panel = document.createElement('div'),
-      panels = document.getElementById('panels'),
+      details = document.createElement('div'),
       _;
 
-    for (const [key,value] of es.objectEntries( data )) {
-      const
-        term = document.createElement('dt'),
-        item = document.createElement('dd');
-      term.appendChild( document.createTextNode( key ))
-      item.appendChild( _markup_value( value ))
+    for (const [key,val] of es.objectEntries( data )) {
+      let value = key === 'streams' ? _markup_streams( val, data.vid ) : _markup_value( val );
+      let term = document.createElement('dt'); term.appendChild( document.createTextNode( key ))
+      let item = document.createElement('dd'); item.appendChild( value )
       // console.log(`${key}: ${value}`);
       list.appendChild( term )
       list.appendChild( item )
     }
+    details.style.display = 'none';
+    details.setAttribute('class', 'details')
+    details.appendChild( list )
 
-    panel.setAttribute('class', 'panel')
-    panel.appendChild( list )
-    panels.appendChild( panel )
-    // document.body.insertBefore(panel, currentDiv);
+    return details
+  }
 
-    return data; // chaining
+  /**
+   * Show / hide the video details
+   */
+  function _toggle( e ) {
+    let
+      style = e.target.parentElement.children[1].style;
+
+    if ( style.display === 'none' )
+      style.display = '';
+    else
+      style.display = 'none';
   }
 
   /**

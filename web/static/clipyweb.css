@@ -78,7 +78,25 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     font-size: x-large;
 }
 
-.panel:hover {
-    background-color: aliceblue;
+.panel {
+    padding: 4px;
+    border-style: dotted;
+    border-radius: 8px;
+}
+.toggle {
+    padding: 5px;
+    font-size: larger;
+}
+.toggle:hover {
+    background-color: deepskyblue;
     cursor: pointer;
+    color: aliceblue;
+}
+.stream:hover {
+    background-color: deepskyblue;
+    cursor: pointer;
+    color: aliceblue;
+}
+.details dd > ol {
+    margin: 0;
 }
