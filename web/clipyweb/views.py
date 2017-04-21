@@ -1,15 +1,16 @@
+import sys
 import json
 
 import aiohttp
 import aiohttp_jinja2
 
-import clipyweb
+import clipyweb.request
 import clipyweb.download
 
 
 async def inquire(request):
     video_url = request.query.get('video')
-    video = await clipyweb.get_video(video_url)
+    video = await clipyweb.request.get_video(video_url)
     data = dict(
         description=video.description,
         duration=video.duration,
@@ -26,8 +27,8 @@ async def inquire(request):
 async def download(request):
     vid = request.query.get('vid')
     index = int(request.query.get('index'))
-    video = await clipyweb.get_video(vid)
-    data = await clipyweb.download.get(video.streams[index])
+    video = await clipyweb.request.get_video(vid)
+    data = await clipyweb.download.get(video.streams[index], index=index, log=sys.stdout)
 
     return aiohttp.web.Response(
         content_type='application/json',

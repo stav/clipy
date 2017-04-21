@@ -5,9 +5,8 @@ import re
 import asyncio
 import urllib
 
-# import clipyweb.request
-# import clipyweb.video
-import clipyweb.utils
+import clipyweb.request
+import clipyweb.models
 
 from clipyweb.utils import take_first as tf
 
@@ -130,4 +129,4 @@ def get_video(resource, target=None):
     # with open('get_video', 'w') as f:
     #     f.write('Data: '); f.write(data); f.write('\n\n')
 
-    return clipyweb.video.VideoDetail(data, target=target)
+    return clipyweb.models.VideoDetail(data, target=target)

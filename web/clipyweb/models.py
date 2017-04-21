@@ -2,6 +2,7 @@ import os
 import urllib
 
 import clipyweb.youtube
+import clipyweb.utils
 
 from clipyweb.utils import take_first as tf
 
