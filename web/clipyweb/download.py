@@ -7,25 +7,18 @@ import asyncio
 
 from aiohttp import ClientSession
 
-import clipyweb
 import clipyweb.utils
 
 # Limit number of downloads for calls to `get`
 semaphore = asyncio.Semaphore(3)
 
 
-@asyncio.coroutine
-def get(stream, actives=None, log=None):
+async def get(stream, actives, log=None):
     """
     Govern downloading with a Semaphore
     """
-    try:
-        with (yield from semaphore):
-            response = yield from _download(stream, actives, log)
-            return response
-
-    except ConnectionError:
-        raise
+    with (await semaphore):
+        return await _download(stream, actives, log)
 
 
 async def _download(stream, actives, log):
@@ -44,15 +37,16 @@ async def _download(stream, actives, log):
             offset = 0
             mode = "wb"
             t0 = time.time()
-
             temp_path = stream.path + ".clipyweb"
             print(temp_path)
-
+            # Add back in offset download
             complete = False
 
             with open(temp_path, mode) as fd:
-                while True:
+                while stream.url in actives:
+                    index = actives.index(stream.url)
                     chunk = await response.content.read(chunk_size)
+                    print('chunk len:', len(chunk))
                     if not chunk:
                         complete = True
                         break
@@ -63,7 +57,8 @@ async def _download(stream, actives, log):
                     rate = ((bytesdone - offset) / 1024) / elapsed
                     eta = (total - bytesdone) / (rate * 1024)
 
-                    stream.status = '|{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
+                    stream.status = '{i}|{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
+                        i=' ' * (index * 70),
                         m=clipyweb.utils.progress_bar(bytesdone, total),
                         d=bytesdone,
                         t=clipyweb.utils.size(total),

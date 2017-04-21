@@ -25,10 +25,13 @@ async def inquire(request):
 
 
 async def download(request):
-    vid = request.query.get('vid')
     index = int(request.query.get('index'))
+    vid = request.query.get('vid')
     video = await clipyweb.request.get_video(vid)
-    data = await clipyweb.download.get(video.streams[index], index=index, log=sys.stdout)
+    stream = video.streams[index]
+    actives = request.app['actives']
+    actives.append(stream.url)
+    data = await clipyweb.download.get(stream, actives, log=sys.stdout)
 
     return aiohttp.web.Response(
         content_type='application/json',
