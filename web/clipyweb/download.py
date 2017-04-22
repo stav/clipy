@@ -17,7 +17,7 @@ async def get(stream, actives, log=None):
     """
     Govern downloading with a Semaphore
     """
-    with (await semaphore):
+    async with semaphore:
         return await _download(stream, actives, log)
 
 
@@ -39,7 +39,17 @@ async def _download(stream, actives, log):
             t0 = time.time()
             temp_path = f'videos/{stream.path}.clipyweb'
             print(temp_path)
-            # Add back in offset download
+
+            # Taken from from Pafy https://github.com/np1/pafy
+            if os.path.exists(temp_path):
+                filesize = os.stat(temp_path).st_size
+
+                if filesize < total:
+                    mode = "ab"
+                    bytesdone = offset = filesize
+                    headers = dict(Range='bytes={}-'.format(offset))
+                    response = await session.get(stream.url, headers=headers)
+
             complete = False
 
             with open(temp_path, mode) as fd:
