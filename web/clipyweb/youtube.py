@@ -1,13 +1,6 @@
 """
 Clipy YouTube video downloader YouTube module
 """
-import re
-import asyncio
-import urllib
-
-import clipyweb.request
-import clipyweb.models
-
 from clipyweb.utils import take_first as tf
 
 # Taken from from Pafy https://github.com/np1/pafy
@@ -77,56 +70,6 @@ def get_extension(itag):
     return ITAGS.get(itag, ('', ''))[1]
 
 
-@asyncio.coroutine
-def get_video_id(url):
-    url = url.strip()
-    match = re.match('https://www\.youtube\.com/get_video_info\?video_id=(.+)$', url)
-
-    if match:
-        return match.group(1)
-
-
 def get_stream_map(info):
     return (tf(info.get('url_encoded_fmt_stream_map', '')).split(',') +
             tf(info.get('adaptive_fmts', '')).split(','))
-
-
-@asyncio.coroutine
-def get_info(resource):
-    url = 'https://www.youtube.com/get_video_info?video_id={}'.format(resource)
-    try:
-        data = yield from clipyweb.request.get_text(url)
-
-    except ConnectionError:
-        raise
-
-    info = urllib.parse.parse_qs(data)
-
-    status = tf(info.get('status', None))
-    if status == 'ok':
-        return data
-    else:
-        raise ValueError('Invalid video Id "{}" {}'.format(resource, info))
-
-
-@asyncio.coroutine
-def get_video(resource, target=None):
-    # Pull out just the 11-digit Id from the URL
-    if 'youtube.com/watch?v=' in resource:
-        pos = resource.find('/watch?v=') + 9
-        resource = resource[pos: pos + 11]
-
-    if len(resource) != 11:
-        raise ValueError('Video Id must be 11 chars, got "{}"'.format(resource))
-
-    try:
-        data = yield from get_info(resource)
-
-    except (ConnectionError, ValueError):
-        raise
-
-    # Debug
-    # with open('get_video', 'w') as f:
-    #     f.write('Data: '); f.write(data); f.write('\n\n')
-
-    return clipyweb.models.VideoDetail(data, target=target)

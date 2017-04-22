@@ -2,5 +2,5 @@ aiodns
 aiohttp
 aiohttp_jinja2
 cchardet
-pafy
+#PyYAML
 youtube-dl

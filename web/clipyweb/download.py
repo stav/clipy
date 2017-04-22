@@ -37,7 +37,7 @@ async def _download(stream, actives, log):
             offset = 0
             mode = "wb"
             t0 = time.time()
-            temp_path = stream.path + ".clipyweb"
+            temp_path = f'videos/{stream.path}.clipyweb'
             print(temp_path)
             # Add back in offset download
             complete = False
@@ -47,7 +47,7 @@ async def _download(stream, actives, log):
                     index = actives.index(stream.url)
                     chunk = await response.content.read(chunk_size)
                     print('chunk len:', len(chunk))
-                    if not chunk:
+                    if len(chunk) == 0:
                         complete = True
                         break
                     fd.write(chunk)
@@ -71,6 +71,6 @@ async def _download(stream, actives, log):
                         # log.flush()
 
     if complete:
-        os.rename(temp_path, stream.path)
+        os.rename(temp_path, f'videos/{stream.path}')
 
     return complete, bytesdone

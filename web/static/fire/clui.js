@@ -81,11 +81,12 @@ clui
         text = document.createTextNode( streams[i] );
 
       item.setAttribute('class', 'stream')
-      item.setAttribute('index', i + 1 )
+      item.setAttribute('index', i )
       item.setAttribute('vid', vid )
       item.appendChild( text )
       item.addEventListener('click', _download, false)
 
+      list.setAttribute('start', 0 )
       list.appendChild( item )
     }
     return list
