@@ -29,9 +29,17 @@ async def download(request):
     vid = request.query.get('vid')
     video = await clipyweb.request.get_video(vid)
     stream = video.streams[index]
-    actives = request.app['actives']
-    actives.append(stream.url)
-    data = await clipyweb.download.get(stream, actives, log=sys.stdout)
+    # data = await clipyweb.download.get(stream, request.app['actives'], log=sys.stdout)
+    data = dict(
+        message='Queued',
+        stream=stream.url,
+        index=index,
+        video=video.detail,
+        vid=vid,
+    )
+    # run download as task in background
+    download = clipyweb.download.get(stream, request.app['actives'], log=sys.stdout)
+    request.app.loop.create_task(download)
 
     return aiohttp.web.Response(
         content_type='application/json',

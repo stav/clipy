@@ -53,6 +53,8 @@ async def _download(stream, actives, log):
             complete = False
 
             with open(temp_path, mode) as fd:
+                actives.append(stream.url)
+
                 while stream.url in actives:
                     index = actives.index(stream.url)
                     chunk = await response.content.read(chunk_size)
@@ -79,6 +81,9 @@ async def _download(stream, actives, log):
                     if log:
                         log.write("\r{}    ".format(stream.status))
                         # log.flush()
+
+                if stream.url in actives:
+                    actives.remove(stream.url)
 
     if complete:
         os.rename(temp_path, f'videos/{stream.path}')
