@@ -1,16 +1,7 @@
 """
 Clipy video downloader utilities
 """
-
-
-def take_first(values):
-    if isinstance(values, str):
-        return values
-
-    if values is not None:
-        for value in values:
-            if value is not None and value != '':
-                return value
+import urllib
 
 
 _traditional = [
@@ -20,7 +11,7 @@ _traditional = [
     (1024 ** 2, 'M'),
     (1024 ** 1, 'K'),
     (1024 ** 0, 'B'),
-    ]
+]
 
 
 def size(bytes, system=_traditional):
@@ -56,7 +47,7 @@ def size(bytes, system=_traditional):
         if bytes >= factor:
             break
 
-    amount = int(bytes/factor)
+    amount = int(bytes / factor)
 
     if isinstance(suffix, tuple):
         singular, multiple = suffix
@@ -93,8 +84,25 @@ def list_properties(obj):
     return [
         '{}: {}'.format(p, getattr(obj, p, ''))
         for p in dir(obj)
-        if not p.startswith('_')
-        and not hasattr(
-            getattr(obj, p, None),
-            '__call__')
+        if not p.startswith('_') and not hasattr(getattr(obj, p, None), '__call__')
     ]
+
+
+def take_first(values):
+    if isinstance(values, str):
+        return values
+
+    if values is not None:
+        for value in values:
+            if value is not None and value != '':
+                return value
+
+
+def get_video_id(video):
+    if '/watch' in video:
+        parts = urllib.parse.urlsplit(video)
+        info = urllib.parse.parse_qs(parts.query)
+        vid = take_first(info.get('v'))
+        return vid
+
+    return video

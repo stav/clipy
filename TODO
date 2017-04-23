@@ -4,6 +4,8 @@ Application
 
     config
 
+    	videos download location
+
 UI
 
     waiting spinner, for example when waiting for inquiry/searching

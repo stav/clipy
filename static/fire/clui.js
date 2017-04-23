@@ -34,8 +34,12 @@ clui
    * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
    */
   function show_progress( data ) {
-    _add_active_progress_bars( data )
-    _remove_dead_progress_bars( data )
+    if ( data ) {
+      console.log('show_progress')
+      console.log(data)
+      _add_active_progress_bars( data )
+      _remove_dead_progress_bars( data )
+    }
   }
 
   /**
@@ -204,6 +208,7 @@ clui
    */
   function _add_active_progress_bars( data ) {
     for ( let stream of data.actives ) {
+      console.log('active')
       console.log(stream)
       let
         progress = document.getElementById( stream.url ),
@@ -229,7 +234,12 @@ clui
    * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
    */
   function _remove_dead_progress_bars( data ) {
-    for ( let progress of document.getElementsByTagName('progress') ) {
+    let
+      bars = document.getElementsByTagName('progress'),
+      _;
+
+    for (let i = bars.length - 1; i >= 0; i--) {
+      let progress = bars.item(i);
 
       function active_url( value, index ) {
         return value.url === progress.id
@@ -238,7 +248,7 @@ clui
       if ( !data.actives.find( active_url ) ) {
         console.log('remove')
         console.log( progress )
-        progress.remove()
+        progress.parentElement.remove()
       }
     }
   }

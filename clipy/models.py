@@ -1,15 +1,15 @@
 import os
 import urllib
 
-import clipyweb.youtube
-import clipyweb.utils
+import clipy.youtube
+import clipy.utils
 
-from clipyweb.utils import take_first as tf
+from clipy.utils import take_first as tf
 
 
 class VideoDetail(object):
     """ Video information container """
-    def __init__(self, vid, data=None, target=None):
+    def __init__(self, vid, data=None):
         self.vid = vid
         self.info = dict()
         self.stream = None
@@ -24,7 +24,7 @@ class VideoDetail(object):
             self.info = data
 
             # first we split the mapping on the commas
-            stream_map = clipyweb.youtube.get_stream_map(self.info)
+            stream_map = clipy.youtube.get_stream_map(self.info)
 
             # then we zip/map the values into our streams list
             streams = [{k: tf(v)
@@ -39,11 +39,11 @@ class VideoDetail(object):
                 itag = stream.get('itag', None)
 
                 stream.update(
-                    resolution=clipyweb.youtube.get_resolution(itag),
-                    extension=clipyweb.youtube.get_extension(itag),
+                    resolution=clipy.youtube.get_resolution(itag),
+                    extension=clipy.youtube.get_extension(itag),
                     title=self.info.get('title', '<NOTITLE>'),
                 )
-                self.streams.append(Stream(stream, video=self, target=target))
+                self.streams.append(Stream(stream, video=self))
 
                 # from pprint import pformat
                 # # info = pformat(self.info)
@@ -116,13 +116,12 @@ Streams: {}
 
 class Stream(object):
     """ Video stream """
-    def __init__(self, info, video=None, target=None):
+    def __init__(self, info, video=None):
         """  """
         # First load all info items into the object namespace
         self.itags = []
         self.itag = None
         self.name = None
-        self.path = None
         self.progress = dict()
 
         for k, v in info.items():
@@ -136,11 +135,8 @@ class Stream(object):
             info.get('extension', ''),
         ).replace('/', '|')
 
-        # Declare the path using the name
-        self.path = os.path.join(target or '.', self.name)
-
         # Declare the tags
-        self.itags = clipyweb.youtube.get_itags(info.get('itag', None))
+        self.itags = clipy.youtube.get_itags(info.get('itag', None))
 
     def __str__(self):
         # from pprint import pformat
@@ -164,9 +160,9 @@ class Stream(object):
         eta = (total - bytesdone) / (rate * 1024)
 
         return '{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
-            m=clipyweb.utils.progress_bar(bytesdone, total),
+            m=clipy.utils.progress_bar(bytesdone, total),
             d=bytesdone,
-            t=clipyweb.utils.size(total),
+            t=clipy.utils.size(total),
             p=bytesdone * 1.0 / total,
             r=rate,
             e=eta,
@@ -179,4 +175,4 @@ class Stream(object):
                                       getattr(self, 'type', ''))
 
     def detail(self):
-        return '\n'.join(clipyweb.utils.list_properties(self))
+        return '\n'.join(clipy.utils.list_properties(self))

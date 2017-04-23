@@ -16,7 +16,7 @@ import aiohttp_jinja2
 import jinja2
 # import yaml
 
-import clipyweb.routes
+import clipy.routes
 
 
 def app():
@@ -42,8 +42,8 @@ def app():
         loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
     )
     app['actives'] = dict()
-    clipyweb.routes.setup_routes(app)
-    aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('clipyweb', 'templates'))
+    clipy.routes.setup_routes(app)
+    aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('clipy', 'templates'))
     app.router.add_static('/static/', path='static', name='static')
 
     app.on_startup.append(startup)

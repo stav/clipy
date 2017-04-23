@@ -3,13 +3,13 @@ import json
 import aiohttp
 import aiohttp_jinja2
 
-import clipyweb.request
-import clipyweb.download
+import clipy.request
+import clipy.download
 
 
 async def inquire(request):
     video_url = request.query.get('video')
-    video = await clipyweb.request.get_video(video_url)
+    video = await clipy.request.get_video(video_url)
     data = dict(
         description=video.description,
         duration=video.duration,
@@ -26,7 +26,7 @@ async def inquire(request):
 async def download(request):
     stream_index = int(request.query.get('stream'))
     vid = request.query.get('vid')
-    video = await clipyweb.request.get_video(vid)
+    video = await clipy.request.get_video(vid)
     stream = video.streams[stream_index]
     data = dict(
         message='Queued',
@@ -36,8 +36,8 @@ async def download(request):
         vid=vid,
     )
     # run download as task in background
-    download = clipyweb.download.get(stream, request.app['actives'])
-    request.app.loop.create_task(download)
+    coroutine = clipy.download.get(stream, request.app['actives'])
+    request.app.loop.create_task(coroutine)
 
     return aiohttp.web.Response(
         content_type='application/json',

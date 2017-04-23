@@ -37,3 +37,4 @@ docs/_build/
 # Clipy data files
 clipy.downloads*
 clipy.lookups*
+videos/

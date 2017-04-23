@@ -1,98 +1,36 @@
-"""
-Clipy YouTube video downloader network communications
+import urllib
 
-g79HokJTfPU
-gZAf4nJBpa0
-mxvLMEyCXR0
-"""
 import aiohttp
-import asyncio
-import logging
 
-import clipy.config
+import clipy.utils
+import clipy.models
 
-logger = logging.getLogger('clipy')
-
-
-class Response(aiohttp.Response):
-    """Manual response"""
-    body = None
-
-    def __init__(self, status):
-        super(Response, self).__init__(None, status)
-
-    @asyncio.coroutine
-    def text(self):
-        return self.body
+from clipy.utils import take_first as tf
 
 
-@asyncio.coroutine
-def _fetch_local(url, **kw):
-    # Open connection to local server
-    reader, writer = yield from asyncio.streams.open_connection('127.0.0.1', 8888)
-
-    # Request the server for our url
-    writer.write('{}\n'.format(url).encode("utf-8"))
-
-    # Wait for the server response
-    msgback = (yield from reader.readline()).decode("utf-8").rstrip()
-    writer.close()
-
-    if msgback.startswith('FAIL'):
-        raise ConnectionError(msgback)
-
-    # Build the client response
-    response = Response(200)
-    response.body = msgback
-
-    return response
+async def get_text(url, headers=None):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            body = await response.read()
+            return body.decode('utf-8')
 
 
-@asyncio.coroutine
-def _fetch_network(url, **kw):
-    try:
-        response = yield from aiohttp.request('GET', url, **kw)
-
-    except aiohttp.errors.OsConnectionError as ex:
-        raise ConnectionError('Cannot connect') from ex
-
-    # Debug
-    # data = yield from response.text()
-    # with open('fetch_network', 'w') as f:
-    #     f.write('Url:       '); f.write(url);                   f.write('\n\n')
-    #     f.write('Response:  '); f.write(str(response));         f.write('\n\n')
-    #     f.write('Status:    '); f.write(str(response.status));  f.write('\n\n')
-    #     f.write('Header:    '); f.write(str(response.headers)); f.write('\n\n')
-    #     f.write('Data:      '); f.write(data);                  f.write('\n\n')
-
-    return response
+async def get_info(resource):
+    url = f'https://www.youtube.com/get_video_info?video_id={resource}'
+    data = await get_text(url)
+    # print(f'get_info: data "{data}"')
+    info = urllib.parse.parse_qs(data)
+    status = tf(info.get('status', None))
+    if status == 'ok':
+        return info
+    else:
+        raise ValueError('Invalid video Id "{}" {}'.format(resource, info))
 
 
-@asyncio.coroutine
-def get(url, **kw):
-    logger.debug('request get: {}... {}'.format(url[:100], kw if kw else ''))
-    try:
-        if clipy.config.LOCAL_NETWORK:
-            response = yield from _fetch_local(url, **kw)
-        else:
-            response = yield from _fetch_network(url, **kw)
+async def get_video(url):
+    vid = clipy.utils.get_video_id(url)
+    print(f'info: url "{url}", vid "{vid}"')
+    data = await get_info(vid)
+    video = clipy.models.VideoDetail(vid, data)
 
-    except ConnectionError:
-        raise
-
-    if response.status < 200 or response.status > 299:
-        raise ConnectionError('Bad response status: {}, {}'.format(response.status, url))
-
-    return response
-
-
-@asyncio.coroutine
-def get_text(url):
-    try:
-        response = yield from get(url)
-
-    except ConnectionError:
-        raise
-
-    data = yield from response.text()
-    return data
+    return video

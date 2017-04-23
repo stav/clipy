@@ -1,4 +1,4 @@
-from clipyweb.views import index, inquire, download, progress
+from clipy.views import index, inquire, download, progress
 
 
 def setup_routes(app):
