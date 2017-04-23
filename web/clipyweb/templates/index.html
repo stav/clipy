@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+  <div class="container">
+
+    <!--                                                                               HEROUNIT -->
+    <div class="row">
+      <div class="twelve columns">
+        <h4 class="page-header">
+          <img src="/static/c-logo.png">
+          Clipy
+        </h4>
+      </div>
+    </div>
+
+    <!--                                                                               PROGRESS -->
+    <div class="row">
+      <div class="twelve columns">
+        <ul id="progress-bars">
+          <li><progress value="22" max="100" title="asdfsdaf"></progress></li>
+          <li><progress value="70" max="100" title="asdfsdaf"></progress></li>
+        </ul>
+      </div>
+    </div>
+
+    <!--                                                                                TEXTBOX -->
+    <div class="row">
+      <div class="twelve columns">
+        <label for="input-video">
+          Video
+          <div class="tooltip" title="This is not Python, just a URL string, no quotes., For now only one URL supported.">
+            <div class="info" title=""></div>
+          </div>
+        </label>
+        <input
+          type="text"
+          name="video"
+          class="u-full-width"
+          placeholder="http://youtube.com/watch?v=12345678901"
+          id="input-video"
+          value="https://www.youtube.com/watch?v=kfchvCyHmsc"
+        >
+      </div>
+    </div>
+
+    <!--                                                                                BUTTONS -->
+    <div class="row">
+      <div class="ten columns">
+        <button class="button-primary" onclick="clui.inquire()"> Inquire </button>
+        <button class="button" onclick="clui.download()"> Download </button>
+      </div>
+      <div class="two columns winctl">
+        <button class="button" onclick="clui.clear()" title="Clear all panels"> X </button>
+      </div>
+    </div>
+
+    <!--                                                                                 PANELS -->
+    <div class="row">
+      <div class="twelve columns">
+        <div id="panels-container">
+          <ol id="panels"></ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+{% include 'footer.html' %}
+
+</body>
+</html>

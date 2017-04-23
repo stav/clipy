@@ -1,0 +1,17 @@
+logging:
+  version: 1
+  formatters:
+    simple:
+      format: '[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S %z'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: simple
+      level: DEBUG
+      stream: ext://sys.stdout
+  loggers:
+    clipy:
+      handlers:
+        - console
+      level: DEBUG

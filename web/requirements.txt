@@ -1,0 +1,6 @@
+aiodns
+aiohttp
+aiohttp_jinja2
+cchardet
+#PyYAML
+youtube-dl
