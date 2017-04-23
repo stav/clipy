@@ -1,31 +1,36 @@
 """
 Clipy YouTube video downloader disk storage
+
+DEBUG:asyncio:<_SelectorSocketTransport fd=9 read=polling write=<idle, bufsize=0>>: Fatal read error on socket transport
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 724, in _read_ready
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
 """
 import os
 import time
 import asyncio
+import logging
 
 from aiohttp import ClientSession
-
-import clipyweb.utils
 
 # Limit number of downloads for calls to `get`
 semaphore = asyncio.Semaphore(3)
 
 
-async def get(stream, actives, log=None):
+async def get(stream, actives):
     """
     Govern downloading with a Semaphore
     """
     async with semaphore:
-        return await _download(stream, actives, log)
+        return await _download(stream, actives)
 
 
-async def _download(stream, actives, log):
+async def _download(stream, actives):
     """
     Request stream's url and read from response and write to disk
 
-    After every chunk is processed the stream's status is updated.
+    After every chunk is processed the stream's progress is updated.
     """
     async with ClientSession() as session:
         print(stream.url)
@@ -53,10 +58,9 @@ async def _download(stream, actives, log):
             complete = False
 
             with open(temp_path, mode) as fd:
-                actives.append(stream.url)
+                actives[stream.url] = stream
 
                 while stream.url in actives:
-                    index = actives.index(stream.url)
                     chunk = await response.content.read(chunk_size)
                     print('chunk len:', len(chunk))
                     if len(chunk) == 0:
@@ -64,26 +68,18 @@ async def _download(stream, actives, log):
                         break
                     fd.write(chunk)
 
-                    elapsed = time.time() - t0
                     bytesdone += len(chunk)
-                    rate = ((bytesdone - offset) / 1024) / elapsed
-                    eta = (total - bytesdone) / (rate * 1024)
 
-                    stream.status = '{i}|{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
-                        i=' ' * (index * 70),
-                        m=clipyweb.utils.progress_bar(bytesdone, total),
-                        d=bytesdone,
-                        t=clipyweb.utils.size(total),
-                        p=bytesdone * 1.0 / total,
-                        r=rate,
-                        e=eta,
+                    stream.progress.update(
+                        bytesdone=bytesdone,
+                        elapsed=time.time() - t0,
+                        offset=offset,
+                        total=total,
                     )
-                    if log:
-                        log.write("\r{}    ".format(stream.status))
-                        # log.flush()
+                    logging.info(stream.status)
 
                 if stream.url in actives:
-                    actives.remove(stream.url)
+                    del actives[stream.url]
 
     if complete:
         os.rename(temp_path, f'videos/{stream.path}')

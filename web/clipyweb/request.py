@@ -33,7 +33,6 @@ async def get_video(url):
     data = await get_info(vid)
     # print(f'info: data "{data}"')
 
-    video = clipyweb.models.VideoDetail(data)
-    video.vid = vid
+    video = clipyweb.models.VideoDetail(vid, data)
 
     return video

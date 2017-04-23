@@ -100,3 +100,7 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
 .details dd > ol {
     margin: 0;
 }
+
+#progress-bars {
+    list-style: none;
+}

@@ -1,4 +1,3 @@
-import sys
 import json
 
 import aiohttp
@@ -25,22 +24,33 @@ async def inquire(request):
 
 
 async def download(request):
-    index = int(request.query.get('index'))
+    stream_index = int(request.query.get('stream'))
     vid = request.query.get('vid')
     video = await clipyweb.request.get_video(vid)
-    stream = video.streams[index]
-    # data = await clipyweb.download.get(stream, request.app['actives'], log=sys.stdout)
+    stream = video.streams[stream_index]
     data = dict(
         message='Queued',
-        stream=stream.url,
-        index=index,
+        index=stream_index,
         video=video.detail,
+        url=stream.url,
         vid=vid,
     )
     # run download as task in background
-    download = clipyweb.download.get(stream, request.app['actives'], log=sys.stdout)
+    download = clipyweb.download.get(stream, request.app['actives'])
     request.app.loop.create_task(download)
 
+    return aiohttp.web.Response(
+        content_type='application/json',
+        text=json.dumps(data),
+    )
+
+
+async def progress(request):
+    # for stream in request.app['actives'].values():
+    #     d = s.progress
+    data = dict(
+        actives=[{**s.progress, **dict(url=s.url, name=s.name)} for s in request.app['actives'].values()],
+    )
     return aiohttp.web.Response(
         content_type='application/json',
         text=json.dumps(data),

@@ -9,7 +9,8 @@ from clipyweb.utils import take_first as tf
 
 class VideoDetail(object):
     """ Video information container """
-    def __init__(self, data=None, target=None):
+    def __init__(self, vid, data=None, target=None):
+        self.vid = vid
         self.info = dict()
         self.stream = None
         self.streams = list()
@@ -122,14 +123,17 @@ class Stream(object):
         self.itag = None
         self.name = None
         self.path = None
-        self.status = ''
+        self.progress = dict()
 
         for k, v in info.items():
             setattr(self, k, tf(v))
 
         # Declare the stream/file name using the title et.al.
-        self.name = video.name or '{}-({}).{}'.format(
-            video.title, info.get('resolution', ''), info.get('extension', '')
+        self.name = video.name or '{}-({}){}.{}'.format(
+            video.title,
+            info.get('resolution', ''),
+            video.vid,
+            info.get('extension', ''),
         ).replace('/', '|')
 
         # Declare the path using the name
@@ -145,6 +149,28 @@ class Stream(object):
         #     f.write('x: '); f.write(x); f.write('\n\n')
         #     f.write('------------------------------------\n\n')
         return 'S> {} {}'.format(self.status, self.display)
+
+    @property
+    def status(self):
+        bytesdone = int(self.progress.get('bytesdone', 0))
+        elapsed = int(self.progress.get('elapsed', 0))
+        offset = int(self.progress.get('offset', 0))
+        total = int(self.progress.get('total', 0))
+
+        if not (total and elapsed):
+            return 'Huh?'
+
+        rate = ((bytesdone - offset) / 1024) / elapsed
+        eta = (total - bytesdone) / (rate * 1024)
+
+        return '{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
+            m=clipyweb.utils.progress_bar(bytesdone, total),
+            d=bytesdone,
+            t=clipyweb.utils.size(total),
+            p=bytesdone * 1.0 / total,
+            r=rate,
+            e=eta,
+        )
 
     @property
     def display(self):

@@ -41,7 +41,7 @@ def app():
         # logger=logger,
         loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
     )
-    app['actives'] = list()
+    app['actives'] = dict()
     clipyweb.routes.setup_routes(app)
     aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('clipyweb', 'templates'))
     app.router.add_static('/static/', path='static', name='static')
