@@ -11,11 +11,11 @@ in the `shell` branch.
 
 ### Server
 
-* Python 3.6
+* Python 3.6 (only)
 
 ### Client
 
-* ES6 (ECMAScript 2015)
+* ES6+ (ECMAScript 2015)
 
 See also requirements.txt
 
@@ -23,15 +23,23 @@ See also requirements.txt
 
 You will probably need the development package of Python to install `pycares`:
 
-	sudo apt-get install python-dev
+	sudo apt-get install python3.6-dev
 
 Install dependencies:
 
 	pip install -r requirements.txt
 
+Install the application
+
+	python3.6 setup.py install
+
 ## Run the server:
 
-	clipy$ python main.py
+	clipy
+
+	INFO:asyncio:<Server sockets=[<socket.socket fd=6, family=AddressFamily.AF_INET, type=2049, proto=6, laddr=('127.0.0.1', 7070)>]> is serving
+	======== Running on http://127.0.0.1:7070 ========
+	(Press CTRL+C to quit)
 
 ## Open the GUI:
 
@@ -43,5 +51,5 @@ Use a web browser: http://127.0.0.1:7070/
 
 # Credits
 
-* C logo: http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/simple-red-square-icons-alphanumeric/128147-simple-red-square-icon-alphanumeric-letter-c.png
-* Download code: Pafy
+* C logo: [mysitemyway](http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/simple-red-square-icons-alphanumeric/128147-simple-red-square-icon-alphanumeric-letter-c.png)
+* Download code: [Pafy](http://pythonhosted.org/Pafy/)
