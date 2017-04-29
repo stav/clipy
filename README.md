@@ -41,6 +41,10 @@ Install the application
 	======== Running on http://127.0.0.1:7070 ========
 	(Press CTRL+C to quit)
 
+### Or running for development:
+
+	python -Wdefault -m clipy.run
+
 ## Open the GUI:
 
 Use a web browser: http://127.0.0.1:7070/

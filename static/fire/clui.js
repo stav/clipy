@@ -23,7 +23,7 @@ clui
 
     http.get( url )
     .then( json.parse  )
-    .then( _inload     )
+ // .then( _inload     )
     .then( _insert     )
     .fail( console.log )
   }
@@ -35,8 +35,6 @@ clui
    */
   function show_progress( data ) {
     if ( data ) {
-      console.log('show_progress')
-      console.log(data)
       _add_active_progress_bars( data )
       _remove_dead_progress_bars( data )
     }
@@ -98,6 +96,7 @@ clui
         text = document.createTextNode( streams[i] );
 
       item.setAttribute('class', 'stream')
+      item.setAttribute('title', 'Download this stream')
       item.setAttribute('stream', i )
       item.setAttribute('vid', vid )
       item.appendChild( text )
@@ -120,7 +119,41 @@ clui
     }
     // clipy_cache[ clipy_index++ ] = data;
 
-    return data; // chaining
+    return data // chaining
+  }
+
+  /**
+   * Construct the panel header line with togglable title and close button
+   */
+  function _get_panel_header( data ) {
+    let
+      row = document.createElement('div'),
+      left = document.createElement('div'),
+      right = document.createElement('div'),
+      close = document.createElement('button'),
+      text = document.createElement('span'),
+      _;
+
+    text.innerText = data.title;
+    text.setAttribute('class', 'toggle')
+    text.addEventListener('click', _toggle, false)
+
+    left.setAttribute('class', 'eleven columns')
+    left.appendChild( text )
+
+    close.setAttribute('class', 'button close')
+    close.setAttribute('title', 'Close this panel')
+    close.innerText = 'X';
+    close.addEventListener('click', _close, false)
+
+    right.setAttribute('class', 'one columns')
+    right.appendChild( close )
+
+    row.setAttribute('class', 'row')
+    row.appendChild( left )
+    row.appendChild( right )
+
+    return row
   }
 
   /**
@@ -128,24 +161,20 @@ clui
    */
   function _insert( data ) {
     let
-      text = document.createElement('span'),
+      head = _get_panel_header( data ),
       panel = document.createElement('li'),
       panels = document.getElementById('panels'),
       details = _get_details( data ),
       _;
 
-    text.innerText = data.title;
-    text.setAttribute('class', 'toggle')
-    text.addEventListener('click', _toggle, false)
-
     panel.setAttribute('class', 'panel')
     panel.setAttribute('title', data.vid )
     panel.setAttribute('vid', data.vid )
-    panel.appendChild( text )
+    panel.appendChild( head )
     panel.appendChild( details )
     panels.appendChild( panel )
 
-    return data; // chaining
+    return data // chaining
   }
 
   /**
@@ -175,9 +204,19 @@ clui
   /**
    * Show / hide the video details
    */
+  function _close( e ) {
+    let
+      panel = e.target.parentElement.parentElement.parentElement;
+
+    panel.remove()
+  }
+
+  /**
+   * Show / hide the video details
+   */
   function _toggle( e ) {
     let
-      style = e.target.parentElement.children[1].style;
+      style = e.target.parentElement.parentElement.parentElement.children[1].style;
 
     if ( style.display === 'none' )
       style.display = '';
@@ -208,8 +247,6 @@ clui
    */
   function _add_active_progress_bars( data ) {
     for ( let stream of data.actives ) {
-      console.log('active')
-      console.log(stream)
       let
         progress = document.getElementById( stream.url ),
         item = undefined,
@@ -246,8 +283,6 @@ clui
       }
 
       if ( !data.actives.find( active_url ) ) {
-        console.log('remove')
-        console.log( progress )
         progress.parentElement.remove()
       }
     }

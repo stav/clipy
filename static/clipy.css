@@ -104,3 +104,14 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
 #progress-bars {
     list-style: none;
 }
+
+.button.close {
+    padding: 0 7px 0 7px;
+    height: inherit;
+    line-height: inherit;
+}
+
+.panel .row {
+    display: inline-flex;
+    width: 96%;
+}

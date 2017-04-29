@@ -17,10 +17,7 @@
     <!--                                                                               PROGRESS -->
     <div class="row">
       <div class="twelve columns">
-        <ul id="progress-bars">
-          <li><progress value="22" max="100" title="asdfsdaf"></progress></li>
-          <li><progress value="70" max="100" title="asdfsdaf"></progress></li>
-        </ul>
+        <ul id="progress-bars"></ul>
       </div>
     </div>
 
@@ -29,8 +26,8 @@
       <div class="twelve columns">
         <label for="input-video">
           Video
-          <div class="tooltip" title="This is not Python, just a URL string, no quotes., For now only one URL supported.">
-            <div class="info" title=""></div>
+          <div class="tooltip" title="Enter a YouTube 'watch' URL or just the 11-char Id.">
+            <div class="info"></div>
           </div>
         </label>
         <input
@@ -46,11 +43,11 @@
 
     <!--                                                                                BUTTONS -->
     <div class="row">
-      <div class="ten columns">
+      <div class="nine columns">
         <button class="button-primary" onclick="clui.inquire()"> Inquire </button>
         <button class="button" onclick="clui.download()"> Download </button>
       </div>
-      <div class="two columns winctl">
+      <div class="three columns winctl">
         <button class="button" onclick="clui.clear()" title="Clear all panels"> X </button>
       </div>
     </div>

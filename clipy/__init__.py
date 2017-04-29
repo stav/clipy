@@ -1,1 +1,1 @@
-from clipy.run import main  # noqa
+# from clipy.run import main  # noqa
