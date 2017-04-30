@@ -241,6 +241,21 @@ clui
   }
 
   /**
+   * Cancel a download in progress
+   */
+  function _cancel( e ) {
+    let
+      id = e.target.id,
+      url = '/api/cancel?url=' + id,
+      _;
+
+    http.get( url )
+    .then( json.parse  )
+    .then( console.log )
+    .fail( console.log )
+  }
+
+  /**
    * Display the progress bars
    *
    * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
@@ -258,6 +273,7 @@ clui
         progress.setAttribute('title', stream.name )
         item = document.createElement('li');
         item.appendChild( progress )
+        item.addEventListener('click', _cancel, false)
         document.getElementById('progress-bars').appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )

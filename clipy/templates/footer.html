@@ -37,6 +37,17 @@
         box.value = element.innerText;
       }
 
+      function shutdown() {
+        let
+          url = '/api/shutdown',
+          _;
+
+        http.get( url )
+        .then( json.parse )
+        .then( console.log )
+        .fail( console.log )
+      }
+
     </script>
 
   </footer>

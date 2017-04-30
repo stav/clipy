@@ -1,10 +1,18 @@
 import json
 
-import aiohttp
+import aiohttp.web
 import aiohttp_jinja2
 
 import clipy.request
 import clipy.download
+
+
+@aiohttp_jinja2.template('index.html')
+async def index(request):
+    return {
+        'question': 'question',
+        'choices': 'choices'
+    }
 
 
 async def inquire(request):
@@ -57,9 +65,26 @@ async def progress(request):
     )
 
 
-@aiohttp_jinja2.template('index.html')
-async def index(request):
-    return {
-        'question': 'question',
-        'choices': 'choices'
-    }
+async def cancel(request):
+    stream_url = request.query.get('url')
+    actives = request.app['actives']
+    if stream_url in actives:
+        del actives[stream_url]
+        removed = True
+    else:
+        removed = False
+    data = dict(removed=removed)
+    return aiohttp.web.json_response(data)
+
+
+async def shutdown(request):
+    # app = request.app
+    # loop = app.loop
+    # loop.run_until_complete(app.shutdown())
+    # loop.run_until_complete(app.cleanup())
+    # app.shutdown()
+    # app.cleanup()
+    # raise TypeError('asdf')
+    request.app['server']['running'] = False
+    data = dict(app=str(request.app))
+    return aiohttp.web.json_response(data)

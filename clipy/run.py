@@ -19,6 +19,11 @@ import jinja2
 import clipy.routes
 
 
+async def run_loop(app):
+    while app['server']['running']:
+        await asyncio.sleep(2)
+
+
 def main():
 
     # with open("logger.yaml", 'r') as stream:
@@ -28,28 +33,50 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     # logger = logging.getLogger('access')
 
-    async def startup(app):
-        pass
+    async def on_startup(app):
+        logging.debug('@@@ startup')
 
-    async def cleanup(app):
-        pass
+    async def on_cleanup(app):
+        logging.debug('@@@ cleanup')
+
+    async def on_shutdown(app):
+        logging.debug('@@@ shutdown')
 
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
 
-    app = aiohttp.web.Application(
-        # logger=logger,
-        loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
-    )
+    # app = aiohttp.web.Application(
+    #     # logger=logger,
+    #     loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
+    # )
+    app = aiohttp.web.Application()
     app['actives'] = dict()
+    app['server'] = dict(running=True)
     clipy.routes.setup_routes(app)
     aiohttp_jinja2.setup(app, loader=jinja2.PackageLoader('clipy', 'templates'))
     app.router.add_static('/static/', path='static', name='static')
+    app.on_startup.append(on_startup)
+    app.on_cleanup.append(on_cleanup)
+    app.on_shutdown.append(on_shutdown)
+    # aiohttp.web.run_app(app, host='127.0.0.1', port=7070)
 
-    app.on_startup.append(startup)
-    app.on_cleanup.append(cleanup)
+    handler = app.make_handler()
+    f = loop.create_server(handler, '0.0.0.0', 7070)
+    srv = loop.run_until_complete(f)
+    print('serving on', srv.sockets[0].getsockname())
+    try:
+        # loop.run_forever()
+        loop.run_until_complete(run_loop(app))
+    except Exception as e:
+        logging.error(e)
+    finally:
+        srv.close()
+        loop.run_until_complete(srv.wait_closed())
+        loop.run_until_complete(app.shutdown())
+        loop.run_until_complete(handler.shutdown(60.0))
+        loop.run_until_complete(app.cleanup())
 
-    aiohttp.web.run_app(app, host='127.0.0.1', port=7070)
+    loop.close()
 
 
 if __name__ == "__main__":
