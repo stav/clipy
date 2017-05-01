@@ -24,6 +24,11 @@ async def run_loop(app):
         await asyncio.sleep(2)
 
 
+class PollFilter(logging.Filter):
+    def filter(self, record):
+        return not record.getMessage().startswith('poll')
+
+
 def main():
 
     # with open("logger.yaml", 'r') as stream:
@@ -31,7 +36,9 @@ def main():
     #     logging.config.dictConfig(config['logging'])
 
     logging.basicConfig(level=logging.DEBUG)
-    # logger = logging.getLogger('access')
+    logger = logging.getLogger('asyncio')
+    logger.setLevel(logging.DEBUG)
+    logger.addFilter(PollFilter())
 
     async def on_startup(app):
         logging.debug('@@@ startup')
@@ -45,11 +52,10 @@ def main():
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
 
-    # app = aiohttp.web.Application(
-    #     # logger=logger,
-    #     loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
-    # )
-    app = aiohttp.web.Application()
+    app = aiohttp.web.Application(
+        # logger=logger,
+        # loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
+    )
     app['actives'] = dict()
     app['server'] = dict(running=True)
     clipy.routes.setup_routes(app)
@@ -61,9 +67,9 @@ def main():
     # aiohttp.web.run_app(app, host='127.0.0.1', port=7070)
 
     handler = app.make_handler()
-    f = loop.create_server(handler, '0.0.0.0', 7070)
+    f = loop.create_server(handler, '127.0.0.1', 7070)
     srv = loop.run_until_complete(f)
-    print('serving on', srv.sockets[0].getsockname())
+    logging.info('serving on http://{}:{}/'.format(*srv.sockets[0].getsockname()))
     try:
         # loop.run_forever()
         loop.run_until_complete(run_loop(app))
