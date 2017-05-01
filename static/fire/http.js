@@ -31,7 +31,7 @@ http
     catch ( error ) {
       deferred.reject( error )
     }
-    return deferred.promise
+    return deferred.promise.timeout( 5000, 'Server not responding, assuming shutdown')
   }
 
   /*

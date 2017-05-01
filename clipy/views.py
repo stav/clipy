@@ -1,4 +1,5 @@
 import json
+# import asyncio
 
 import aiohttp.web
 import aiohttp_jinja2
@@ -59,6 +60,7 @@ async def progress(request):
     data = dict(
         actives=[{**s.progress, **dict(url=s.url, name=s.name)} for s in request.app['actives'].values()],
     )
+    # await asyncio.sleep(2)
     return aiohttp.web.Response(
         content_type='application/json',
         text=json.dumps(data),

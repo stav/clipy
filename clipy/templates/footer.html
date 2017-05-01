@@ -12,12 +12,19 @@
     <script>
       "use strict";
 
+      var check_progress_id = window.setInterval( check_progress, 5000 );
       // var
       //   clipy_cache = { 0: null },
       //   clipy_index = 1,
       //   _;
 
-      setInterval(check_progress, 2000);
+      function bail( error ) {
+        console.log( error )
+        if ( error.code === 'ETIMEDOUT' ) {
+          console.log( 'stopping: ' + check_progress_id )
+          window.clearInterval( check_progress_id )
+        }
+      }
 
       function check_progress() {
         let
@@ -27,7 +34,7 @@
         http.get( url )
         .then( json.parse )
         .then( clui.show_progress )
-        .fail( console.log )
+        .fail( bail )
       }
 
       function seed( element ) {
