@@ -14,9 +14,9 @@ http
    * https://github.com/bellbind/using-promise-q#setup-q-module
    */
   function get( url ) {
-    var
+    let
       deferred = Q.defer(),
-      request = new XMLHttpRequest()
+      request = new XMLHttpRequest();
 
     request.onreadystatechange = function () {
       if (request.readyState !== 4) return;
@@ -40,7 +40,7 @@ http
    * Callback-based async post
    */
   function post( url, string, callback, errback ) {
-    var xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = callback;
@@ -53,7 +53,7 @@ http
 
   return {
     get: get,
-    post: post
+    post: post,
   }
 
 }())
