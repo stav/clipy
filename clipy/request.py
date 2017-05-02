@@ -1,3 +1,4 @@
+import logging
 import urllib
 
 import aiohttp
@@ -29,8 +30,8 @@ async def get_info(resource):
 
 async def get_video(url):
     vid = clipy.utils.get_video_id(url)
-    print(f'info: url "{url}", vid "{vid}"')
+    logging.debug(f'url "{url}" --> vid "{vid}"')
     data = await get_info(vid)
-    video = clipy.models.VideoDetail(vid, data)
+    video = clipy.models.Video(vid, data)
 
     return video

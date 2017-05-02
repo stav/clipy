@@ -7,7 +7,7 @@ import clipy.utils
 from clipy.utils import take_first as tf
 
 
-class VideoDetail(object):
+class Video(object):
     """ Video information container """
     def __init__(self, vid, data=None):
         self.vid = vid
