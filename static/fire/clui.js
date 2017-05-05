@@ -18,7 +18,7 @@ clui
   function inquire() {
     let
       video = document.getElementById('input-video').value,
-      url = '/api/inquire?video=' + video,
+      url = '/api/inquire?video=' + encodeURIComponent(video),
       _;
 
     http.get( url )
@@ -31,12 +31,14 @@ clui
   /**
    * Display the progress bars
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * Called every few seconds with the servers list of streams actively downloading
+   *
+   * data: { actives: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "k12h3..." },... ]}
    */
   function show_progress( data ) {
-    if ( data ) {
-      _add_active_progress_bars( data )
-      _remove_dead_progress_bars( data )
+    if ( data.actives ) {
+      _add_active_progress_bars( data.actives )
+      _remove_dead_progress_bars( data.actives )
     }
   }
 
@@ -231,7 +233,7 @@ clui
     let
       vid = e.target.attributes.vid.value,
       stream = e.target.attributes.stream.value,
-      url = '/api/download?vid=' + vid + '&stream=' + stream,
+      url = '/api/download?vid=' + encodeURIComponent(vid) + '&stream=' + encodeURIComponent(stream),
       _;
 
     http.get( url )
@@ -246,7 +248,7 @@ clui
   function _cancel( e ) {
     let
       id = e.target.id,
-      url = '/api/cancel?url=' + id,
+      url = '/api/cancel?hash=' + encodeURIComponent(id),
       _;
 
     http.get( url )
@@ -258,18 +260,18 @@ clui
   /**
    * Display the progress bars
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "60b6f8b8898d4..."" },... ]
    */
-  function _add_active_progress_bars( data ) {
-    for ( let stream of data.actives ) {
+  function _add_active_progress_bars( streams ) {
+    for ( let stream of streams ) {
       let
-        progress = document.getElementById( stream.url ),
+        progress = document.getElementById( stream.hash ),
         item = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
-        progress.id = stream.url;
+        progress.id = stream.hash;
         progress.setAttribute('title', stream.name )
         item = document.createElement('li');
         item.appendChild( progress )
@@ -284,9 +286,9 @@ clui
   /**
    * Remove and progress bars that are no longer active
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "60b6f8b8898d4..."" },... ]
    */
-  function _remove_dead_progress_bars( data ) {
+  function _remove_dead_progress_bars( streams ) {
     let
       bars = document.getElementsByTagName('progress'),
       _;
@@ -294,11 +296,11 @@ clui
     for (let i = bars.length - 1; i >= 0; i--) {
       let progress = bars.item(i);
 
-      function active_url( value, index ) {
-        return value.url === progress.id
+      function active( value, index ) {
+        return value.hash === progress.id
       }
 
-      if ( !data.actives.find( active_url ) ) {
+      if ( !streams.find( active ) ) {
         progress.parentElement.remove()
       }
     }

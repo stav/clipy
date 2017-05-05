@@ -1,5 +1,5 @@
-import os
 import urllib
+import hashlib
 
 import clipy.youtube
 import clipy.utils
@@ -118,12 +118,15 @@ class Stream(object):
     """ Video stream """
     def __init__(self, info, video=None):
         """  """
-        # First load all info items into the object namespace
+        # Initialize some main properties
         self.itags = []
         self.itag = None
         self.name = None
+        self.hash = None
+        self.url = None
         self.progress = dict()
 
+        # Load all info items into the object namespace
         for k, v in info.items():
             setattr(self, k, tf(v))
 
@@ -137,6 +140,10 @@ class Stream(object):
 
         # Declare the tags
         self.itags = clipy.youtube.get_itags(info.get('itag', None))
+
+        # Hash the url
+        if self.url:
+            self.hash = hashlib.md5(self.url.encode('utf8')).hexdigest()
 
     def __str__(self):
         # from pprint import pformat

@@ -37,9 +37,9 @@ asyncio_logger = logging.getLogger('asyncio')
 asyncio_logger.setLevel(logging.DEBUG)
 asyncio_logger.addFilter(PollFilter())
 
-clipy_logger = logging.getLogger('clipy')
-clipy_logger.setLevel(logging.DEBUG)
-clipy_logger.addFilter(PollFilter())
+downloader_logger = logging.getLogger('clipy:downloader')
+server_logger = logging.getLogger('clipy:server')
+views_logger = logging.getLogger('clipy:views')
 
 
 def init(app):
@@ -54,7 +54,7 @@ def init(app):
 
 
 async def on_startup(app):
-    clipy_logger.info(f'startup: {app}')
+    server_logger.info(f'startup: {app}')
 
     def get_server_uri():
         socket = app['server']['sockets'][0]
@@ -63,15 +63,15 @@ async def on_startup(app):
 
     app['server']['running'] = True
     uri = get_server_uri()
-    clipy_logger.info(f'serving on {uri}')
+    server_logger.info(f'serving on {uri}')
 
 
 async def on_shutdown(app):
-    clipy_logger.info(f'shutdown: {app}')
+    server_logger.info(f'shutdown: {app}')
 
 
 async def on_cleanup(app):
-    clipy_logger.info(f'cleanup: {app}')
+    server_logger.info(f'cleanup: {app}')
     app['actives'].clear()
     app['server'].clear()
 
