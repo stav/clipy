@@ -15,9 +15,10 @@ clui
    * We get back JSON in the response and convert it to an object then load it into the the cache
    * and then insert a display panel for it.
    */
-  function inquire() {
+  function inquire( element ) {
     let
-      video = document.getElementById('input-video').value,
+      vid = element ? element.target.vid : undefined,
+      video = vid ? vid : document.getElementById('input-video').value,
       url = '/api/inquire?video=' + encodeURIComponent(video),
       _;
 
@@ -256,10 +257,10 @@ clui
   /**
    * Cancel a download in progress
    */
-  function _cancel( e ) {
+  function _cancel( element ) {
     let
-      id = e.target.id,
-      url = '/api/cancel?hash=' + encodeURIComponent(id),
+      hash = element.target.hash,
+      url = '/api/cancel?hash=' + encodeURIComponent(hash),
       _;
 
     http.get( url )
@@ -282,11 +283,13 @@ clui
 
       if ( !progress ) {
         progress = document.createElement('progress');
+        progress.vid = stream.vid;
         progress.id = stream.hash;
         progress.setAttribute('title', stream.name )
         item = document.createElement('li');
         item.appendChild( progress )
-        item.addEventListener('click', _cancel, false)
+        item.addEventListener('click', inquire, false)
+        // item.addEventListener('click', _cancel, false)
         document.getElementById('progress-bars').appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )
