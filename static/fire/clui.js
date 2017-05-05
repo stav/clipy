@@ -12,6 +12,10 @@ clui
   /**
    * Request a video inquiry for the particulars like title, duration and description
    *
+   * Can be called from either the Inquire button in which case we have no element argument and
+   * we use the text box; or, this function can be called from clicking the progress bar which
+   * passes us the target element which has the video Id for us to use for inquiry.
+   *
    * We get back JSON in the response and convert it to an object then load it into the the cache
    * and then insert a display panel for it.
    */
@@ -106,8 +110,9 @@ clui
 
     for ( let i = 0; i < streams.length; i++ ) {
       const
+        stream = streams[i],
         item = document.createElement('li'),
-        text = document.createTextNode( streams[i] );
+        text = document.createTextNode( stream.display );
 
       item.setAttribute('class', 'stream')
       item.setAttribute('title', 'Download this stream')

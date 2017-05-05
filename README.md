@@ -43,7 +43,7 @@ Install the application
 
 ### Or running for development:
 
-	python -Wdefault -m clipy.run
+	python -Wdefault -m clipy.server
 
 ## Open the GUI:
 

@@ -7,7 +7,7 @@ import clipy.utils
 from clipy.utils import take_first as tf
 
 
-class Video(object):
+class Video():
     """ Video information container """
     def __init__(self, vid, data=None):
         self.vid = vid
@@ -114,7 +114,7 @@ Streams: {}
         #     f.write(output)
 
 
-class Stream(object):
+class Stream():
     """ Video stream """
     def __init__(self, info, video=None):
         """  """
@@ -152,6 +152,10 @@ class Stream(object):
         #     f.write('x: '); f.write(x); f.write('\n\n')
         #     f.write('------------------------------------\n\n')
         return 'S> {} {}'.format(self.status, self.display)
+
+    @property
+    def serial(self):
+        return dict(**self.__dict__, **dict(status=self.status, display=self.display))
 
     @property
     def status(self):

@@ -24,7 +24,7 @@ async def inquire(request):
     data = dict(
         description=video.description,
         duration=video.duration,
-        streams=[str(s) for s in video.streams],
+        streams=[s.serial for s in video.streams],
         title=video.title,
         vid=video.vid,
     )
