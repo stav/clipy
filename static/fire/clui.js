@@ -125,6 +125,27 @@ clui
   }
 
   /**
+   * Display the data summary in a new panel
+   */
+  function _insert( data ) {
+    let
+      head = _get_panel_header( data ),
+      panel = document.createElement('li'),
+      panels = document.getElementById('panels'),
+      details = _get_details( data ),
+      _;
+
+    panel.setAttribute('class', 'panel')
+    panel.setAttribute('title', data.vid )
+    panel.setAttribute('vid', data.vid )
+    panel.appendChild( head )
+    panel.appendChild( details )
+    panels.appendChild( panel )
+
+    return data // chaining
+  }
+
+  /**
    * Construct the panel header line with togglable title and close button
    */
   function _get_panel_header( data ) {
@@ -156,27 +177,6 @@ clui
     row.appendChild( right )
 
     return row
-  }
-
-  /**
-   * Display the data summary in a new panel
-   */
-  function _insert( data ) {
-    let
-      head = _get_panel_header( data ),
-      panel = document.createElement('li'),
-      panels = document.getElementById('panels'),
-      details = _get_details( data ),
-      _;
-
-    panel.setAttribute('class', 'panel')
-    panel.setAttribute('title', data.vid )
-    panel.setAttribute('vid', data.vid )
-    panel.appendChild( head )
-    panel.appendChild( details )
-    panels.appendChild( panel )
-
-    return data // chaining
   }
 
   /**
