@@ -36,9 +36,20 @@ clui
    * data: { actives: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "k12h3..." },... ]}
    */
   function show_progress( data ) {
-    if ( data.actives ) {
-      _add_active_progress_bars( data.actives )
-      _remove_dead_progress_bars( data.actives )
+    let
+      status = document.getElementById('running'),
+      _;
+
+    if ( u.isObject( data ) ) {
+      status.checked = true;
+
+      if ( data.actives ) {
+        _add_active_progress_bars( data.actives )
+        _remove_dead_progress_bars( data.actives )
+      }
+    }
+    else {
+      status.checked = false;
     }
   }
 

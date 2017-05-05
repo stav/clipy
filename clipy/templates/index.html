@@ -21,10 +21,18 @@
       </div>
     </div>
 
-    <!--                                                                               SHUTDOWN -->
+    <!--                                                                                 STATUS -->
     <div class="row">
       <div class="twelve columns">
-        <button "button" onclick="shutdown()"> Shutdown </button>
+        <button class="button valign" onclick="shutdown()"> Shutdown </button>
+        <input
+          type="checkbox"
+          class="valign"
+          name="running"
+          id="running"
+          title="Is the sesrver running?"
+          disabled="true"
+        >
       </div>
     </div>
 

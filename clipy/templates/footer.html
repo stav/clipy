@@ -19,15 +19,19 @@
 
       setInterval(check_progress, 10000);
 
+      function bail( e ) {
+        console.log(e)
+      }
+
       function check_progress() {
         let
           url = '/api/progress',
           _;
 
         http.get( url )
-        .then( json.parse )
+        .then( json.parse         )
         .then( clui.show_progress )
-        .fail( console.log )
+        .fail( bail               )
       }
 
       function seed( element ) {
