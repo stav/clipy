@@ -27,6 +27,10 @@ class PollFilter(logging.Filter):
         return not record.getMessage().startswith('poll')
 
 
+# with open("logger.yaml", 'r') as stream:
+#     config = yaml.load(stream)
+#     logging.config.dictConfig(config['logging'])
+
 logging.basicConfig(level=logging.DEBUG)
 
 asyncio_logger = logging.getLogger('asyncio')
@@ -51,10 +55,15 @@ def init(app):
 
 async def on_startup(app):
     clipy_logger.info(f'startup: {app}')
-    sockets = app['server']['sockets']
-    clipy_logger.info(f'startup: {sockets}')  # [0].getsockname()
+
+    def get_server_uri():
+        socket = app['server']['sockets'][0]
+        host, port = socket.getsockname()
+        return 'http://{}:{}/'.format(host, port)
+
     app['server']['running'] = True
-    clipy_logger.info('serving on http://{}:{}/'.format(*sockets[0].getsockname()))
+    uri = get_server_uri()
+    clipy_logger.info(f'serving on {uri}')
 
 
 async def on_shutdown(app):
@@ -73,11 +82,6 @@ async def run_loop(app):
 
 
 def main():
-
-    # with open("logger.yaml", 'r') as stream:
-    #     config = yaml.load(stream)
-    #     logging.config.dictConfig(config['logging'])
-
     app = aiohttp.web.Application(
         debug=True,
         # logger=logger,
