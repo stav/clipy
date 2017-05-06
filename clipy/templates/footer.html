@@ -7,30 +7,13 @@
     <script src="/static/lib/http.js"></script>
     <script src="/static/lib/json.js"></script>
 
+    <script src="/static/clipy/cler.js"></script>
     <script src="/static/clipy/clui.js"></script>
 
     <script>
       "use strict";
 
-      setInterval(check_progress, 2000);
-
-      function bail( e ) {
-        console.log(e)
-      }
-
-      function check_progress() {
-        http.get('/api/progress')
-        .then( json.parse         )
-        .then( clui.show_progress )
-        .fail( bail               )
-      }
-
-      function shutdown() {
-        http.get('/api/shutdown')
-        .then( json.parse )
-        .then( console.log )
-        .fail( console.log )
-      }
+      setInterval(cler.check_progress, 2000);
 
     </script>
 

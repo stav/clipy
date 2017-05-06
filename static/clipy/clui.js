@@ -1,6 +1,6 @@
 clui
 /**
- * Clipy Tools - User Interface
+ * Clipy User Interface
  */
 =(function(){"use strict";
 
