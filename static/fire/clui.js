@@ -38,7 +38,7 @@ clui
    *
    * Called every few seconds with the servers list of streams actively downloading
    *
-   * data: { actives: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "k12h3..." },... ]}
+   * data: { actives: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]}
    */
   function show_progress( data ) {
     let
@@ -46,6 +46,7 @@ clui
       _;
 
     if ( u.isObject( data ) ) {
+      // Server is running since we got a valid response
       status.checked = true;
 
       if ( data.actives ) {
@@ -54,6 +55,7 @@ clui
       }
     }
     else {
+      // Server is not running since we got no response
       status.checked = false;
     }
   }
@@ -116,10 +118,11 @@ clui
 
       item.setAttribute('class', 'stream')
       item.setAttribute('title', 'Download this stream')
-      item.setAttribute('stream', i )
+      item.setAttribute('index', i )
       item.setAttribute('vid', vid )
       item.appendChild( text )
       item.addEventListener('click', _download, false)
+      item.sid = stream.sid;
 
       list.setAttribute('start', 0 )
       list.appendChild( item )
@@ -246,17 +249,30 @@ clui
   /**
    * Get the goods
    */
-  function _download( e ) {
+  function _download( element ) {
     let
-      vid = e.target.attributes.vid.value,
-      stream = e.target.attributes.stream.value,
-      url = '/api/download?vid=' + encodeURIComponent(vid) + '&stream=' + encodeURIComponent(stream),
+      att = element.target.attributes,
+      vid = att.vid.value,
+      sid = element.target.sid,
+      index = att.index.value,
+      progress = document.getElementById( sid ),
+      url = '/api/download?vid=' + encodeURIComponent(vid) + '&stream=' + index,
       _;
 
-    http.get( url )
-    .then( json.parse  )
-    .then( console.log )
-    .fail( console.log )
+    console.log('_download')
+    console.log(element)
+    console.log(progress)
+    if ( progress ) {
+      console.log('CANCEL')
+      _cancel( element )
+    }
+    else {
+      console.log('DOWNLOAD')
+      http.get( url )
+      .then( json.parse  )
+      .then( console.log )
+      .fail( console.log )
+    }
   }
 
   /**
@@ -264,8 +280,8 @@ clui
    */
   function _cancel( element ) {
     let
-      hash = element.target.hash,
-      url = '/api/cancel?hash=' + encodeURIComponent(hash),
+      sid = element.target.sid,
+      url = '/api/cancel?sid=' + encodeURIComponent(sid),
       _;
 
     http.get( url )
@@ -277,24 +293,23 @@ clui
   /**
    * Display the progress bars
    *
-   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "60b6f8b8898d4..."" },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]
    */
   function _add_active_progress_bars( streams ) {
     for ( let stream of streams ) {
       let
-        progress = document.getElementById( stream.hash ),
+        progress = document.getElementById( stream.sid ),
         item = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
         progress.vid = stream.vid;
-        progress.id = stream.hash;
+        progress.id = stream.sid;
         progress.setAttribute('title', stream.name )
         item = document.createElement('li');
         item.appendChild( progress )
         item.addEventListener('click', inquire, false)
-        // item.addEventListener('click', _cancel, false)
         document.getElementById('progress-bars').appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )
@@ -305,7 +320,7 @@ clui
   /**
    * Remove and progress bars that are no longer active
    *
-   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, hash: "60b6f8b8898d4..."" },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]
    */
   function _remove_dead_progress_bars( streams ) {
     let
@@ -316,7 +331,7 @@ clui
       let progress = bars.item(i);
 
       function active( value, index ) {
-        return value.hash === progress.id
+        return value.sid === progress.id
       }
 
       if ( !streams.find( active ) ) {

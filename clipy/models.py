@@ -1,60 +1,67 @@
 import urllib
-import hashlib
+import logging
 
 import clipy.youtube
 import clipy.utils
 
 from clipy.utils import take_first as tf
 
+logger = logging.getLogger(__name__)
 
-class Video():
-    """ Video information container """
-    def __init__(self, vid, data=None):
+
+class VideoModel():
+    """Video information container
+
+    stream_map:
+
+        ['init=0-4451&projection_type=1&bitrate=72530&fps=1&url=https%3A%2F%2Fr3---sn-j5caxh5n...']
+
+    streams:
+
+         [{'bitrate': '72530',
+           'clen': '73646',
+           'fps': '1',
+           'index': '4452-4470',
+           'init': '0-4451',
+           'itag': '171',
+           'lmt': '1392038165904022',
+           'projection_type': '1',
+           'type': 'audio/webm; codecs="vorbis"',
+           'url': 'https://r3---sn-j5caxh5n-upwl.googlevideo.com/videoplayback?mv=m&mt=14...'},...]
+    """
+    def __init__(self, vid: str, info: dict = None, index: int = None) -> None:
         self.vid = vid
-        self.info = dict()
+        self.info = info
         self.stream = None
         self.streams = list()
         self.info_map = dict(
             videoid='video_id',
             duration='length_seconds',
         )
-        if data is not None:
-            # data is url querystring format, so we need to parse it
-            # self.info = urllib.parse.parse_qs(data)
-            self.info = data
-
+        if info is not None:
             # first we split the mapping on the commas
             stream_map = clipy.youtube.get_stream_map(self.info)
 
-            # then we zip/map the values into our streams list
-            streams = [{k: tf(v)
-                        for k, v in sdic.items()}
-                       for sdic in [urllib.parse.parse_qs(mapp)
-                                    for mapp in stream_map]]
+            # Check it we only want a specific stream
+            if index is None:
+                # collect all streams data since we don't have a stream index
+                for i, string in enumerate(stream_map):
+                    stream = self._get_stream(string, i)
+                    self.streams.append(stream)
+            else:
+                # Just collect the stream we want
+                string = stream_map[int(index)]
+                self.stream = self._get_stream(string, int(index))
 
-            # now add in our new fields
-            self.streams = []
-            for stream in streams:
-
-                itag = stream.get('itag', None)
-
-                stream.update(
-                    resolution=clipy.youtube.get_resolution(itag),
-                    extension=clipy.youtube.get_extension(itag),
-                    title=self.info.get('title', '<NOTITLE>'),
-                )
-                self.streams.append(Stream(stream, video=self))
-
-                # from pprint import pformat
-                # # info = pformat(self.info)
-                # # strm = pformat(self.streams)
-                # strm = pformat([str(s) for s in self.streams])
-                # with open('INIT', 'a') as f:
-                #     # f.write('data: '); f.write(data); f.write('\n\n')
-                #     # f.write('info: '); f.write(info); f.write('\n\n')
-                #     # f.write('stream_map: '); f.write(str(stream_map)); f.write('\n\n')
-                #     f.write('strm: '); f.write(strm); f.write('\n\n')
-                #     f.write('------------------------------------\n\n')
+    def _get_stream(self, string, index):
+        data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
+        itag = data.get('itag', None)
+        data.update(
+            resolution=clipy.youtube.get_resolution(itag),
+            extension=clipy.youtube.get_extension(itag),
+            title=self.info.get('title', '<NOTITLE>'),
+        )
+        return StreamModel(data, self, index)
 
     def __getattr__(self, field_name):
         """
@@ -114,15 +121,16 @@ Streams: {}
         #     f.write(output)
 
 
-class Stream():
+class StreamModel():
     """ Video stream """
-    def __init__(self, info, video=None):
+    def __init__(self, info, video, index):
         """  """
         # Initialize some main properties
         self.itags = []
+        self.index = index
         self.itag = None
         self.name = None
-        self.hash = None
+        self.sid = f'{video.vid}|{index}'
         self.url = None
         self.progress = dict()
 
@@ -141,16 +149,9 @@ class Stream():
         # Declare the tags
         self.itags = clipy.youtube.get_itags(info.get('itag', None))
 
-        # Hash the url
-        if self.url:
-            self.hash = hashlib.md5(self.url.encode('utf8')).hexdigest()
+        logger.debug(f'Stream {index} {self.name}')
 
     def __str__(self):
-        # from pprint import pformat
-        # x = pformat(self.type)
-        # with open('Stream.__str__', 'a') as f:
-        #     f.write('x: '); f.write(x); f.write('\n\n')
-        #     f.write('------------------------------------\n\n')
         return 'S> {} {}'.format(self.status, self.display)
 
     @property
@@ -181,9 +182,9 @@ class Stream():
 
     @property
     def display(self):
-        return 'Sd> {}; {} {}'.format(', '.join(self.itags),
-                                      getattr(self, 'quality', ''),
-                                      getattr(self, 'type', ''))
+        return '{}; {} {}'.format(', '.join(self.itags),
+                                  getattr(self, 'quality', ''),
+                                  getattr(self, 'type', ''))
 
     def detail(self):
         return '\n'.join(clipy.utils.list_properties(self))

@@ -34,12 +34,12 @@ class PollFilter(logging.Filter):
 logging.basicConfig(level=logging.DEBUG)
 
 asyncio_logger = logging.getLogger('asyncio')
-asyncio_logger.setLevel(logging.DEBUG)
+asyncio_logger.setLevel(logging.INFO)
 asyncio_logger.addFilter(PollFilter())
 
-downloader_logger = logging.getLogger('clipy:downloader')
-server_logger = logging.getLogger('clipy:server')
-views_logger = logging.getLogger('clipy:views')
+# downloader_logger = logging.getLogger('clipy:downloader')
+logger = logging.getLogger('clipy.server')
+# views_logger = logging.getLogger('clipy:views')
 
 
 def init(app):
@@ -54,7 +54,7 @@ def init(app):
 
 
 async def on_startup(app):
-    server_logger.info(f'startup: {app}')
+    logger.info(f'startup: {app}')
 
     def get_server_uri():
         socket = app['server']['sockets'][0]
@@ -63,15 +63,15 @@ async def on_startup(app):
 
     app['server']['running'] = True
     uri = get_server_uri()
-    server_logger.info(f'serving on {uri}')
+    logger.info(f'serving on {uri}')
 
 
 async def on_shutdown(app):
-    server_logger.info(f'shutdown: {app}')
+    logger.info(f'shutdown: {app}')
 
 
 async def on_cleanup(app):
-    server_logger.info(f'cleanup: {app}')
+    logger.info(f'cleanup: {app}')
     app['actives'].clear()
     app['server'].clear()
 
@@ -99,7 +99,7 @@ def main():
     except Exception as e:
         logging.error(e)
     except KeyboardInterrupt:
-        pass
+        logger.warning(f'Interrupt')
     finally:
         srv.close()
         loop.run_until_complete(srv.wait_closed())
