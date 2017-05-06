@@ -1,8 +1,6 @@
 u
 /**
- * Utility functions
- *
- * Inject global namespace: u
+ * Utility library
  */
 =(function(){"use strict";
 

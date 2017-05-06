@@ -1,8 +1,6 @@
 http
 /**
- * Clipy Tools - HTTP utilities
- *
- * Inject global namespace: http
+ * HTTP library
  */
 =(function(){"use strict";
 

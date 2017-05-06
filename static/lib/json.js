@@ -1,8 +1,6 @@
 json
 /**
- * Clipy Tools - JSON utilities
- *
- * Inject global namespace: json
+ * JSON library
  */
 =(function(){"use strict";
 

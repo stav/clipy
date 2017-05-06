@@ -1,8 +1,6 @@
 es
 /**
- * EatUp Tools - Ecmascript utilities
- *
- * Inject global namespace: es
+ * Ecmascript library
  */
 =(function(){"use strict";
 

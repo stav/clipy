@@ -1,8 +1,6 @@
 clui
 /**
  * Clipy Tools - User Interface
- *
- * Inject global namespace: clui
  */
 =(function(){"use strict";
 
