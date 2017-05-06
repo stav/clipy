@@ -1,10 +1,12 @@
-import json
+import logging
 
 import aiohttp.web
 import aiohttp_jinja2
 
 import clipy.request
 import clipy.download
+
+logger = logging.getLogger(__name__)
 
 
 @aiohttp_jinja2.template('index.html')
@@ -21,58 +23,59 @@ async def inquire(request):
     data = dict(
         description=video.description,
         duration=video.duration,
-        streams=[str(s) for s in video.streams],
+        streams=[s.serial for s in video.streams],
         title=video.title,
         vid=video.vid,
     )
-    return aiohttp.web.Response(
-        content_type='application/json',
-        text=json.dumps(data),
-    )
+    return aiohttp.web.json_response(data)
+    # return aiohttp.web.Response(
+    #     content_type='application/json',
+    #     text=json.dumps(data),
+    # )
 
 
 async def download(request):
-    stream_index = int(request.query.get('stream'))
     vid = request.query.get('vid')
-    video = await clipy.request.get_video(vid)
-    stream = video.streams[stream_index]
+    idx = request.query.get('stream')
+    sid = f'{vid}|{idx}'
     data = dict(
         message='Queued',
-        index=stream_index,
-        video=video.detail,
-        url=stream.url,
-        vid=vid,
+        sid=sid,
     )
+    logger.debug(f'sid {sid}')
     # run download as task in background
-    coroutine = clipy.download.get(stream, request.app['actives'])
+    coroutine = clipy.download.get(sid, request.app['actives'])
     request.app.loop.create_task(coroutine)
 
-    return aiohttp.web.Response(
-        content_type='application/json',
-        text=json.dumps(data),
-    )
+    return aiohttp.web.json_response(data)
+    # return aiohttp.web.Response(
+    #     content_type='application/json',
+    #     text=json.dumps(data),
+    # )
 
 
 async def progress(request):
     # for stream in request.app['actives'].values():
     #     d = s.progress
     data = dict(
-        actives=[{**s.progress, **dict(url=s.url, name=s.name)} for s in request.app['actives'].values()],
+        actives=[{**s.progress, **dict(sid=s.sid, name=s.name)} for s in request.app['actives'].values()],
     )
-    return aiohttp.web.Response(
-        content_type='application/json',
-        text=json.dumps(data),
-    )
+    return aiohttp.web.json_response(data)
+    # return aiohttp.web.Response(
+    #     content_type='application/json',
+    #     text=json.dumps(data),
+    # )
 
 
 async def cancel(request):
-    stream_url = request.query.get('url')
+    sid = request.query.get('sid')
     actives = request.app['actives']
-    if stream_url in actives:
-        del actives[stream_url]
+    if sid in actives:
+        del actives[sid]
         removed = True
     else:
         removed = False
+    logger.debug(f'cancel: sid {sid} removed? {removed}')
     data = dict(removed=removed)
     return aiohttp.web.json_response(data)
 

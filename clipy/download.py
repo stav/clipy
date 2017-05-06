@@ -12,16 +12,19 @@ import time
 import asyncio
 import logging
 
-from aiohttp import ClientSession
+import aiohttp
 
-# Limit number of downloads for calls to `get`
-semaphore = asyncio.Semaphore(3)
+import clipy.request
+
+logger = logging.getLogger(__name__)
+semaphore = asyncio.Semaphore(3)  # Limit number of downloads for calls to ``get``
 
 
-async def get(stream, actives):
+async def get(sid, actives):
     """
     Govern downloading with a Semaphore
     """
+    stream = await clipy.request.get_stream(sid)
     async with semaphore:
         return await _download(stream, actives)
 
@@ -32,12 +35,11 @@ async def _download(stream, actives):
 
     After every chunk is processed the stream's progress is updated.
     """
-    async with ClientSession() as session:
-        logging.debug(stream.url)
+    async with aiohttp.ClientSession() as session:
         async with session.get(stream.url) as response:
 
             total = int(response.headers.get('Content-Length', '0').strip())
-            chunk_size = 16384
+            chunk_size = 2**14
             bytesdone = 0
             offset = 0
             mode = "wb"
@@ -47,7 +49,7 @@ async def _download(stream, actives):
             os.makedirs(target_dir, exist_ok=True)
             target_path = os.path.join(target_dir, stream.name)
             temp_path = f'{target_path}.clipy'
-            logging.debug(temp_path)
+            logger.info(f'{stream.sid} -> {temp_path}')
 
             # Taken from from Pafy https://github.com/np1/pafy
             if os.path.exists(temp_path):
@@ -62,11 +64,10 @@ async def _download(stream, actives):
             complete = False
 
             with open(temp_path, mode) as fd:
-                actives[stream.url] = stream
+                actives[stream.sid] = stream
 
-                while stream.url in actives:
+                while stream.sid in actives:
                     chunk = await response.content.read(chunk_size)
-                    logging.debug('chunk len: {}'.format(len(chunk)))
                     if len(chunk) == 0:
                         complete = True
                         break
@@ -80,10 +81,10 @@ async def _download(stream, actives):
                         offset=offset,
                         total=total,
                     )
-                    logging.info(stream.status)
+                    # logger.info(stream.status)
 
-                if stream.url in actives:
-                    del actives[stream.url]
+                if stream.sid in actives:
+                    del actives[stream.sid]
 
     if complete:
         os.rename(temp_path, target_path)

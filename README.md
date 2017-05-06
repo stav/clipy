@@ -15,39 +15,32 @@ in the `shell` branch.
 
 ### Client
 
-* ES6+ (ECMAScript 2015)
+* ES6+ (ECMAScript 2015) modern browser
 
 See also requirements.txt
 
 ## Install
 
-You will probably need the development package of Python to install `pycares`:
+First clone this repository.
 
-	sudo apt-get install python3.6-dev
+You will need a terminal in the repository directory with the file ``setup.py``.
 
-Install dependencies:
-
-	pip install -r requirements.txt
-
-Install the application
+### Setup
 
 	python3.6 setup.py install
 
-## Run the server:
+You may need the development package of Python to install `pycares`:
 
-	clipy
+	sudo apt-get install python3.6-dev
 
-	INFO:asyncio:<Server sockets=[<socket.socket fd=6, family=AddressFamily.AF_INET, type=2049, proto=6, laddr=('127.0.0.1', 7070)>]> is serving
-	======== Running on http://127.0.0.1:7070 ========
-	(Press CTRL+C to quit)
+## Run
 
-### Or running for development:
+Open a terminal and run the following:
 
-	python -Wdefault -m clipy.run
+	clipyd & sleep 2; clipy
 
-## Open the GUI:
-
-Use a web browser: http://127.0.0.1:7070/
+This will run the Clipy server as a background process and wait two seconds for it to start and then
+it will open a web browser and requst the home page.
 
 ## Screen-shots
 

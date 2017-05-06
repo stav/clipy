@@ -1,6 +1,5 @@
-aiodns
-aiohttp
-aiohttp_jinja2
-cchardet
+aiodns==1.1.1
+aiohttp==2.0.7
+aiohttp-jinja2==0.13.0
+cchardet==2.0.1
 #PyYAML
-

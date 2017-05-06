@@ -12,13 +12,18 @@ clui
   /**
    * Request a video inquiry for the particulars like title, duration and description
    *
+   * Can be called from either the Inquire button in which case we have no element argument and
+   * we use the text box; or, this function can be called from clicking the progress bar which
+   * passes us the target element which has the video Id for us to use for inquiry.
+   *
    * We get back JSON in the response and convert it to an object then load it into the the cache
    * and then insert a display panel for it.
    */
-  function inquire() {
+  function inquire( element ) {
     let
-      video = document.getElementById('input-video').value,
-      url = '/api/inquire?video=' + video,
+      vid = element ? element.target.vid : undefined,
+      video = vid ? vid : document.getElementById('input-video').value,
+      url = '/api/inquire?video=' + encodeURIComponent(video),
       _;
 
     http.get( url )
@@ -31,12 +36,27 @@ clui
   /**
    * Display the progress bars
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * Called every few seconds with the servers list of streams actively downloading
+   *
+   * data: { actives: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]}
    */
   function show_progress( data ) {
-    if ( data ) {
-      _add_active_progress_bars( data )
-      _remove_dead_progress_bars( data )
+    let
+      status = document.getElementById('running'),
+      _;
+
+    if ( u.isObject( data ) ) {
+      // Server is running since we got a valid response
+      status.checked = true;
+
+      if ( data.actives ) {
+        _add_active_progress_bars( data.actives )
+        _remove_dead_progress_bars( data.actives )
+      }
+    }
+    else {
+      // Server is not running since we got no response
+      status.checked = false;
     }
   }
 
@@ -92,15 +112,17 @@ clui
 
     for ( let i = 0; i < streams.length; i++ ) {
       const
+        stream = streams[i],
         item = document.createElement('li'),
-        text = document.createTextNode( streams[i] );
+        text = document.createTextNode( stream.display );
 
       item.setAttribute('class', 'stream')
       item.setAttribute('title', 'Download this stream')
-      item.setAttribute('stream', i )
+      item.setAttribute('index', i )
       item.setAttribute('vid', vid )
       item.appendChild( text )
       item.addEventListener('click', _download, false)
+      item.sid = stream.sid;
 
       list.setAttribute('start', 0 )
       list.appendChild( item )
@@ -118,6 +140,27 @@ clui
       return
     }
     // clipy_cache[ clipy_index++ ] = data;
+
+    return data // chaining
+  }
+
+  /**
+   * Display the data summary in a new panel
+   */
+  function _insert( data ) {
+    let
+      head = _get_panel_header( data ),
+      panel = document.createElement('li'),
+      panels = document.getElementById('panels'),
+      details = _get_details( data ),
+      _;
+
+    panel.setAttribute('class', 'panel')
+    panel.setAttribute('title', data.vid )
+    panel.setAttribute('vid', data.vid )
+    panel.appendChild( head )
+    panel.appendChild( details )
+    panels.appendChild( panel )
 
     return data // chaining
   }
@@ -154,27 +197,6 @@ clui
     row.appendChild( right )
 
     return row
-  }
-
-  /**
-   * Display the data summary in a new panel
-   */
-  function _insert( data ) {
-    let
-      head = _get_panel_header( data ),
-      panel = document.createElement('li'),
-      panels = document.getElementById('panels'),
-      details = _get_details( data ),
-      _;
-
-    panel.setAttribute('class', 'panel')
-    panel.setAttribute('title', data.vid )
-    panel.setAttribute('vid', data.vid )
-    panel.appendChild( head )
-    panel.appendChild( details )
-    panels.appendChild( panel )
-
-    return data // chaining
   }
 
   /**
@@ -227,26 +249,39 @@ clui
   /**
    * Get the goods
    */
-  function _download( e ) {
+  function _download( element ) {
     let
-      vid = e.target.attributes.vid.value,
-      stream = e.target.attributes.stream.value,
-      url = '/api/download?vid=' + vid + '&stream=' + stream,
+      att = element.target.attributes,
+      vid = att.vid.value,
+      sid = element.target.sid,
+      index = att.index.value,
+      progress = document.getElementById( sid ),
+      url = '/api/download?vid=' + encodeURIComponent(vid) + '&stream=' + index,
       _;
 
-    http.get( url )
-    .then( json.parse  )
-    .then( console.log )
-    .fail( console.log )
+    console.log('_download')
+    console.log(element)
+    console.log(progress)
+    if ( progress ) {
+      console.log('CANCEL')
+      _cancel( element )
+    }
+    else {
+      console.log('DOWNLOAD')
+      http.get( url )
+      .then( json.parse  )
+      .then( console.log )
+      .fail( console.log )
+    }
   }
 
   /**
    * Cancel a download in progress
    */
-  function _cancel( e ) {
+  function _cancel( element ) {
     let
-      id = e.target.id,
-      url = '/api/cancel?url=' + id,
+      sid = element.target.sid,
+      url = '/api/cancel?sid=' + encodeURIComponent(sid),
       _;
 
     http.get( url )
@@ -258,22 +293,23 @@ clui
   /**
    * Display the progress bars
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]
    */
-  function _add_active_progress_bars( data ) {
-    for ( let stream of data.actives ) {
+  function _add_active_progress_bars( streams ) {
+    for ( let stream of streams ) {
       let
-        progress = document.getElementById( stream.url ),
+        progress = document.getElementById( stream.sid ),
         item = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
-        progress.id = stream.url;
+        progress.vid = stream.vid;
+        progress.id = stream.sid;
         progress.setAttribute('title', stream.name )
         item = document.createElement('li');
         item.appendChild( progress )
-        item.addEventListener('click', _cancel, false)
+        item.addEventListener('click', inquire, false)
         document.getElementById('progress-bars').appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )
@@ -284,9 +320,9 @@ clui
   /**
    * Remove and progress bars that are no longer active
    *
-   * data: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, url: https://r2---sn..." },... ]
+   * streams: [ { bytesdone: 91750, elapsed: 7.58, total: 627020, sid: "1M6sk2zD6D8|17" },... ]
    */
-  function _remove_dead_progress_bars( data ) {
+  function _remove_dead_progress_bars( streams ) {
     let
       bars = document.getElementsByTagName('progress'),
       _;
@@ -294,11 +330,11 @@ clui
     for (let i = bars.length - 1; i >= 0; i--) {
       let progress = bars.item(i);
 
-      function active_url( value, index ) {
-        return value.url === progress.id
+      function active( value, index ) {
+        return value.sid === progress.id
       }
 
-      if ( !data.actives.find( active_url ) ) {
+      if ( !streams.find( active ) ) {
         progress.parentElement.remove()
       }
     }

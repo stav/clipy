@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='clipy-web',
-    version='0.1',
+    version='0.2',
     license='BSD',
     url='https://github.com/stav/clipy',
     download_url='https://github.com/stav/clipy/archive/master.zip',
@@ -26,7 +26,8 @@ setup(
     test_suite='tests',
     entry_points={
         'console_scripts': [
-            'clipy=clipy:main',
+            'clipyd=clipy.server:main',
+            'clipy=clipy.client:main',
         ],
     },
 )
