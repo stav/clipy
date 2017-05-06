@@ -50,6 +50,12 @@ it will open a web browser and requst the home page.
 
 Videos will be downloaded to the ``videos`` directory under the repository.
 
+## Server
+
+You can shutdown the server using the button in the browser or from the command line:
+
+	pkill clipyd
+
 # Credits
 
 * C logo: [mysitemyway](http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/simple-red-square-icons-alphanumeric/128147-simple-red-square-icon-alphanumeric-letter-c.png)
