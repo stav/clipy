@@ -2,20 +2,15 @@
 
     <script src="/static/vendor/q.js"></script>
 
-    <script src="/static/lib/es.js"></script>
     <script src="/static/lib/u.js"></script>
+    <script src="/static/lib/es.js"></script>
+    <script src="/static/lib/http.js"></script>
+    <script src="/static/lib/json.js"></script>
 
-    <script src="/static/fire/http.js"></script>
-    <script src="/static/fire/json.js"></script>
-    <script src="/static/fire/clui.js"></script>
+    <script src="/static/clipy/clui.js"></script>
 
     <script>
       "use strict";
-
-      // var
-      //   clipy_cache = { 0: null },
-      //   clipy_index = 1,
-      //   _;
 
       setInterval(check_progress, 2000);
 
@@ -24,29 +19,14 @@
       }
 
       function check_progress() {
-        let
-          url = '/api/progress',
-          _;
-
-        http.get( url )
+        http.get('/api/progress')
         .then( json.parse         )
         .then( clui.show_progress )
         .fail( bail               )
       }
 
-      function seed( element ) {
-        let
-          box = document.getElementById('input-video'),
-          _;
-        box.value = element.innerText;
-      }
-
       function shutdown() {
-        let
-          url = '/api/shutdown',
-          _;
-
-        http.get( url )
+        http.get('/api/shutdown')
         .then( json.parse )
         .then( console.log )
         .fail( console.log )

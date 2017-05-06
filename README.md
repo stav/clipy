@@ -46,6 +46,10 @@ it will open a web browser and requst the home page.
 
 ![Clipy user interface](http://104.237.140.142/clipy/screenshot_gui.png)
 
+## Downloads
+
+Videos will be downloaded to the ``videos`` directory under the repository.
+
 # Credits
 
 * C logo: [mysitemyway](http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/simple-red-square-icons-alphanumeric/128147-simple-red-square-icon-alphanumeric-letter-c.png)

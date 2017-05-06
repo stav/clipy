@@ -10,7 +10,6 @@ build/
 develop-eggs/
 dist/
 eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -35,6 +34,4 @@ coverage.xml
 docs/_build/
 
 # Clipy data files
-clipy.downloads*
-clipy.lookups*
 videos/
