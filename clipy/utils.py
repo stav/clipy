@@ -1,7 +1,7 @@
 """
 Clipy video downloader utilities
 """
-import urllib
+import urllib.parse
 
 
 _traditional = [

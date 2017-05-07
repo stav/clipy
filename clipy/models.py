@@ -138,7 +138,7 @@ class StreamModel():
         logger.debug(f'Stream {index} {self.name}')
 
     def __str__(self):
-        return 'S> {} {}'.format(self.status, self.display)
+        return f'{self.display} {self.status}'
 
     @property
     def serial(self):
@@ -147,16 +147,12 @@ class StreamModel():
     @property
     def status(self):
         bytesdone = int(self.progress.get('bytesdone', 0))
-        elapsed = int(self.progress.get('elapsed', 0))
         total = int(self.progress.get('total', 0))
-
-        if not (total and elapsed):
-            return 'Huh?'
 
         return '{d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
             d=bytesdone,
             t=clipy.utils.size(total),
-            p=bytesdone * 1.0 / total,
+            p=(bytesdone * 1.0 / total) if total else 0.0,
             r=self.rate,
             e=self.eta,
         )

@@ -14,17 +14,14 @@ import logging
 
 import aiohttp
 
-import clipy.request
-
 logger = logging.getLogger(__name__)
 semaphore = asyncio.Semaphore(3)  # Limit number of downloads for calls to ``get``
 
 
-async def get(sid, actives):
+async def get(stream, actives):
     """
     Govern downloading with a Semaphore
     """
-    stream = await clipy.request.get_stream(sid)
     async with semaphore:
         return await _download(stream, actives)
 
