@@ -1,7 +1,5 @@
-import urllib
 import logging
 
-import clipy.youtube
 import clipy.utils
 
 from clipy.utils import take_first as tf
@@ -29,40 +27,11 @@ class VideoModel():
            'type': 'audio/webm; codecs="vorbis"',
            'url': 'https://r3---sn-j5caxh5n-upwl.googlevideo.com/videoplayback?mv=m&mt=14...'},...]
     """
-    def __init__(self, vid: str, info: dict = None, index: int = None) -> None:
+    def __init__(self, vid, info) -> None:
         self.vid = vid
         self.info = info
         self.stream = None
         self.streams = list()
-        self.info_map = dict(
-            videoid='video_id',
-            duration='length_seconds',
-        )
-
-        def get_stream(string, index):
-            data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
-            itag = data.get('itag', None)
-            data.update(
-                resolution=clipy.youtube.get_resolution(itag),
-                extension=clipy.youtube.get_extension(itag),
-                title=self.info.get('title', '<NOTITLE>'),
-            )
-            return StreamModel(data, self, index)
-
-        if info is not None:
-            # first we split the mapping on the commas
-            stream_map = clipy.youtube.get_stream_map(self.info)
-
-            # Check it we only want a specific stream
-            if index is None:
-                # collect all streams data since we don't have a stream index
-                for i, string in enumerate(stream_map):
-                    stream = get_stream(string, i)
-                    self.streams.append(stream)
-            else:
-                # Just collect the stream we want
-                string = stream_map[int(index)]
-                self.stream = get_stream(string, int(index))
 
     def __getattr__(self, field_name):
         """Check if our attribute exists for the object, otherwise return the corresponding entry
