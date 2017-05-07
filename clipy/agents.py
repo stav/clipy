@@ -14,18 +14,18 @@ class Agent():
         self.lookup = lookup
         self.vid = vid
 
+    async def get_video(self):
+        self._load_video_id()
+        logger.debug(f'{self.__class__.__name__} get_video "{self.lookup}" --> vid "{self.vid}"')
+        data = await self._get_info()
+        return clipy.models.VideoModel(self.vid, data)
+
 
 class YoutubeAgent(Agent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    async def get_video(self):
-        self.load_video_id()
-        logger.debug(f'Youtube get_video "{self.lookup}" --> vid "{self.vid}"')
-        data = await self._get_info()
-        return clipy.models.VideoModel(self.vid, data)
-
-    def load_video_id(self) -> None:
+    def _load_video_id(self) -> None:
         if not self.vid:
             if '/watch' in self.lookup:
                 parts = urllib.parse.urlsplit(self.lookup)
@@ -52,12 +52,19 @@ class VidmeAgent(Agent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    async def get_video(self):
-        url = self.lookup
-        vurl = url.rpartition('/')[2] if '/' in url else url
-        aurl = f'https://api.vid.me/videoByUrl/{vurl}'
-        data = await clipy.request.get_json(aurl)
-        return data['video']['complete_url']
+    def _load_video_id(self) -> None:
+        if not self.vid:
+            url = self.lookup
+            self.vid = url.rpartition('/')[2] if '/' in url else url
+
+    async def _get_info(self):
+        url = f'https://api.vid.me/videoByUrl/{self.vid}'
+        data = await clipy.request.get_json(url)
+        # import pprint
+        # data = pprint.pformat(data)
+        # logger.debug(f'get_video data: {data}')
+        return data['video']
+        # return data['video']['complete_url']
 
 
 def lookup_agent(url: str):
