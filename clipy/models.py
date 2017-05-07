@@ -32,6 +32,7 @@ class VideoModel():
         self.info = info
         self.stream = None
         self.streams = list()
+        self.info_map = dict()
 
     def __getattr__(self, field_name):
         """Check if our attribute exists for the object, otherwise return the corresponding entry
@@ -39,9 +40,8 @@ class VideoModel():
         """
         return self.__dict__.get(
             field_name,
-            tf(
-                self.info.get(
-                    self.info_map.get(field_name, field_name))))
+            self.info.get(
+                self.info_map.get(field_name, field_name)))
 
     def __str__(self):
         return '<{cls}> {duration} {title}'.format(

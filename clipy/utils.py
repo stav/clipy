@@ -89,7 +89,7 @@ def list_properties(obj):
 
 
 def take_first(values):
-    if isinstance(values, str):
+    if isinstance(values, (str, int, float, bool)):
         return values
 
     if values is not None:

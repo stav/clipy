@@ -19,6 +19,11 @@ class Agent():
         self._load_video_streams(video)
         return video
 
+    async def get_stream(self, idx):
+        video = await self._get_video()
+        self._load_video_stream(video, idx)
+        return video.stream
+
 
 class YoutubeAgent(Agent):
     def __init__(self, *args):
@@ -53,12 +58,7 @@ class YoutubeAgent(Agent):
         if status == 'ok':
             return info
         else:
-            raise ValueError('Invalid video Id "{}" {}'.format(vid, info))
-
-    async def get_stream(self, idx):
-        video = await self._get_video()
-        self._load_video_stream(video, idx)
-        return video.stream
+            raise ValueError(f'Invalid video Id "{vid}" {info}')
 
     def _get_stream(self, video, string, index):
         data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
@@ -92,19 +92,42 @@ class VidmeAgent(Agent):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def _load_video_id(self) -> None:
-        if not self.vid:
-            url = self.lookup
-            self.vid = url.rpartition('/')[2] if '/' in url else url
+    async def _get_video(self):
+        vid = self._get_video_id()
+        info = await self._get_info(vid)
+        video = clipy.models.VideoModel(vid, info)
+        video
+        return video
 
-    async def _get_info(self):
-        url = f'https://api.vid.me/videoByUrl/{self.vid}'
+    def _get_video_id(self) -> None:
+        url = self.lookup
+        vid = url.rpartition('/')[2] if '/' in url else url
+        logger.debug(f'{self.__class__.__name__} using vid "{vid}"')
+        return vid
+
+    async def _get_info(self, vid):
+        url = f'https://api.vid.me/videoByUrl/{vid}'
         data = await clipy.request.get_json(url)
         # import pprint
         # data = pprint.pformat(data)
         # logger.debug(f'get_video data: {data}')
         return data['video']
         # return data['video']['complete_url']
+
+    def _get_stream(self, video, stream_format, index):
+        stream = clipy.models.StreamModel(stream_format, video, index)
+        stream.url = stream_format.get('uri')
+        return stream
+
+    def _load_video_streams(self, video):
+        for i, stream_format in enumerate(video.formats):
+            stream = self._get_stream(video, stream_format, i)
+            video.streams.append(stream)
+
+    def _load_video_stream(self, video, idx):
+        stream_format = video.formats[int(idx)]
+        stream = self._get_stream(video, stream_format, int(idx))
+        video.stream = stream
 
 
 def lookup_agent(url: str):
