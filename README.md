@@ -1,14 +1,19 @@
 # Clipy
 
-YouTube video downloader which includes an asynchronous Python backend server written using
-`aiohttp` and a front end that requires a modern browser. The latest version of *Clipy* is
-moving toward a web browser interface with the heavy lifting done by the server.
+Video downloader which includes an asynchronous Python back-end server written using `aiohttp`
+and a front-end that requires a modern browser. The latest version of *Clipy* is moving toward
+a web browser interface with the heavy lifting done by the server.
 
 The previous version of *Clipy* used the command line heavily and that code is still available
 in the `shell` branch.
 
-Evenually the async downloading work should be wrapped up nicely in a Python module that the Clipy
-client just imports and calls.
+Evenually the async downloading work should be wrapped up nicely in a Python module that the
+Clipy client just imports and calls.
+
+Supported video platforms
+
+* Vid.me
+* YouTube
 
 ## Requirements
 

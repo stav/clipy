@@ -1,21 +1,21 @@
-0.9.7   September 2014
+CHANGELOG
 
-Local server
-Logging
+0.2   May 2017
 
-0.9.6   September 2014
+Browser-based UI
 
-Modules spit out from ui
+* Clipy is now an aiohttp web-app
+* Vid.me support added
 
-0.9.2   25 August 2014
+0.1   September 2014
 
-Python 3 only now, asyncronous via Python asyncio library, app & ui integrated
+Curses-based UI
 
-0.9     August 2014
-
-Use asyncio instead of threads
-Pafy YouTube API module no longer used in UI v0.9.9
-
-0.5     23 July 2014
-
-Focussing on command-line.
+* Focussing on command-line
+* Use asyncio instead of threads
+* Pafy YouTube API module no longer used in UI
+* Python 3 only now, asyncronous via Python asyncio library, app & ui integrated
+* Modules spit out from ui
+* Local server
+* Logging
+* YouTube only
