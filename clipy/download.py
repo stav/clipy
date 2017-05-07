@@ -81,7 +81,6 @@ async def _download(stream, actives):
                         offset=offset,
                         total=total,
                     )
-                    # logger.info(stream.status)
 
                 if stream.sid in actives:
                     del actives[stream.sid]

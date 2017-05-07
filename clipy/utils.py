@@ -77,9 +77,9 @@ def progress_bar(done, total, length=10, bar='#', sep='-'):
 
 def list_properties(obj):
     """
-    Return a list of all the object's properties
+    Return a list of the object's properties
 
-    Does not include callable attributes or attributes that begin with "_".
+    .. note:: Does not include callable or private attributes
     """
     return [
         '{}: {}'.format(p, getattr(obj, p, ''))

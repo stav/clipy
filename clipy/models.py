@@ -38,6 +38,17 @@ class VideoModel():
             videoid='video_id',
             duration='length_seconds',
         )
+
+        def get_stream(string, index):
+            data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
+            itag = data.get('itag', None)
+            data.update(
+                resolution=clipy.youtube.get_resolution(itag),
+                extension=clipy.youtube.get_extension(itag),
+                title=self.info.get('title', '<NOTITLE>'),
+            )
+            return StreamModel(data, self, index)
+
         if info is not None:
             # first we split the mapping on the commas
             stream_map = clipy.youtube.get_stream_map(self.info)
@@ -46,42 +57,17 @@ class VideoModel():
             if index is None:
                 # collect all streams data since we don't have a stream index
                 for i, string in enumerate(stream_map):
-                    stream = self._get_stream(string, i)
+                    stream = get_stream(string, i)
                     self.streams.append(stream)
             else:
                 # Just collect the stream we want
                 string = stream_map[int(index)]
-                self.stream = self._get_stream(string, int(index))
-
-    def _get_stream(self, string, index):
-        data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
-        itag = data.get('itag', None)
-        data.update(
-            resolution=clipy.youtube.get_resolution(itag),
-            extension=clipy.youtube.get_extension(itag),
-            title=self.info.get('title', '<NOTITLE>'),
-        )
-        return StreamModel(data, self, index)
+                self.stream = get_stream(string, int(index))
 
     def __getattr__(self, field_name):
+        """Check if our attribute exists for the object, otherwise return the corresponding entry
+        from our 'info'.
         """
-        Check if our attribute exists for the object, otherwise return the
-        corresponding entry from our 'info'.
-        """
-        # from pprint import pformat
-        # # import pdb; pdb.set_trace()
-        # sdict = pformat(self.__dict__)
-        # dname = self.__dict__.get(field_name, '?.')
-        # mname = self.info_map.get(field_name, field_name)
-        # ninfo = self.info.get(mname)
-        # finfo = tf(ninfo)
-        # with open('getattr.{}'.format(field_name), 'w') as f:
-        #     f.write('field_name:  '); f.write(     field_name ); f.write('\n\n')
-        #     f.write('dict:  '); f.write(    sdict ); f.write('\n\n')
-        #     f.write('dname: '); f.write(    dname ); f.write('\n\n')
-        #     f.write('mname: '); f.write(    mname ); f.write('\n\n')
-        #     f.write('ninfo: '); f.write(str(ninfo)); f.write('\n\n')
-        #     f.write('finfo: '); f.write(    finfo ); f.write('\n\n')
         return self.__dict__.get(
             field_name,
             tf(
@@ -89,8 +75,8 @@ class VideoModel():
                     self.info_map.get(field_name, field_name))))
 
     def __str__(self):
-        return 'V> {duration}  {title}  {path}'.format(
-            duration=self.duration, title=self.title, path=self.path)
+        return '<{cls}> {duration} {title}'.format(
+            cls=self.__class__.__name__, duration=self.duration, title=self.title)
 
     @property
     def detail(self):
@@ -162,23 +148,34 @@ class StreamModel():
     def status(self):
         bytesdone = int(self.progress.get('bytesdone', 0))
         elapsed = int(self.progress.get('elapsed', 0))
-        offset = int(self.progress.get('offset', 0))
         total = int(self.progress.get('total', 0))
 
         if not (total and elapsed):
             return 'Huh?'
 
-        rate = ((bytesdone - offset) / 1024) / elapsed
-        eta = (total - bytesdone) / (rate * 1024)
-
-        return '{m}| {d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
-            m=clipy.utils.progress_bar(bytesdone, total),
+        return '{d:,} ({p:.0%}) {t} @ {r:.0f} KB/s {e:.0f} s'.format(
             d=bytesdone,
             t=clipy.utils.size(total),
             p=bytesdone * 1.0 / total,
-            r=rate,
-            e=eta,
+            r=self.rate,
+            e=self.eta,
         )
+
+    @property
+    def rate(self):
+        bytesdone = int(self.progress.get('bytesdone', 0))
+        elapsed = int(self.progress.get('elapsed', 0))
+        offset = int(self.progress.get('offset', 0))
+
+        return (((bytesdone - offset) / 1024) / elapsed) if elapsed else 0.0
+
+    @property
+    def eta(self):
+        bytesdone = int(self.progress.get('bytesdone', 0))
+        total = int(self.progress.get('total', 0))
+        rate = self.rate
+
+        return (total - bytesdone) / (rate * 1024) if rate else 0.0
 
     @property
     def display(self):
@@ -186,5 +183,6 @@ class StreamModel():
                                   getattr(self, 'quality', ''),
                                   getattr(self, 'type', ''))
 
+    @property
     def detail(self):
         return '\n'.join(clipy.utils.list_properties(self))

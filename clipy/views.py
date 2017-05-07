@@ -28,10 +28,6 @@ async def inquire(request):
         vid=video.vid,
     )
     return aiohttp.web.json_response(data)
-    # return aiohttp.web.Response(
-    #     content_type='application/json',
-    #     text=json.dumps(data),
-    # )
 
 
 async def download(request):
@@ -48,23 +44,16 @@ async def download(request):
     request.app.loop.create_task(coroutine)
 
     return aiohttp.web.json_response(data)
-    # return aiohttp.web.Response(
-    #     content_type='application/json',
-    #     text=json.dumps(data),
-    # )
 
 
 async def progress(request):
-    # for stream in request.app['actives'].values():
-    #     d = s.progress
+    def info(stream):
+        s = stream
+        return dict(sid=s.sid, name=s.name, status=s.status, eta=int(s.eta), rate=int(s.rate))
     data = dict(
-        actives=[{**s.progress, **dict(sid=s.sid, name=s.name)} for s in request.app['actives'].values()],
+        actives=[{**s.progress, **info(s)} for s in request.app['actives'].values()],
     )
     return aiohttp.web.json_response(data)
-    # return aiohttp.web.Response(
-    #     content_type='application/json',
-    #     text=json.dumps(data),
-    # )
 
 
 async def cancel(request):
@@ -81,13 +70,6 @@ async def cancel(request):
 
 
 async def shutdown(request):
-    # app = request.app
-    # loop = app.loop
-    # loop.run_until_complete(app.shutdown())
-    # loop.run_until_complete(app.cleanup())
-    # app.shutdown()
-    # app.cleanup()
-    # raise TypeError('asdf')
     request.app['server']['running'] = False
     data = dict(app=str(request.app))
     return aiohttp.web.json_response(data)

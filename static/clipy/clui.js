@@ -297,21 +297,28 @@ clui
     for ( let stream of streams ) {
       let
         progress = document.getElementById( stream.sid ),
-        item = undefined,
+        bars = document.getElementById('progress-bars'),
+        item, stats = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
         progress.vid = stream.vid;
         progress.id = stream.sid;
-        progress.setAttribute('title', stream.name )
+        stats = document.createElement('span');
+        stats.setAttribute('class', 'stats')
         item = document.createElement('li');
+        item.setAttribute('class', 'progress')
+        item.setAttribute('title', stream.name )
         item.appendChild( progress )
+        item.appendChild( stats )
         item.addEventListener('click', inquire, false)
-        document.getElementById('progress-bars').appendChild( item )
+        bars.appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )
       progress.setAttribute('max', stream.total )
+      stats = progress.nextElementSibling;
+      stats.innerText = stream.rate + ' KB/s - ' + stream.eta + ' sec';
     }
   }
 
