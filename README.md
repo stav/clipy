@@ -7,6 +7,9 @@ moving toward a web browser interface with the heavy lifting done by the server.
 The previous version of *Clipy* used the command line heavily and that code is still available
 in the `shell` branch.
 
+Evenually the async downloading work should be wrapped up nicely in a Python module that the Clipy
+client just imports and calls.
+
 ## Requirements
 
 ### Server
