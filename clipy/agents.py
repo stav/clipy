@@ -53,22 +53,30 @@ class YoutubeAgent(Agent):
     async def _get_info(self, vid):
         url = f'https://www.youtube.com/get_video_info?video_id={vid}'
         data = await clipy.request.get_text(url)
-        info = urllib.parse.parse_qs(data)
-        status = tf(info.get('status', None))
-        if status == 'ok':
+        info = {k: tf(v) for k, v in urllib.parse.parse_qs(data).items()}
+        if info.get('status') == 'ok':
             return info
         else:
             raise ValueError(f'Invalid video Id "{vid}" {info}')
 
     def _get_stream(self, video, string, index):
+        name = video.name or video.title
         data = {k: tf(v) for k, v in urllib.parse.parse_qs(string).items()}
-        itag = data.get('itag', None)
+        quality = data.get('quality', '')
+        type = data.get('type', '')
+        itag = data.get('itag')
+        itags = clipy.youtube.get_itags(itag)
+        res = clipy.youtube.get_resolution(itag)
+        ext = clipy.youtube.get_extension(itag)
+        author = video.info.get('author')
+
         data.update(
-            resolution=clipy.youtube.get_resolution(itag),
-            extension=clipy.youtube.get_extension(itag),
-            title=video.info.get('title', '<NOTITLE>'),
+            display=f'{itags} {quality} ({res}) {type}',
+            title=video.info.get('title', name),
+            name=f'{author}_{name}-({res}){video.vid}.{ext}'.replace('/', '|'),
         )
-        return clipy.models.StreamModel(data, video, index)
+        stream = clipy.models.StreamModel(data, video, index)
+        return stream
 
     def _load_video_streams(self, video):
         if video.info is not None:
@@ -118,9 +126,9 @@ class VidmeAgent(Agent):
         return data['video']
         # return data['video']['complete_url']
 
-    def _get_stream(self, video, stream_format, index):
+    def _get_stream(self, video, data, index):
         """
-        stream_format::
+        data::
 
            {'height': None,
             'type': '720p',
@@ -134,22 +142,25 @@ class VidmeAgent(Agent):
         #         return f'{s.type} {dimensions} v{s.version}'
 
         def extension():
-            parts = urllib.parse.urlsplit(stream_format['uri'])
+            parts = urllib.parse.urlsplit(data['uri'])
             return parts.path.partition('.')[2]
 
-        # s = Stream(stream_format, video, index)
-        s = clipy.models.StreamModel(stream_format, video, index)
-
-        dimensions = f'{s.width}x({s.height})' if s.width and s.height else ''
+        name = video.name or video.title
+        width = data.get('width')
+        height = data.get('height')
+        version = data.get('version')
+        dimensions = f'{width}x({height})' if width and height else ''
         user = video.info['user']['username']
-        res = stream_format.get('type', '')
+        type = data.get('type', '')
         ext = extension()
 
-        s.url = stream_format.get('uri')
-        s.name = f'{user}_{s.name}-({res}){video.vid}.{ext}'.replace('/', '|')
-        s.display = f'{s.type} {dimensions} v{s.version}'
-
-        return s
+        data.update(
+            display=f'{type} {dimensions} v{version}',
+            name=f'{user}_{name}-({type}){video.vid}.{ext}'.replace('/', '|'),
+            url=data.get('uri'),
+        )
+        stream = clipy.models.StreamModel(data, video, index)
+        return stream
 
     def _load_video_streams(self, video):
         """

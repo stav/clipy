@@ -48,6 +48,7 @@ class StreamModel(Model):
         """  """
         # Initialize some main properties
         self.progress = dict()
+        self.display = str(index)
         self.index = index
         self.name = video.name or video.title
         self.type = None
@@ -58,8 +59,6 @@ class StreamModel(Model):
         for k, v in info.items():
             setattr(self, k, tf(v))
 
-        self.display = f'type: {self.type}'
-
         logger.debug(f'Stream {index} {self.name}')
 
     def __str__(self):
@@ -69,7 +68,6 @@ class StreamModel(Model):
     def serial(self):
         data = self.__dict__
         data.update(status=self.status)
-        data.update(display=self.display)
         return data
 
     @property
