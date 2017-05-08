@@ -93,10 +93,14 @@ class VidmeAgent(Agent):
         super().__init__(*args)
 
     async def _get_video(self):
+        """
+        vid: 'ssEN'
+        info: type(dict)
+        video: <clipy.models.VideoModel object>
+        """
         vid = self._get_video_id()
         info = await self._get_info(vid)
         video = clipy.models.VideoModel(vid, info)
-        video
         return video
 
     def _get_video_id(self) -> None:
@@ -115,18 +119,51 @@ class VidmeAgent(Agent):
         # return data['video']['complete_url']
 
     def _get_stream(self, video, stream_format, index):
-        stream = clipy.models.StreamModel(stream_format, video, index)
-        stream.url = stream_format.get('uri')
-        return stream
+        """
+        stream_format::
+
+           {'height': None,
+            'type': '720p',
+            'uri': 'https://d1wst0behutosd.cloudfront.net/videos/15280893/50222025.mp4?Expires...',
+            'version': 12,
+            'width': None},
+        """
+        # class Stream(clipy.models.StreamModel):
+        #     def display(self):
+        #         dimensions = f'{s.width}x({s.height})' if s.width and s.height else ''
+        #         return f'{s.type} {dimensions} v{s.version}'
+
+        def extension():
+            parts = urllib.parse.urlsplit(stream_format['uri'])
+            return parts.path.partition('.')[2]
+
+        # s = Stream(stream_format, video, index)
+        s = clipy.models.StreamModel(stream_format, video, index)
+
+        dimensions = f'{s.width}x({s.height})' if s.width and s.height else ''
+        user = video.info['user']['username']
+        res = stream_format.get('type', '')
+        ext = extension()
+
+        s.url = stream_format.get('uri')
+        s.name = f'{user}_{s.name}-({res}){video.vid}.{ext}'.replace('/', '|')
+        s.display = f'{s.type} {dimensions} v{s.version}'
+
+        return s
 
     def _load_video_streams(self, video):
+        """
+        self = <clipy.agents.VidmeAgent object at 0x7f35787c94e0>
+        video = <clipy.models.VideoModel object at 0x7f35787c9518>
+        """
         for i, stream_format in enumerate(video.formats):
             stream = self._get_stream(video, stream_format, i)
             video.streams.append(stream)
 
-    def _load_video_stream(self, video, idx):
-        stream_format = video.formats[int(idx)]
-        stream = self._get_stream(video, stream_format, int(idx))
+    def _load_video_stream(self, video, stream_index: int):
+        i = int(stream_index)
+        stream_format = video.formats[i]
+        stream = self._get_stream(video, stream_format, i)
         video.stream = stream
 
 

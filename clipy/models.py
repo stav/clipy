@@ -7,25 +7,18 @@ from clipy.utils import take_first as tf
 logger = logging.getLogger(__name__)
 
 
-class VideoModel():
+class Model():
+    """Base model
+    """
+    def __repr__(self):
+        return '\n\n'.join(clipy.utils.list_properties(self))
+
+    def detail(self):
+        return clipy.utils.dict_properties(self)
+
+
+class VideoModel(Model):
     """Video information container
-
-    stream_map:
-
-        ['init=0-4451&projection_type=1&bitrate=72530&fps=1&url=https%3A%2F%2Fr3---sn-j5caxh5n...']
-
-    streams:
-
-         [{'bitrate': '72530',
-           'clen': '73646',
-           'fps': '1',
-           'index': '4452-4470',
-           'init': '0-4451',
-           'itag': '171',
-           'lmt': '1392038165904022',
-           'projection_type': '1',
-           'type': 'audio/webm; codecs="vorbis"',
-           'url': 'https://r3---sn-j5caxh5n-upwl.googlevideo.com/videoplayback?mv=m&mt=14...'},...]
     """
     def __init__(self, vid, info) -> None:
         self.vid = vid
@@ -47,71 +40,37 @@ class VideoModel():
         return '<{cls}> {duration} {title}'.format(
             cls=self.__class__.__name__, duration=self.duration, title=self.title)
 
-    @property
-    def detail(self):
-        streams = ''
 
-        for i, stream in enumerate(self.streams):
-            if hasattr(stream, 'url'):
-                streams += '{}: {}\n'.format(i, stream.display)
-
-        return '''
-Id:     {}
-Title:  {}
-Author: {}
-Length: {} seconds
-Views:  {}
-
-Streams: {}
-{}'''.format(
-            tf(self.info['video_id']),
-            tf(self.info['title']),
-            tf(self.info['author']),
-            tf(self.info['length_seconds']),
-            tf(self.info['view_count']),
-            len(self.streams),
-            streams,
-        )
-        # with open('qs', 'w') as f:
-        #     f.write(output)
-
-
-class StreamModel():
-    """ Video stream """
+class StreamModel(Model):
+    """Video stream
+    """
     def __init__(self, info, video, index):
         """  """
         # Initialize some main properties
-        self.itags = []
+        self.progress = dict()
         self.index = index
-        self.itag = None
-        self.name = None
+        self.name = video.name or video.title
+        self.type = None
         self.sid = f'{video.vid}|{index}'
         self.url = None
-        self.progress = dict()
 
         # Load all info items into the object namespace
         for k, v in info.items():
             setattr(self, k, tf(v))
 
-        # Declare the stream/file name using the title et.al.
-        self.name = video.name or '{}-({}){}.{}'.format(
-            video.title,
-            info.get('resolution', ''),
-            video.vid,
-            info.get('extension', ''),
-        ).replace('/', '|')
-
-        # Declare the tags
-        self.itags = clipy.youtube.get_itags(info.get('itag', None))
+        self.display = f'type: {self.type}'
 
         logger.debug(f'Stream {index} {self.name}')
 
     def __str__(self):
-        return f'{self.display} {self.status}'
+        return f'display: {self.display}, status: {self.status}'
 
     @property
     def serial(self):
-        return dict(**self.__dict__, **dict(status=self.status, display=self.display))
+        data = self.__dict__
+        data.update(status=self.status)
+        data.update(display=self.display)
+        return data
 
     @property
     def status(self):
@@ -141,13 +100,3 @@ class StreamModel():
         rate = self.rate
 
         return (total - bytesdone) / (rate * 1024) if rate else 0.0
-
-    @property
-    def display(self):
-        return '{}; {} {}'.format(', '.join(self.itags),
-                                  getattr(self, 'quality', ''),
-                                  getattr(self, 'type', ''))
-
-    @property
-    def detail(self):
-        return '\n'.join(clipy.utils.list_properties(self))

@@ -88,6 +88,19 @@ def list_properties(obj):
     ]
 
 
+def dict_properties(obj):
+    """
+    Return a dict of the object's properties
+
+    .. note:: Does not include callable or private attributes
+    """
+    return {
+        p: getattr(obj, p, '')
+        for p in dir(obj)
+        if not p.startswith('_') and not hasattr(getattr(obj, p, None), '__call__')
+    }
+
+
 def take_first(values):
     if isinstance(values, (str, int, float, bool)):
         return values
