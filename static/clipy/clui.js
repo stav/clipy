@@ -257,18 +257,13 @@ clui
       url = '/api/download?vid=' + encodeURIComponent(vid) + '&stream=' + index,
       _;
 
-    console.log('_download')
-    console.log(element)
-    console.log(progress)
     if ( progress ) {
-      console.log('CANCEL')
       _cancel( element )
     }
     else {
-      console.log('DOWNLOAD')
       http.get( url )
       .then( json.parse  )
-      .then( console.log )
+      .then( function ( data ) { if ('error' in data) _insert( data ) } )
       .fail( console.log )
     }
   }

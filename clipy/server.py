@@ -82,11 +82,28 @@ async def run_loop(app):
         await asyncio.sleep(2)
 
 
+async def error_middleware(app, next_handler):
+    async def middleware_handler(request):
+        try:
+            response = await next_handler(request)
+            return response
+        except Exception as e:
+            logger.error(e)
+            data = dict(
+                title='Error',
+                message=str(e),
+                error=str(e.__class__),
+                url=str(request.url),
+            )
+            return aiohttp.web.json_response(data)
+    return middleware_handler
+
+
 def main():
     app = aiohttp.web.Application(
         debug=True,
+        middlewares=[error_middleware],
         # logger=logger,
-        # loop=loop,  # deprecated http://aiohttp.readthedocs.io/en/stable/web_reference.html#aiohttp.web.Application
     )
     # aiohttp.web.run_app(app, host='127.0.0.1', port=7070)
     init(app)
