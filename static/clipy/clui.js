@@ -298,27 +298,27 @@ clui
       let
         progress = document.getElementById( stream.sid ),
         bars = document.getElementById('progress-bars'),
-        item, stats = undefined,
+        item, label = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
         progress.vid = stream.vid;
         progress.id = stream.sid;
-        stats = document.createElement('span');
-        stats.setAttribute('class', 'stats')
+        label = document.createElement('label');
+        label.setAttribute('for', stream.sid )
         item = document.createElement('li');
         item.setAttribute('class', 'progress')
         item.setAttribute('title', stream.name )
         item.appendChild( progress )
-        item.appendChild( stats )
+        item.appendChild( label )
         item.addEventListener('click', inquire, false)
         bars.appendChild( item )
       }
       progress.setAttribute('value', stream.bytesdone )
       progress.setAttribute('max', stream.total )
-      stats = progress.nextElementSibling;
-      stats.innerText = stream.rate + ' KB/s - ' + stream.eta + ' sec';
+      label = progress.nextElementSibling;
+      label.innerText = stream.rate + ' KB/s - ' + stream.eta + ' sec';
     }
   }
 
