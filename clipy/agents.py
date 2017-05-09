@@ -120,9 +120,6 @@ class VidmeAgent(Agent):
     async def _get_info(self, vid):
         url = f'https://api.vid.me/videoByUrl/{vid}'
         data = await clipy.request.get_json(url)
-        # import pprint
-        # data = pprint.pformat(data)
-        # logger.debug(f'get_video data: {data}')
         return data['video']
         # return data['video']['complete_url']
 
@@ -196,3 +193,5 @@ def get_agent(vid: str):
 
     elif len(vid) == 4:
         return VidmeAgent(vid)
+
+    raise Exception(f'No suitable video agent found for: {vid}')

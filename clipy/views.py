@@ -50,11 +50,14 @@ async def download(request):
 
 
 async def progress(request):
-    def info(stream):
-        s = stream
-        return dict(sid=s.sid, name=s.name, status=s.status, eta=int(s.eta), rate=int(s.rate))
+    def active(stream):
+        info = dict(stream.__dict__)
+        info.update(eta=int(stream.eta), rate=int(stream.rate))
+        info.update(**info['progress'])
+        del info['progress']
+        return info
     data = dict(
-        actives=[{**s.progress, **info(s)} for s in request.app['actives'].values()],
+        actives=[active(s) for s in request.app['actives'].values()],
     )
     return aiohttp.web.json_response(data)
 

@@ -53,6 +53,7 @@ class StreamModel(Model):
         self.name = video.name or video.title
         self.type = None
         self.sid = f'{video.vid}|{index}'
+        self.vid = video.vid
         self.url = None
 
         # Load all info items into the object namespace
