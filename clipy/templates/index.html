@@ -41,7 +41,11 @@
       <div class="twelve columns">
         <label for="input-video">
           Video
-          <div class="tooltip" title="Enter a YouTube 'watch' URL or just the 11-char Id.">
+          {% set tooltip = "Vid.me URLs end in a 4-charcter Id like 'xyzZ' "
+                         + "and YouTube 'watch' URLs have 'v=12345678901' "
+                         + "with an 11-char Id. You can enter the full URL or just the Id."
+          %}
+          <div class="tooltip" title="{{ tooltip }}">
             <div class="info"></div>
           </div>
         </label>
