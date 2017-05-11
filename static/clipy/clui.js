@@ -293,28 +293,36 @@ clui
       let
         progress = document.getElementById( stream.sid ),
         bars = document.getElementById('progress-bars'),
-        item, label = undefined,
+        item, label, info = undefined,
         _;
 
       if ( !progress ) {
         progress = document.createElement('progress');
         progress.vid = stream.vid;
         progress.id = stream.sid;
+
         label = document.createElement('label');
         label.setAttribute('class', 'fa fa-bolt')
         label.setAttribute('for', stream.sid )
+
+        info = document.createElement('i');
+        info.setAttribute('class', 'fa fa-info-circle')
+        info.setAttribute('title', 'Inquire video information')
+        info.addEventListener('click', inquire, false)
+
         item = document.createElement('li');
         item.setAttribute('class', 'progress')
         item.setAttribute('title', stream.name )
         item.appendChild( progress )
         item.appendChild( label )
-        item.addEventListener('click', inquire, false)
+        item.appendChild( info )
+
         bars.appendChild( item )
       }
-      progress.setAttribute('value', stream.bytesdone )
-      progress.setAttribute('max', stream.total )
+      progress.setAttribute('value', stream.progress.bytesdone )
+      progress.setAttribute('max', stream.progress.total )
       label = progress.nextElementSibling;
-      label.innerText = ' ' + stream.rate + ' KB/s - ' + stream.eta + ' sec';
+      label.innerText = ' ' + stream.status;
     }
   }
 

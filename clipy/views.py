@@ -43,6 +43,7 @@ async def download(request):
     # run download as task in background
     coroutine = clipy.download.get(stream, request.app['actives'])
     request.app.loop.create_task(coroutine)
+    # return something to our client
     data = dict(
         message='Queued',
         stream=str(stream),
@@ -51,14 +52,8 @@ async def download(request):
 
 
 async def progress(request):
-    def active(stream):
-        info = dict(stream.__dict__)
-        info.update(eta=int(stream.eta), rate=int(stream.rate))
-        info.update(**info['progress'])
-        del info['progress']
-        return info
     data = dict(
-        actives=[active(s) for s in request.app['actives'].values()],
+        actives=[s.serial for s in request.app['actives'].values()],
     )
     return aiohttp.web.json_response(data)
 

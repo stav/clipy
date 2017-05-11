@@ -101,13 +101,6 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     margin: 0;
 }
 
-#progress-bars {
-    list-style: none;
-}
-.progress {
-    cursor: pointer;
-}
-
 .button.close {
     padding: 0 7px 0 7px;
     height: inherit;
@@ -123,10 +116,19 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     vertical-align: top;
 }
 
+
+#progress-bars {
+    list-style: none;
+}
 .progress label {
     display: inline-block;
     padding-left: 0.4em;
     vertical-align: top;
+}
+.progress i {
+    cursor: pointer;
+    padding-left: 20px;
+    vertical-align: super;
 }
 
 .logo {

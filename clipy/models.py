@@ -68,7 +68,7 @@ class StreamModel(Model):
 
     @property
     def serial(self):
-        data = self.__dict__
+        data = dict(self.__dict__)
         data.update(status=self.status)
         return data
 
