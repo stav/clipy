@@ -62,10 +62,11 @@ class VidmeAgent(clipy.agents.Agent):
         user = video.info['user']['username']
         type = data.get('type', '')
         ext = extension()
+        filename = f'{user}_{name}-({type}){video.vid}.{ext}'.replace('/', '|')
 
         data.update(
             display=f'{type} {dimensions} v{version}',
-            name=f'{user}_{name}-({type}){video.vid}.{ext}'.replace('/', '|'),
+            name=clipy.models.StreamModel.safe_name(filename),
             url=data.get('uri'),
         )
         stream = clipy.models.StreamModel(data, video, index)

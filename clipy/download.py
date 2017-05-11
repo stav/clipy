@@ -56,6 +56,7 @@ async def _download(stream, actives):
                     mode = "ab"
                     bytesdone = offset = filesize
                     headers = dict(Range='bytes={}-'.format(offset))
+                    logger.info(f'{stream.sid} exists, sending headers: {headers}')
                     response = await session.get(stream.url, headers=headers)
 
             complete = False
@@ -65,6 +66,8 @@ async def _download(stream, actives):
 
                 while stream.sid in actives:
                     chunk = await response.content.read(chunk_size)
+                    # length = len(chunk)
+                    # logger.debug(f'@@@ {stream.sid} chunk len {length}')
                     if len(chunk) == 0:
                         complete = True
                         break
@@ -79,6 +82,8 @@ async def _download(stream, actives):
                         total=total,
                     )
 
+                active = stream.sid in actives
+                logger.debug(f'{stream.sid} finished, active? {active}')
                 if stream.sid in actives:
                     del actives[stream.sid]
 

@@ -128,3 +128,7 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     padding-left: 0.4em;
     vertical-align: top;
 }
+
+.logo {
+    color: red;
+}

@@ -54,11 +54,12 @@ class YoutubeAgent(clipy.agents.Agent):
         res = _get_resolution(itag)
         ext = _get_extension(itag)
         author = video.info.get('author')
+        filename = f'{author}_{name}-({res}){video.vid}.{ext}'.replace('/', '|')
 
         data.update(
             display=f'{itags} {quality} ({res}) {type}',
             title=video.info.get('title', name),
-            name=f'{author}_{name}-({res}){video.vid}.{ext}'.replace('/', '|'),
+            name=clipy.models.StreamModel.safe_name(filename),
         )
         stream = clipy.models.StreamModel(data, video, index)
         return stream

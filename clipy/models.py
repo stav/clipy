@@ -1,3 +1,4 @@
+import string
 import logging
 
 import clipy.utils
@@ -50,7 +51,7 @@ class StreamModel(Model):
         self.progress = dict()
         self.display = str(index)
         self.index = index
-        self.name = video.name or video.title
+        self.name = StreamModel.safe_name(video.name or video.title)
         self.type = None
         self.sid = f'{video.vid}|{index}'
         self.vid = video.vid
@@ -99,3 +100,8 @@ class StreamModel(Model):
         rate = self.rate
 
         return (total - bytesdone) / (rate * 1024) if rate else 0.0
+
+    @staticmethod
+    def safe_name(name: str):
+        white_chars = string.ascii_letters + string.digits + '!|()-.,_'
+        return ''.join(s for s in name if s in white_chars).strip()

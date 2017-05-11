@@ -301,6 +301,7 @@ clui
         progress.vid = stream.vid;
         progress.id = stream.sid;
         label = document.createElement('label');
+        label.setAttribute('class', 'fa fa-bolt')
         label.setAttribute('for', stream.sid )
         item = document.createElement('li');
         item.setAttribute('class', 'progress')
@@ -313,7 +314,7 @@ clui
       progress.setAttribute('value', stream.bytesdone )
       progress.setAttribute('max', stream.total )
       label = progress.nextElementSibling;
-      label.innerText = stream.rate + ' KB/s - ' + stream.eta + ' sec';
+      label.innerText = ' ' + stream.rate + ' KB/s - ' + stream.eta + ' sec';
     }
   }
 
