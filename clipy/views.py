@@ -3,9 +3,10 @@ import logging
 import aiohttp.web
 import aiohttp_jinja2
 
-import clipy.agents
 import clipy.request
 import clipy.download
+
+from clipy.agents.utils import lookup_agent, get_agent
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ async def index(request):
 
 async def inquire(request):
     video_url = request.query.get('video')
-    agent = clipy.agents.lookup_agent(video_url)
+    agent = lookup_agent(video_url)
     logger.debug(f'inquire - Agent: {agent}')
     video = await agent.get_video()
     data = dict(
@@ -36,7 +37,7 @@ async def inquire(request):
 async def download(request):
     vid = request.query.get('vid')
     idx = request.query.get('stream')
-    agent = clipy.agents.get_agent(vid)
+    agent = get_agent(vid)
     logger.debug(f'download - Agent: {agent}')
     stream = await agent.get_stream(idx)
     # run download as task in background
