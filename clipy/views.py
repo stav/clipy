@@ -40,12 +40,20 @@ async def download(request):
     agent = get_agent(vid)
     logger.debug(f'download - Agent: {agent}')
     stream = await agent.get_stream(idx)
-    # run download as task in background
-    coroutine = clipy.download.get(stream, request.app['actives'])
-    request.app.loop.create_task(coroutine)
+
+    # check if stream is already tasked to download
+    if stream.filename in clipy.download.get_pending_tasks():
+        message = 'Already tasked'
+    else:
+        # run download as task in the background
+        message='Queued'
+        coroutine = clipy.download.get(stream, request.app['actives'])
+        request.app.loop.create_task(coroutine)
+
     # return something to our client
+    logger.info(f'{stream} {message}')
     data = dict(
-        message='Queued',
+        message=message,
         stream=str(stream),
     )
     return aiohttp.web.json_response(data)
@@ -54,6 +62,7 @@ async def download(request):
 async def progress(request):
     data = dict(
         actives=[s.serial() for s in request.app['actives'].values()],
+        downloads=clipy.download.get_pending_tasks(request.app.loop),
     )
     return aiohttp.web.json_response(data)
 
@@ -68,6 +77,11 @@ async def cancel(request):
         removed = False
     logger.debug(f'cancel: sid {sid} removed? {removed}')
     data = dict(removed=removed)
+    return aiohttp.web.json_response(data)
+
+
+async def tasks(request):
+    data = dict(tasks=clipy.download.get_pending_tasks(request.app.loop))
     return aiohttp.web.json_response(data)
 
 

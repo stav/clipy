@@ -50,6 +50,7 @@ clui
       if ( data.actives ) {
         _add_active_progress_bars( data.actives )
         _remove_dead_progress_bars( data.actives )
+        _show_downloads(data.downloads)
       }
     }
     else {
@@ -351,6 +352,26 @@ clui
       if ( !streams.find( active ) ) {
         progress.parentElement.remove()
       }
+    }
+  }
+
+  /**
+   * Show actual downloading tasks
+   *
+   * filenames: ['JoeCroninShow_FormerWWEsuperstarRYBACKCallsoutVIDMECreator!-(240p)hGYG.mp4',...]
+   */
+  function _show_downloads( filenames ) {
+    let
+      downloads = document.getElementById('downloads'),
+      _;
+
+    downloads.innerHTML = '';
+
+    for (let filename of filenames ) {
+      let item = document.createElement('li');
+      item.setAttribute('class', 'download')
+      item.innerText = filename;
+      downloads.appendChild( item )
     }
   }
 
