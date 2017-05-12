@@ -66,7 +66,7 @@ class VidmeAgent(clipy.agents.Agent):
 
         data.update(
             display=f'{type} {dimensions} v{version}',
-            name=clipy.models.StreamModel.safe_name(filename),
+            filename=clipy.models.StreamModel.safe_name(filename),
             url=data.get('uri'),
         )
         stream = clipy.models.StreamModel(data, video, index)

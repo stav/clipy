@@ -8,34 +8,6 @@
     margin-top: 75px;
 }
 
-    /*
-Info circle
-http://nicolasgallagher.com/pure-css-gui-icons/
-*/
-.info {
-    color:#2385BA;
-    display: inline-flex;
-    font: 1em/1.4 Cambria, Georgia, sans-serif;
-}
-.info:before {
-    content:"i";
-    left:3px;
-    width:16px;
-    height:16px;
-    margin-top:-8px;
-    font-size:14px;
-    font-weight:bold;
-    font-style:italic;
-    line-height:15px;
-    text-align:center;
-    color:#fff;
-    background:#2385BA;
-    /* css3 */
-    -webkit-border-radius:16px;
-    -moz-border-radius:16px;
-    border-radius:16px;
-}
-
 /*
 Tooltip
 http://www.webdesignerdepot.com/2012/11/how-to-create-a-simple-css3-tooltip/
@@ -120,14 +92,20 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
 #progress-bars {
     list-style: none;
 }
+.progress {
+    margin: 0;
+}
 .progress label {
     display: inline-block;
     padding-left: 0.4em;
+    padding-right: 1em;
     vertical-align: top;
 }
 .progress i {
+    color: #33C3F0;
     cursor: pointer;
-    padding-left: 20px;
+    padding-left: 1em;
+    padding-right: 1em;
     vertical-align: super;
 }
 

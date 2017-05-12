@@ -24,14 +24,14 @@ async def inquire(request):
     agent = lookup_agent(video_url)
     logger.debug(f'inquire - Agent: {agent}')
     video = await agent.get_video()
-    data = dict(
-        description=video.description,
-        duration=video.duration,
-        streams=[s.serial for s in video.streams],
-        title=video.title,
-        vid=video.vid,
-    )
-    return aiohttp.web.json_response(data)
+    # data = dict(
+    #     description=video.description,
+    #     duration=video.duration,
+    #     streams=[s.serial for s in video.streams],
+    #     title=video.title,
+    #     vid=video.vid,
+    # )
+    return aiohttp.web.json_response(video.serial())
 
 
 async def download(request):
@@ -53,7 +53,7 @@ async def download(request):
 
 async def progress(request):
     data = dict(
-        actives=[s.serial for s in request.app['actives'].values()],
+        actives=[s.serial() for s in request.app['actives'].values()],
     )
     return aiohttp.web.json_response(data)
 

@@ -258,14 +258,12 @@ clui
       _;
 
     if ( progress ) {
-      _cancel( element )
+      console.log('Stream ' + sid + ' already downloading')
     }
-    else {
-      http.get( url )
-      .then( json.parse  )
-      .then( function ( data ) { if ('error' in data) _insert( data ) } )
-      .fail( console.log )
-    }
+    http.get( url )
+    .then( json.parse  )
+    .then( function ( data ) { if ('error' in data) _insert( data ) } )
+    .fail( console.log )
   }
 
   /**
@@ -274,7 +272,7 @@ clui
   function _cancel( element ) {
     let
       sid = element.target.sid,
-      url = '/api/cancel?sid=' + encodeURIComponent(sid),
+      url = '/api/cancel?sid=' + encodeURIComponent( sid ),
       _;
 
     http.get( url )
@@ -293,7 +291,7 @@ clui
       let
         progress = document.getElementById( stream.sid ),
         bars = document.getElementById('progress-bars'),
-        item, label, info = undefined,
+        item, label, info, pause = undefined,
         _;
 
       if ( !progress ) {
@@ -310,12 +308,19 @@ clui
         info.setAttribute('title', 'Inquire video information')
         info.addEventListener('click', inquire, false)
 
+        pause = document.createElement('i');
+        pause.setAttribute('class', 'fa fa-pause')
+        pause.setAttribute('title', 'Pause download')
+        pause.addEventListener('click', _cancel, false)
+        pause.sid = stream.sid;
+
         item = document.createElement('li');
         item.setAttribute('class', 'progress')
-        item.setAttribute('title', stream.name )
+        item.setAttribute('title', stream.filename )
         item.appendChild( progress )
-        item.appendChild( label )
-        item.appendChild( info )
+        item.appendChild( label    )
+        item.appendChild( info     )
+        item.appendChild( pause    )
 
         bars.appendChild( item )
       }

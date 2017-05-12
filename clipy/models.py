@@ -41,6 +41,15 @@ class VideoModel(Model):
         return '<{cls}> {duration} {title}'.format(
             cls=self.__class__.__name__, duration=self.duration, title=self.title)
 
+    def serial(self):
+        data = dict(self.__dict__)
+        data.update(self.info)
+        data.update(
+            # Object of type 'StreamModel' is not JSON serializable
+            streams=[s.serial() for s in self.streams],
+        )
+        return data
+
 
 class StreamModel(Model):
     """Video stream
@@ -51,11 +60,12 @@ class StreamModel(Model):
         self.progress = dict()
         self.display = str(index)
         self.index = index
-        self.name = StreamModel.safe_name(video.name or video.title)
+        self.name = video.name or video.title
         self.type = None
         self.sid = f'{video.vid}|{index}'
         self.vid = video.vid
         self.url = None
+        self.user = None
 
         # Load all info items into the object namespace
         for k, v in info.items():
@@ -66,7 +76,6 @@ class StreamModel(Model):
     def __str__(self):
         return f'display: {self.display}, status: {self.status}'
 
-    @property
     def serial(self):
         data = dict(self.__dict__)
         data.update(status=self.status)

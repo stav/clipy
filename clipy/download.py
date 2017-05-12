@@ -44,7 +44,7 @@ async def _download(stream, actives):
 
             target_dir = 'videos'
             os.makedirs(target_dir, exist_ok=True)
-            target_path = os.path.join(target_dir, stream.name)
+            target_path = os.path.join(target_dir, stream.filename)
             temp_path = f'{target_path}.clipy'
             logger.info(f'{stream.sid} -> {temp_path}')
 
