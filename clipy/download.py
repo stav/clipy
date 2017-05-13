@@ -22,7 +22,11 @@ def get_pending_tasks(loop=None):
     tasks = []
     for task in asyncio.Task.all_tasks(loop=loop):
         if 'clipy/download' in str(task):
-            tasks.append(task.get_stack()[0].f_locals['stream'].filename)
+            stacks = task.get_stack()
+            if stacks:
+                stream = stacks[0].f_locals.get('stream')
+                if stream:
+                    tasks.append(stream.filename)
     return tasks
 
 

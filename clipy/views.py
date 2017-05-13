@@ -80,11 +80,6 @@ async def cancel(request):
     return aiohttp.web.json_response(data)
 
 
-async def tasks(request):
-    data = dict(tasks=clipy.download.get_pending_tasks(request.app.loop))
-    return aiohttp.web.json_response(data)
-
-
 async def shutdown(request):
     request.app['server']['running'] = False
     data = dict(app=str(request.app))

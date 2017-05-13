@@ -18,16 +18,6 @@ cler
   }
 
   /**
-   * Query running tasks
-   */
-  function tasks() {
-    http.get('/api/tasks')
-    .then( json.parse  )
-    .then( console.log )
-    .fail( _bail       )
-  }
-
-  /**
    * Shutdown the server
    */
   function shutdown() {
@@ -50,7 +40,6 @@ cler
   return {
     check_progress: check_progress,
     shutdown: shutdown,
-    tasks: tasks,
   }
 
 }())
