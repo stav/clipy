@@ -27,7 +27,7 @@ clui
     http.get( url )
     .then( json.parse  )
  // .then( _inload     )
-    .then( _insert     )
+    .then( _add_panel  )
     .fail( console.log )
   }
 
@@ -146,7 +146,7 @@ clui
   /**
    * Display the data summary in a new panel
    */
-  function _insert( data ) {
+  function _add_panel( data ) {
     let
       head = _get_panel_header( data ),
       panel = document.createElement('li'),
@@ -159,7 +159,7 @@ clui
     panel.setAttribute('vid', data.vid )
     panel.appendChild( head )
     panel.appendChild( details )
-    panels.appendChild( panel )
+    panels.insertBefore( panel, panels.firstChild );
 
     return data // chaining
   }
@@ -263,7 +263,7 @@ clui
     }
     http.get( url )
     .then( json.parse  )
-    .then( function ( data ) { if ('error' in data) _insert( data ) } )
+    .then( function ( data ) { if ('error' in data) _add_panel( data ) } )
     .fail( console.log )
   }
 
@@ -308,6 +308,7 @@ clui
         info.setAttribute('class', 'fa fa-info-circle')
         info.setAttribute('title', 'Inquire video information')
         info.addEventListener('click', inquire, false)
+        info.vid = stream.vid;
 
         pause = document.createElement('i');
         pause.setAttribute('class', 'fa fa-pause')

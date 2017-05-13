@@ -50,11 +50,6 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     font-size: x-large;
 }
 
-.panel {
-    padding: 4px;
-    border-style: dotted;
-    border-radius: 8px;
-}
 .toggle {
     padding: 5px;
     font-size: larger;
@@ -79,6 +74,14 @@ http://netdna.webdesignerdepot.com/uploads7/how-to-create-a-simple-css3-tooltip/
     line-height: inherit;
 }
 
+#panels {
+    list-style: none;
+}
+.panel {
+    padding: 4px;
+    border-style: dotted;
+    border-radius: 8px;
+}
 .panel .row {
     display: inline-flex;
     width: 96%;
